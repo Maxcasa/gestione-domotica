@@ -1,0 +1,280 @@
+import 'package:mqtt_client/mqtt_browser_client.dart';
+import 'package:property_change_notifier/property_change_notifier.dart';
+import 'package:mqtt_client/mqtt_client.dart';
+import 'dart:math';
+import 'package:gestione_domotica/conf/conf_cost.dart';
+
+//import 'package:mqtt_client/mqtt_server_client.dart';
+//import 'package:flutter/material.dart';
+//import 'package:gestione_domotica/models/model_data.dart';
+//import 'repository.dart';
+
+// final String serverUri = "test.mosquitto.org";
+//const String serverUri = "192.168.1.3";
+const String serverUri = 'ws://$remoteServerUri';
+// const int port = 1883;
+const int port = 8080;
+const String topicName = "Max/Domotica/";
+
+enum MqttCurrentConnectionState {
+  IDLE,
+  CONNECTING,
+  CONNECTED,
+  RICONNECT,
+  RICONNECTED,
+  DISCONNECTED,
+  ERROR_WHEN_CONNECTING
+}
+
+enum MqttSubscriptionState { IDLE, SUBSCRIBED }
+
+/// Classe Singleton per la gestione della comunicazione MQTT
+class MQTTClientWrapper extends PropertyChangeNotifier<String> {
+// class MQTTClientWrapper with ChangeNotifier {
+  // costruttori
+  static final MQTTClientWrapper _instance = MQTTClientWrapper._internal();
+
+  factory MQTTClientWrapper() {
+    return _instance;
+  }
+
+  MQTTClientWrapper._internal() {
+    print('Istanzio l\'MQTT Client');
+  }
+
+  // variabili
+  //MqttServerClient? client;
+  MqttBrowserClient? client;
+  MqttCurrentConnectionState connectionState = MqttCurrentConnectionState.IDLE;
+  MqttSubscriptionState subscriptionState = MqttSubscriptionState.IDLE;
+  Map<String, Function(String)> onDataReceivedArray = {};
+
+  Future<void> connectMqttClient() async {
+    if (connectionState != MqttCurrentConnectionState.CONNECTING &&
+        connectionState != MqttCurrentConnectionState.CONNECTED &&
+        connectionState != MqttCurrentConnectionState.RICONNECT &&
+        connectionState != MqttCurrentConnectionState.RICONNECTED &&
+        connectionState != MqttCurrentConnectionState.ERROR_WHEN_CONNECTING) {
+      _setupMqttClient();
+      await _connectClient();
+      _listenClient();
+    }
+  }
+
+  void _setupMqttClient() {
+    // client = MqttServerClient.withPort(serverUri, '#', port);
+    Random random = Random();
+    client = MqttBrowserClient.withPort(
+        serverUri, 'mqtt_domo_gest' + random.nextInt(1000000).toString(), port);
+    client!.logging(on: false);
+    client!.keepAlivePeriod = 60;
+    client!.autoReconnect = true;
+    client!.onDisconnected = _onDisconnected;
+    client!.onAutoReconnect = _onAutoReconnect;
+    client!.onAutoReconnected = _onAutoReconnected;
+    client!.onConnected = _onConnected;
+    client!.onSubscribed = _onSubscribed;
+    client!.onUnsubscribed = _onUnsubscribed;
+  }
+
+  Future<void> _connectClient() async {
+    try {
+      print('MQTTClientWrapper::$serverUri client connecting....');
+      connectionState = MqttCurrentConnectionState.CONNECTING;
+      notifyListeners('connectionState.connecting');
+      await client!.connect('mqtt_user', 'mqtt_user');
+    } on Exception catch (e) {
+      print('MQTTClientWrapper::client exception - $e');
+      connectionState = MqttCurrentConnectionState.ERROR_WHEN_CONNECTING;
+      notifyListeners('connectionState.error');
+      // client!.disconnect();
+    }
+
+    // if (client!.connectionStatus!.state == MqttConnectionState.connected) {
+    //   connectionState = MqttCurrentConnectionState.CONNECTED;
+    //   notifyListeners('connectionState.error');
+    //   print('MQTTClientWrapper::$serverUri client connected');
+    // } else {
+    //   print(
+    //       'MQTTClientWrapper::ERROR $serverUri client connection failed - disconnecting, status is ${client!.connectionStatus}');
+    //   connectionState = MqttCurrentConnectionState.ERROR_WHEN_CONNECTING;
+    //   notifyListeners('currentConnectionState');
+    //   client!.disconnect();
+    // }
+  }
+
+  void _listenClient() {
+    try {
+      client!.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
+        final recMess = c![0].payload as MqttPublishMessage;
+        final topic = c[0].topic;
+        final String message =
+            MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+
+        print("MQTTClientWrapper::GOT A NEW MESSAGE $message");
+        onDataReceivedArray[topic]!(message);
+      });
+    } on Exception catch (e) {
+      print('MQTTClientWrapper::client exception - $e');
+      connectionState = MqttCurrentConnectionState.ERROR_WHEN_CONNECTING;
+      notifyListeners('connectionState.error');
+      client!.disconnect();
+    }
+  }
+
+  // metodo per la sottoscizione ad un topic
+  // topicSurName: postfisso del topic (es. sensori)
+  // onDataReceived: metodo che viene invocato quando viene ricevuto un messaggio
+  void subscribeToTopic(
+      {required String topicSurName,
+      required Function(String) onDataReceived}) {
+    String totalTopic = topicName + topicSurName;
+    print('MQTTClientWrapper::Subscribing to the ' + totalTopic + ' topic');
+
+    client!.subscribe(totalTopic, MqttQos.atMostOnce);
+    onDataReceivedArray[totalTopic] = onDataReceived;
+  }
+
+  // metodo per la rimozione della sottoscizione ad un topic
+  // topicSurName: postfisso del topic (es. sensori)
+  void unsubscribeToTopic({required String topicSurName}) {
+    print('MQTTClientWrapper::UnSubscribing to the ' +
+        topicName +
+        topicSurName +
+        ' topic');
+    client!.unsubscribe(topicName + topicSurName);
+    onDataReceivedArray.remove('topicSurName');
+  }
+
+  // metodo per la pubblicazione di un messaggio
+  // topicSurName: postfisso del topic (es. sensori)
+  // messageData: ModelData da inviare
+  void publishMessage(
+      {required String topicSurName, required String messageData}) {
+    final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
+    String totalTopic = topicName + topicSurName;
+    builder.addString(messageData);
+
+    print(
+        'MQTTClientWrapper::Publishing message ${messageData} to topic ${totalTopic}');
+    client!.publishMessage(totalTopic, MqttQos.exactlyOnce, builder.payload!);
+  }
+
+  void _onSubscribed(String topic) {
+    print('MQTTClientWrapper::Subscription confirmed for topic $topic');
+    subscriptionState = MqttSubscriptionState.SUBSCRIBED;
+  }
+
+  void _onUnsubscribed(String? topic) {
+    print('MQTTClientWrapper::UnSubscription confirmed for topic $topic');
+    //subscriptionState = MqttSubscriptionState.SUBSCRIBED;
+  }
+
+  void _onDisconnected() {
+    print(
+        'MQTTClientWrapper::OnDisconnected client callback - Client disconnection');
+    // if (client.connectionStatus.returnCode == MqttConnectReturnCode.solicited) {
+    //   print('MQTTClientWrapper::OnDisconnected callback is solicited, this is correct');
+    // }
+    connectionState = MqttCurrentConnectionState.DISCONNECTED;
+    notifyListeners('connectionState.disconnected');
+  }
+
+  void _onConnected() {
+    connectionState = MqttCurrentConnectionState.CONNECTED;
+    print(
+        'MQTTClientWrapper::OnConnected client callback - Client connection was sucessful');
+    notifyListeners('connectionState.connected');
+  }
+
+  void _onAutoReconnect() {
+    connectionState = MqttCurrentConnectionState.RICONNECT;
+    print(
+        'MQTTClientWrapper::OnRiconnect client callback - Client riconnecti was in progress');
+    notifyListeners('connectionState.riconnect');
+  }
+
+  void _onAutoReconnected() {
+    connectionState = MqttCurrentConnectionState.RICONNECTED;
+    print(
+        'MQTTClientWrapper::OnRiconnected client callback - Client riconnection was sucessful');
+    notifyListeners('connectionState.riconnected');
+  }
+}
+
+
+// Future<MqttServerClient> connect() async {
+//   MqttServerClient client =
+//       MqttServerClient.withPort('broker.emqx.io', 'flutter_client', 1883);
+//   client.logging(on: true);
+//   client.onConnected = onConnected;
+//   client.onDisconnected = onDisconnected;
+//   client.onUnsubscribed = onUnsubscribed;
+//   client.onSubscribed = onSubscribed;
+//   client.onSubscribeFail = onSubscribeFail;
+//   client.pongCallback = pong;
+
+//   final connMessage = MqttConnectMessage()
+//       .authenticateAs('username', 'password')
+//       .keepAliveFor(60)
+//       .withWillTopic('willtopic')
+//       .withWillMessage('Will message')
+//       .startClean()
+//       .withWillQos(MqttQos.atLeastOnce);
+//   client.connectionMessage = connMessage;
+//   try {
+//     await client.connect();
+//   } catch (e) {
+//     print('Exception: $e');
+//     client.disconnect();
+//   }
+
+//   /// The client has a change notifier object(see the Observable class) which we then listen to to get
+//   /// notifications of published updates to each subscribed topic.
+//   client.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
+//     final recMess = c![0].payload as MqttPublishMessage;
+//     final pt =
+//         MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
+
+//     /// The above may seem a little convoluted for users only interested in the
+//     /// payload, some users however may be interested in the received publish message,
+//     /// lets not constrain ourselves yet until the package has been in the wild
+//     /// for a while.
+//     /// The payload is a byte buffer, this will be specific to the topic
+//     print(
+//         'EXAMPLE::Change notification:: topic is <${c[0].topic}>, payload is <-- $pt -->');
+//     print('');
+//   });
+
+//   return client;
+// }
+
+// // connection succeeded
+// void onConnected() {
+//   print('Connected');
+// }
+
+// // unconnected
+// void onDisconnected() {
+//   print('Disconnected');
+// }
+
+// // subscribe to topic succeeded
+// void onSubscribed(String topic) {
+//   print('Subscribed topic: $topic');
+// }
+
+// // subscribe to topic failed
+// void onSubscribeFail(String topic) {
+//   print('Failed to subscribe $topic');
+// }
+
+// // unsubscribe succeeded
+// void onUnsubscribed(String topic) {
+//   print('Unsubscribed topic: $topic');
+// }
+
+// // PING response received
+// void pong() {
+//   print('Ping response client callback invoked');
+// }
