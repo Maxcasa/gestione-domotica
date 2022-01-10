@@ -63,13 +63,21 @@ class Allarme with ChangeNotifier {
     Map<String, dynamic> jsonData = jsonDecode(messageData);
     if (jsonData.containsKey('get')) {
       switch (jsonData['get']) {
+        case "2":
+          colore = Colors.red;
+          icona = Icons.home_outlined;
+          valore = 2;
+          notifyListeners();
+          break;
         case "1":
           colore = Colors.red;
+          icona = Icons.power_settings_new_outlined;
           valore = 1;
           notifyListeners();
           break;
         case "0":
           colore = Colors.black;
+          icona = Icons.power_settings_new_outlined;
           valore = 0;
           notifyListeners();
           break;
@@ -78,7 +86,9 @@ class Allarme with ChangeNotifier {
   }
 
   void cambiaStatoAllarme() {
-    String message = "{\"set\": \"" + (valore == 0 ? "1" : "0") + "\"}";
+    int tmpValore = valore++;
+    tmpValore = tmpValore <= 2 ? tmpValore : 0;
+    String message = "{\"set\": \"" + tmpValore.toString() + "\"}";
     mqttClientWrapper!
         .publishMessage(topicSurName: topicSurName, messageData: message);
   }
