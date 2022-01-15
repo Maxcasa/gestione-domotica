@@ -48,7 +48,7 @@ class SensoreModel {
         posTop = double.parse(json['posTop'] ?? '0');
 
   String? cambiaStato(int valore) {
-    return json.encode({'id': id, 'set': valore});
+    return json.encode({'id': id, 'stato': valore});
   }
 
   Map<String, dynamic> toJson() {

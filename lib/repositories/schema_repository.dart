@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart' as io_client;
 import 'package:path_provider/path_provider.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:flutter/services.dart' show rootBundle;
@@ -11,8 +12,8 @@ import 'package:network_info_plus/network_info_plus.dart';
 
 const String localFileUri = 'domo_conf.json';
 const String localBackUri = 'domo_conf.jpg';
-const String remoteFileUri = 'http://$remoteServerUri/$localFileUri';
-const String remoteBackUri = 'http://$remoteServerUri/$localBackUri';
+const String remoteFileUri = 'http://$remoteServerUri/conf/$localFileUri';
+const String remoteBackUri = 'http://$remoteServerUri/conf/$localBackUri';
 
 /// Classe che contiene lo schema del sistema
 class SchemaRepository extends PropertyChangeNotifier<String> {
@@ -97,7 +98,12 @@ class SchemaRepository extends PropertyChangeNotifier<String> {
   }
 
   Future<Map<String, dynamic>> getSchemaFromRemote() async {
+    // HttpClient httpClient = HttpClient()
+    //   ..badCertificateCallback =
+    //       ((X509Certificate cert, String host, int port) => true);
+    // io_client.IOClient ioClient = io_client.IOClient(httpClient);
     http.Response httpResponse = await http.get(Uri.parse(remoteFileUri));
+    //http.Response httpResponse = await ioClient.get(Uri.parse(remoteFileUri));
     if (httpResponse.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.

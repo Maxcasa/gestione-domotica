@@ -1,4 +1,4 @@
 [
-  {"num": 0, "pageName": "Allarme", "drawerItem": "Allarme"},
-  {"num": 1, "pageName": "Calendar", "drawerItem": "Calendar"}
+  {"num": 0, "pageName": "Home", "drawerItem": "Home"},
+  {"num": 1, "pageName": "Conf", "drawerItem": "Conf"}
 ]

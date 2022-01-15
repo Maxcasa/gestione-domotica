@@ -3,7 +3,7 @@ import 'dart:convert';
 
 //import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:gestione_domotica/models/allarme/allarme.dart';
+import 'package:gestione_domotica/models/stati/stato.dart';
 import 'package:provider/provider.dart';
 import 'main_drawer.dart';
 //import '../widget/AzioneForm.dart';
@@ -19,8 +19,8 @@ class AllarmPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     //_planProviderState.id = idPlan;
-    return Consumer<Allarme>(
-        builder: (BuildContext context, Allarme allarme, Widget? child) {
+    return Consumer<Stato>(
+        builder: (BuildContext context, Stato allarme, Widget? child) {
       return visalizzaAllarme(allarme);
       // SizedBox(
       //     height: 200.0,
@@ -35,7 +35,7 @@ class AllarmPage extends StatelessWidget {
     //floatingActionButton: _buildAddTaskButton(),
   }
 
-  Widget visalizzaAllarme(Allarme allarme) {
+  Widget visalizzaAllarme(Stato allarme) {
     return SizedBox(
         height: 200.0,
         width: 200.0,

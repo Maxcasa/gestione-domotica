@@ -20,7 +20,11 @@ class SensoreSirena extends SensoreModel {
             ? HexColor.fromHex(json['colore'])
             : Colors.black,
         super(
-            id: json['id'], nome: json['nome'], icona: Icons.lightbulb_rounded);
+            id: json['id'],
+            nome: json['nome'],
+            icona: Icons.notifications_on_rounded,
+            posLeft: double.parse(json['posLeft'] ?? '0'),
+            posTop: double.parse(json['posTop'] ?? '0'));
 
   // variabili
   int _id;

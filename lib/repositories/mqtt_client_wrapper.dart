@@ -111,7 +111,8 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
         final String message =
             MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
 
-        print("MQTTClientWrapper::GOT A NEW MESSAGE $message");
+        print(
+            "MQTTClientWrapper::GOT A NEW MESSAGE $message from topic $topic");
         onDataReceivedArray[topic]!(message);
       });
     } on Exception catch (e) {
@@ -200,7 +201,18 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
         'MQTTClientWrapper::OnRiconnected client callback - Client riconnection was sucessful');
     notifyListeners('connectionState.riconnected');
   }
+
+  void toggleState() {
+    if (connectionState == MqttCurrentConnectionState.CONNECTED) {
+      client!.disconnect();
+      //  connect('mqtt_user', 'mqtt_user');
+    } else if (connectionState == MqttCurrentConnectionState.DISCONNECTED ||
+        connectionState == MqttCurrentConnectionState.IDLE) {
+      _connectClient();
+    }
+  }
 }
+
 
 
 // Future<MqttServerClient> connect() async {

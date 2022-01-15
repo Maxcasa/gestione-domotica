@@ -58,14 +58,14 @@ class MainDrawer extends StatelessWidget {
       case '0':
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (_) => AllarmPage(),
+            builder: (_) => HomePage(),
           ),
         );
         break;
       case '1':
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (_) => SensorPage(),
+            builder: (_) => HomePage(),
           ),
         );
         break;

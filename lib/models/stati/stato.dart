@@ -4,13 +4,13 @@ import 'package:gestione_domotica/repositories/schema_repository.dart';
 import 'package:gestione_domotica/models/hex_color.dart';
 import 'dart:convert';
 
-const String topicSurName = "a_out";
+const String topicSurName = "stati";
 
 /// Classe che contiene la gestione degli allarmi
 // ignore: mixin_inherits_from_not_object
-class Allarme with ChangeNotifier {
+class Stato with ChangeNotifier {
   // costruttori
-  Allarme({required this.id}) : super() {
+  Stato({required this.id}) : super() {
     _setupMqtt();
     _getSchemaAllarme();
   }
@@ -25,9 +25,9 @@ class Allarme with ChangeNotifier {
 
   //metodi
   Future<void> _getSchemaAllarme() async {
-    List listAllarmi = (await SchemaRepository().schema)['sensori'];
-    if (listAllarmi.isNotEmpty) {
-      for (var element in listAllarmi) {
+    List listStati = (await SchemaRepository().schema)['sensori'];
+    if (listStati.isNotEmpty) {
+      for (var element in listStati) {
         nome = element['nome'];
         icona = element['icona'] != null
             ? IconData(element['icona']['codePoint'],
@@ -53,16 +53,16 @@ class Allarme with ChangeNotifier {
 
   void _subscribeTopic() {
     mqttClientWrapper!.subscribeToTopic(
-        topicSurName: topicSurName,
+        topicSurName: '${topicSurName}/get',
         onDataReceived: (messageData) => _onAllarmChanged(messageData));
     mqttClientWrapper!.publishMessage(
-        topicSurName: topicSurName, messageData: "{\"status\": \"\"}");
+        topicSurName: '${topicSurName}/get', messageData: "{\"status\": \"\"}");
   }
 
   _onAllarmChanged(String messageData) {
     Map<String, dynamic> jsonData = jsonDecode(messageData);
-    if (jsonData.containsKey('get')) {
-      switch (jsonData['get']) {
+    if (jsonData.containsKey('stato')) {
+      switch (jsonData['stato']) {
         case "2":
           colore = Colors.red;
           icona = Icons.home_outlined;
@@ -86,10 +86,10 @@ class Allarme with ChangeNotifier {
   }
 
   void cambiaStatoAllarme() {
-    int tmpValore = valore++;
+    int tmpValore = valore + 1;
     tmpValore = tmpValore <= 2 ? tmpValore : 0;
-    String message = "{\"set\": \"" + tmpValore.toString() + "\"}";
-    mqttClientWrapper!
-        .publishMessage(topicSurName: topicSurName, messageData: message);
+    String message = "{\"id\": 0, \"stato\": \"" + tmpValore.toString() + "\"}";
+    mqttClientWrapper!.publishMessage(
+        topicSurName: '${topicSurName}/set', messageData: message);
   }
 }

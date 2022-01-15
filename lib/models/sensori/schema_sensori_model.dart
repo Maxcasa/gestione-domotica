@@ -14,14 +14,14 @@ import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
 
 import 'package:flutter/material.dart';
 
-const String topicSurName = "sensori/";
-const String localStorage = "sensori";
+const String topicSurName = "sensori";
+// const String localStorage = "sensori";
 
 final factories = <String, Object Function(int id)>{
   'Sensore': (id) => SensoreModel(id: id),
   'SensoreLuce': (id) => SensoreLuce(id: id),
   'SensoreInfisso': (id) => SensoreInfisso(id: id),
-  'SensoreSirena': (id) => SensoreSirena(id: id),
+  'Sirena': (id) => SensoreSirena(id: id),
 };
 
 /// Classe che gestisce l'insieme dei sensori
@@ -29,7 +29,7 @@ final factories = <String, Object Function(int id)>{
 class SchemaSensoriModel with ChangeNotifier {
   // costruttori
   SchemaSensoriModel({this.id = 0})
-      : this.nome = localStorage,
+      : this.nome = topicSurName,
         super() {
     _setupMqtt();
     _getSchemaSensori();
@@ -85,6 +85,8 @@ class SchemaSensoriModel with ChangeNotifier {
             sensori.add(SensoreLuce.fromJson(element));
           } else if (tipo == 'SensoreInfisso') {
             sensori.add(SensoreInfisso.fromJson(element));
+          } else if (tipo == 'Sirena') {
+            sensori.add(SensoreSirena.fromJson(element));
           }
         }
       }
@@ -111,20 +113,20 @@ class SchemaSensoriModel with ChangeNotifier {
 
   void _subscribeTopic() {
     mqttClientWrapper!.subscribeToTopic(
-        topicSurName: topicSurName,
+        topicSurName: '${topicSurName}/get',
         onDataReceived: (messageData) => _onSensorChanged(messageData));
   }
 
   _onSensorChanged(String messageData) {
     Map<String, dynamic> jsonData = jsonDecode(messageData);
-    if (jsonData.containsKey('get')) {
-      getSensore(jsonData['id']).valore = jsonData['get'];
+    if (jsonData.containsKey('stato')) {
+      getSensore(jsonData['id']).valore = jsonData['stato'];
       notifyListeners();
     }
-    if (jsonData.containsKey('set')) {
-      getSensore(jsonData['id']).valore = jsonData['set'];
-      notifyListeners();
-    }
+    // if (jsonData.containsKey('set')) {
+    //   getSensore(jsonData['id']).valore = jsonData['set'];
+    //   notifyListeners();
+    // }
     // if (jsonData.containsKey('set_status')) {
     //   getSensore(jsonData['id']).valore = jsonData['set'];
     //   sensori = [];
@@ -139,8 +141,8 @@ class SchemaSensoriModel with ChangeNotifier {
   void cambiaStatoSensore(int id) {
     String? messageData = getSensore(id).cambiaStato(1);
     if (messageData != null) {
-      mqttClientWrapper!
-          .publishMessage(topicSurName: topicSurName, messageData: messageData);
+      mqttClientWrapper!.publishMessage(
+          topicSurName: '${topicSurName}/set', messageData: messageData);
     }
   }
 
