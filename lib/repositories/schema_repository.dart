@@ -12,8 +12,8 @@ import 'package:network_info_plus/network_info_plus.dart';
 
 const String localFileUri = 'domo_conf.json';
 const String localBackUri = 'domo_conf.jpg';
-const String remoteFileUri = 'http://$remoteServerUri/conf/$localFileUri';
-const String remoteBackUri = 'http://$remoteServerUri/conf/$localBackUri';
+const String remoteFileUri = 'http://$remoteServerUri:8080/get/domo_json';
+const String remoteBackUri = 'http://$remoteServerUri:8080/get/domo_image';
 
 /// Classe che contiene lo schema del sistema
 class SchemaRepository extends PropertyChangeNotifier<String> {
@@ -117,7 +117,18 @@ class SchemaRepository extends PropertyChangeNotifier<String> {
   }
 
   Future<Image?> getSensoriBackFromRemote() async {
-    return Image.network(remoteBackUri);
+    http.Response httpResponse = await http.get(Uri.parse(remoteBackUri));
+    //http.Response httpResponse = await ioClient.get(Uri.parse(remoteFileUri));
+    if (httpResponse.statusCode == 200) {
+      // If the server did return a 200 OK response,
+      // then parse the JSON.
+      return Image.memory(httpResponse.bodyBytes);
+    } else {
+      // If the server did not return a 200 OK response,
+      // then throw an exception.
+      //throw Exception('Failed to load album');
+      return const Image(image: AssetImage('sfondo_vuoto.png'));
+    }
   }
 
   Future<void> saveSchema() async {

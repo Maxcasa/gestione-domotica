@@ -62,7 +62,8 @@ class MyApp extends StatelessWidget {
               title: Text('Gestione Domotica'),
             ),
             endDrawer: const MainDrawer(),
-            body: connectionState() ? HomePage() : null));
+            body: HomePage()));
+    //connectionState() ? HomePage() : null
   }
 
   bool connectionState() {
