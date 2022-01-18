@@ -1,7 +1,9 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:gestione_domotica/models/remote_conf/allowed_devices.dart';
 import 'package:gestione_domotica/views/page_layer.dart';
 import 'package:gestione_domotica/widget/dot_indicator.dart';
+import 'package:provider/provider.dart';
 
 class ConfPage extends StatelessWidget {
   ConfPage({Key? key}) : super(key: key) {
@@ -38,38 +40,47 @@ class ConfPage extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return Stack(children: [
-      PageView(
-        controller: _controller,
-        onPageChanged: (indice) {
-          print(indice);
-        },
-        children: [
-          SensorPage(),
-          AllarmPage(),
+    return MultiProvider(
+        providers: [
+          ChangeNotifierProvider<AllowedDevices>(
+            create: (_) => AllowedDevices(),
+          )
         ],
-      ),
-      Positioned(
-          bottom: 0.0,
-          left: 0.0,
-          right: 0.0,
-          child: Container(
-              color: Colors.grey[800]!.withOpacity(0.5),
-              padding: const EdgeInsets.all(20.0),
-              child: Center(
-                child: DotsIndicator(
-                  controller: _controller,
-                  itemCount: 2,
-                  onPageSelected: (int page) {
-                    _controller.animateToPage(
-                      page,
-                      duration: _kDuration,
-                      curve: _kCurve,
-                    );
+        child: Column(children: <Widget>[
+          allowedDevice(),
+        ]));
+  }
+
+  Widget allowedDevice() {
+    return Consumer<AllowedDevices>(builder:
+        (BuildContext context, AllowedDevices allowedDevices, Widget? child) {
+      return Expanded(
+        child: ListView.builder(
+          itemCount: allowedDevices.allowedDevices.length,
+          itemBuilder: (BuildContext context, int index) {
+            if (allowedDevices.allowedDevices.isEmpty) {
+              return const Text('nessuna autorizzazione trovata');
+            }
+            final item = Row(
+              children: [
+                Checkbox(
+                  checkColor: Colors.black,
+                  value: allowedDevices.allowedDevices[index].auth,
+                  onChanged: (bool? value) {
+                    allowedDevices.allowedDevice(value, index);
                   },
                 ),
-              )))
-    ]);
+                Text(allowedDevices.allowedDevices[index].name,
+                    textAlign: TextAlign.center),
+                Text(allowedDevices.allowedDevices[index].nameArp,
+                    textAlign: TextAlign.center),
+              ],
+            );
+            return item;
+          },
+        ),
+      );
+    });
   }
 
   // Widget connectionState() {
@@ -80,12 +91,4 @@ class ConfPage extends StatelessWidget {
   //     return Icon(Icons.cloud_outlined, color: Colors.green, size: 20);
   //   }
   // }
-}
-
-class AppScrollBehavior extends MaterialScrollBehavior {
-  @override
-  Set<PointerDeviceKind> get dragDevices => {
-        PointerDeviceKind.touch,
-        PointerDeviceKind.mouse,
-      };
 }

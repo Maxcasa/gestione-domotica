@@ -10,6 +10,7 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'package:gestione_domotica/conf/conf_cost.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 
+// http constant
 const String localFileUri = 'domo_conf.json';
 const String localBackUri = 'domo_conf.jpg';
 const String remoteFileUri = 'http://$remoteServerUri:8080/get/domo_json';

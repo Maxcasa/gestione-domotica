@@ -1,0 +1,60 @@
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:network_info_plus/network_info_plus.dart';
+import 'package:gestione_domotica/conf/conf_cost.dart';
+import 'package:gestione_domotica/models/remote_conf/allowed_device.dart';
+
+/// Classe che contiene la gestione dei dispositivi autorizzati
+// ignore: mixin_inherits_from_not_object
+class AllowedDevices with ChangeNotifier {
+  // costruttori
+  AllowedDevices() : super() {
+    _getAllowedDevice();
+  }
+
+  // variabili
+  List<AllowedDevice> allowedDevices = [];
+  final info = NetworkInfo();
+
+  void allowedDevice(bool? set, int i) {
+    allowedDevices[i].auth = set ?? false;
+    notifyListeners();
+  }
+
+  //metodi
+
+  // prendo i device autorizzati dal web
+  Future<void> _getAllowedDevice() async {
+    var wifiName = await info.getWifiName();
+    // abilito lo scaricamento da web o da rete locale
+    if (kIsWeb || wifiName == localWiFiConnectionName) {
+      List<Map<String, dynamic>> localJson =
+          await _getAllowedDeviceFromRemote();
+      if (localJson.isNotEmpty) {
+        for (var element in localJson) {
+          allowedDevices.add(AllowedDevice.fromJson(element));
+        }
+      }
+      notifyListeners();
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _getAllowedDeviceFromRemote() async {
+    http.Response httpResponse = await http
+        .get(Uri.parse('http://$remoteServerUri:8080/get/allowed_device'));
+    if (httpResponse.statusCode == 200) {
+      // If the server did return a 200 OK response,
+      // then parse the JSON.
+      return json.decode(httpResponse.body);
+    } else {
+      // If the server did not return a 200 OK response,
+      // return empty
+      // Ecample of throw an exception.
+      //throw Exception('Failed to load album');
+      return [];
+    }
+  }
+}
