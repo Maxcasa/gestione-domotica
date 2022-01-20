@@ -2,8 +2,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/remote_conf/remote_layer.dart';
 import 'package:gestione_domotica/views/page_layer.dart';
+import 'package:gestione_domotica/widget/connection_icon.dart';
 import 'package:gestione_domotica/widget/dot_indicator.dart';
 import 'package:provider/provider.dart';
+
+import 'main_drawer.dart';
 
 class ConfPage extends StatelessWidget {
   ConfPage({Key? key}) : super(key: key) {
@@ -31,6 +34,9 @@ class ConfPage extends StatelessWidget {
 
   static const _kCurve = Curves.ease;
 
+  final ButtonStyle style =
+      ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
+
   // @override
   // void dispose() {
   //   _controller.dispose();
@@ -40,18 +46,25 @@ class ConfPage extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-        providers: [
-          ChangeNotifierProvider<AllowedDevices>(
-            create: (_) => AllowedDevices(),
-          ),
-          ChangeNotifierProvider<RemoteConnection>(
-            create: (_) => RemoteConnection(),
-          )
-        ],
-        child: Column(children: <Widget>[
-          allowedDevice(),
-        ]));
+    return Scaffold(
+        appBar: AppBar(
+          leading: ConnectionIcon(),
+          title: Text('Gestione Domotica'),
+        ),
+        endDrawer: const MainDrawer(),
+        body: MultiProvider(
+            providers: [
+              ChangeNotifierProvider<AllowedDevices>(
+                create: (_) => AllowedDevices(),
+              ),
+              ChangeNotifierProvider<RemoteConnection>(
+                create: (_) => RemoteConnection(),
+              )
+            ],
+            child: Column(children: <Widget>[
+              remoteConnection(),
+              allowedDevice(),
+            ])));
   }
 
   Widget remoteConnection() {
@@ -74,6 +87,19 @@ class ConfPage extends StatelessWidget {
             initialValue: remoteConnection.localWiFiConnectionName,
             onFieldSubmitted: (String value) =>
                 remoteConnection.localWiFiConnectionName = value),
+        const SizedBox(height: 30),
+        const SizedBox(height: 30),
+        ElevatedButton(
+          style: style,
+          onPressed: () async {
+            if (await remoteConnection.saveConnectionInfo()) {
+              mostraSnackBar('Aggiornato', context);
+            } else {
+              mostraSnackBar('Valori errati', context);
+            }
+          },
+          child: const Text('Imposta'),
+        ),
       ]);
     });
   }
@@ -110,6 +136,21 @@ class ConfPage extends StatelessWidget {
     });
   }
 
+  void mostraSnackBar(String testo, BuildContext context) {
+    final snackBar = SnackBar(
+      content: Text(testo),
+      // action: SnackBarAction(
+      //   label: 'Undo',
+      //   onPressed: () {
+      //     // Some code to undo the change.
+      //   },
+      // ),
+    );
+
+    // Find the ScaffoldMessenger in the widget tree
+    // and use it to show a SnackBar.
+    ScaffoldMessenger.of(context).showSnackBar(snackBar);
+  }
   // Widget connectionState() {
   //   if (widget.mqttClientWrapper == null ||
   //     widget.mqttClientWrapper!.connectionState != MqttCurrentConnectionState.CONNECTED) {

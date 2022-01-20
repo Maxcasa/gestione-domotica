@@ -12,7 +12,11 @@ class Stato with ChangeNotifier {
   // costruttori
   Stato({required this.id}) : super() {
     _setupMqtt();
-    _getSchemaAllarme();
+    schemaRepository = SchemaRepository();
+    schemaRepository!.addListener(_getDati);
+    if (schemaRepository != null) {
+      _getDati();
+    }
   }
 
   // variabili
@@ -21,23 +25,31 @@ class Stato with ChangeNotifier {
   IconData icona = Icons.power_settings_new_outlined;
   int valore = 0;
   Color colore = Colors.black;
+  SchemaRepository? schemaRepository;
   MQTTClientWrapper? mqttClientWrapper;
 
   //metodi
+  Future<void> _getDati() async {
+    _getSchemaAllarme();
+  }
+
   Future<void> _getSchemaAllarme() async {
-    List listStati = (await SchemaRepository().schema)['sensori'];
-    if (listStati.isNotEmpty) {
-      for (var element in listStati) {
-        nome = element['nome'];
-        icona = element['icona'] != null
-            ? IconData(element['icona']['codePoint'],
-                fontFamily: element['icona']['fontFamily'])
-            : Icons.power_settings_new_outlined;
-        colore = element['colore'] != null
-            ? HexColor.fromHex(element['colore'])
-            : Colors.black;
+    Map<String, dynamic> tmpSchema = await schemaRepository!.schema;
+    if (tmpSchema.containsKey(topicSurName)) {
+      List listStati = tmpSchema[topicSurName];
+      if (listStati.isNotEmpty) {
+        for (var element in listStati) {
+          nome = element['nome'];
+          icona = element['icona'] != null
+              ? IconData(element['icona']['codePoint'],
+                  fontFamily: element['icona']['fontFamily'])
+              : Icons.power_settings_new_outlined;
+          colore = element['colore'] != null
+              ? HexColor.fromHex(element['colore'])
+              : Colors.black;
+        }
+        notifyListeners();
       }
-      notifyListeners();
     }
   }
 

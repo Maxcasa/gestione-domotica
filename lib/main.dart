@@ -56,13 +56,7 @@ class MyApp extends StatelessWidget {
           // This is the theme of your application.
           primarySwatch: Colors.blue,
         ),
-        home: Scaffold(
-            appBar: AppBar(
-              leading: ConnectionIcon(),
-              title: Text('Gestione Domotica'),
-            ),
-            endDrawer: const MainDrawer(),
-            body: HomePage()));
+        home: HomePage());
     //connectionState() ? HomePage() : null
   }
 

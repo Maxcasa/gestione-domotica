@@ -1,22 +1,25 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
+import 'package:gestione_domotica/views/main_drawer.dart';
 import 'package:gestione_domotica/views/page_layer.dart';
+import 'package:gestione_domotica/widget/connection_icon.dart';
 import 'package:gestione_domotica/widget/dot_indicator.dart';
 
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key) {
-    // mqttClientWrapper = MQTTClientWrapper();
-    // if (mqttClientWrapper!.connectionState == MqttCurrentConnectionState.IDLE) {
-    //   _connect();
-    // }
-    // mqttClientWrapper!.addListener(_connect, ['connectionState.disconnected']);
+    mqttClientWrapper = MQTTClientWrapper();
+    if (mqttClientWrapper!.connectionState == MqttCurrentConnectionState.IDLE) {
+      _connect();
+    }
+    mqttClientWrapper!.addListener(_connect, ['connectionState.disconnected']);
   }
 
-  // MQTTClientWrapper? mqttClientWrapper;
+  MQTTClientWrapper? mqttClientWrapper;
 
-  // void _connect() {
-  //   mqttClientWrapper!.connectMqttClient();
-  // }
+  void _connect() {
+    mqttClientWrapper!.connectMqttClient();
+  }
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -43,48 +46,55 @@ class _HomePageState extends State<HomePage> {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return Stack(children: [
-      PageView(
-        controller: _controller,
-        onPageChanged: (indice) {
-          print(indice);
-        },
-        children: [
-          SensorPage(),
-          AllarmPage(),
-        ],
-      ),
-      Positioned(
-          bottom: 0.0,
-          left: 0.0,
-          right: 0.0,
-          child: Container(
-              color: Colors.grey[800]!.withOpacity(0.5),
-              padding: const EdgeInsets.all(20.0),
-              child: Center(
-                child: DotsIndicator(
-                  controller: _controller,
-                  itemCount: 2,
-                  onPageSelected: (int page) {
-                    _controller.animateToPage(
-                      page,
-                      duration: _kDuration,
-                      curve: _kCurve,
-                    );
-                  },
-                ),
-              )))
-    ]);
+    return Scaffold(
+        appBar: AppBar(
+          leading: ConnectionIcon(),
+          title: Text('Gestione Domotica'),
+        ),
+        endDrawer: const MainDrawer(),
+        body: Stack(children: [
+          PageView(
+            controller: _controller,
+            onPageChanged: (indice) {
+              print(indice);
+            },
+            children: [
+              SensorPage(),
+              AllarmPage(),
+            ],
+          ),
+          Positioned(
+              bottom: 0.0,
+              left: 0.0,
+              right: 0.0,
+              child: Container(
+                  color: Colors.grey[800]!.withOpacity(0.5),
+                  padding: const EdgeInsets.all(20.0),
+                  child: Center(
+                    child: DotsIndicator(
+                      controller: _controller,
+                      itemCount: 2,
+                      onPageSelected: (int page) {
+                        _controller.animateToPage(
+                          page,
+                          duration: _kDuration,
+                          curve: _kCurve,
+                        );
+                      },
+                    ),
+                  )))
+        ]));
   }
 
-  // Widget connectionState() {
-  //   if (widget.mqttClientWrapper == null ||
-  //     widget.mqttClientWrapper!.connectionState != MqttCurrentConnectionState.CONNECTED) {
-  //       return Icon(Icons.cloud_off_outlined, color: Colors.red, size: 20);
-  //   } else {
-  //     return Icon(Icons.cloud_outlined, color: Colors.green, size: 20);
-  //   }
-  // }
+  bool connectionState() {
+    if (widget.mqttClientWrapper == null ||
+        widget.mqttClientWrapper!.connectionState !=
+            MqttCurrentConnectionState.CONNECTED) {
+      return false;
+    } else {
+      return true;
+    }
+  }
 }
 
 class AppScrollBehavior extends MaterialScrollBehavior {

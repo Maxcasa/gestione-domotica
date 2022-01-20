@@ -34,11 +34,13 @@ class AllowedDevices with ChangeNotifier {
   //metodi
   // prendo i device autorizzati dal web
   Future<void> _getAllowedDevice() async {
-    var wifiName = await info.getWifiName();
     // abilito lo scaricamento da web o da rete locale
-    if ((remoteConnection!.localWiFiConnectionName != null &&
+    if ((remoteConnection != null &&
+            remoteConnection!.localWiFiConnectionName != null &&
             remoteConnection!.remoteServerUri != null) &&
-        (kIsWeb || wifiName == remoteConnection!.localWiFiConnectionName)) {
+        (kIsWeb ||
+            (await info.getWifiName() ==
+                remoteConnection!.localWiFiConnectionName))) {
       List<Map<String, dynamic>> localJson =
           await _getAllowedDeviceFromRemote();
       if (localJson.isNotEmpty) {

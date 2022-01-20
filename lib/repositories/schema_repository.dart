@@ -66,26 +66,30 @@ class SchemaRepository extends ChangeNotifier {
   }
 
   Future<void> _getSchema() async {
-    var wifiName = await info.getWifiName();
-    if ((remoteConnection != null &&
-            remoteConnection!.localWiFiConnectionName != null &&
-            remoteConnection!.remoteServerUri != null) &&
-        (kIsWeb || wifiName == remoteConnection!.localWiFiConnectionName)) {
-      schemaTree = await _getSchemaFromRemote();
-    } else {
-      schemaTree = await _getSchemaFromLocal();
+    if (remoteConnection != null &&
+        remoteConnection!.localWiFiConnectionName != null &&
+        remoteConnection!.remoteServerUri != null) {
+      if (kIsWeb ||
+          (await info.getWifiName() ==
+              remoteConnection!.localWiFiConnectionName)) {
+        schemaTree = await _getSchemaFromRemote();
+      } else {
+        schemaTree = await _getSchemaFromLocal();
+      }
     }
   }
 
   Future<void> _getSensoriBack() async {
-    var wifiName = await info.getWifiName();
-    if ((remoteConnection != null &&
-            remoteConnection!.localWiFiConnectionName != null &&
-            remoteConnection!.remoteServerUri != null) &&
-        (kIsWeb || wifiName == remoteConnection!.localWiFiConnectionName)) {
-      _sensoriBack = await _getSensoriBackFromRemote();
-    } else {
-      _sensoriBack = await _getSensoriBackFromLocal();
+    if (remoteConnection != null &&
+        remoteConnection!.localWiFiConnectionName != null &&
+        remoteConnection!.remoteServerUri != null) {
+      if (kIsWeb ||
+          (await info.getWifiName() ==
+              remoteConnection!.localWiFiConnectionName)) {
+        _sensoriBack = await _getSensoriBackFromRemote();
+      } else {
+        _sensoriBack = await _getSensoriBackFromLocal();
+      }
     }
   }
 

@@ -9,6 +9,8 @@ import 'package:network_info_plus/network_info_plus.dart';
 import 'package:gestione_domotica/models/remote_conf/allowed_device.dart';
 import 'package:path_provider/path_provider.dart';
 
+const String port = '8085';
+
 /// Classe che contiene la gestione dei dispositivi autorizzati
 // ignore: mixin_inherits_from_not_object
 class RemoteConnection with ChangeNotifier {
@@ -26,6 +28,7 @@ class RemoteConnection with ChangeNotifier {
   // variabili
   String? _remoteServerUri;
   String? _localWiFiConnectionName;
+  final info = NetworkInfo();
 
   String? get remoteServerUri => _remoteServerUri;
   String? get localWiFiConnectionName => _localWiFiConnectionName;
@@ -63,20 +66,33 @@ class RemoteConnection with ChangeNotifier {
         _remoteServerUri = jsonData['remoteServerUri'];
         _localWiFiConnectionName = jsonData['localWiFiConnectionName'];
         notifyListeners();
+      } else {
+        _localWiFiConnectionName = await info.getWifiName();
       }
     }
   }
 
-  Future<void> saveConnectionInfo() async {
+  Future<bool> saveConnectionInfo() async {
     if (await checkConnectionInfo()) {
       final directory = await getApplicationDocumentsDirectory();
       final File file = File('${directory.path}/connection_info.json');
       await file.writeAsString(
           '{"remoteServerUri": "$_remoteServerUri, "localWiFiConnectionName": $_localWiFiConnectionName}');
+      return true;
+    } else {
+      return false;
     }
   }
 
   Future<bool> checkConnectionInfo() async {
-    return true;
+    bool IpOK = false;
+    bool WiFiOk = false;
+    http.Response httpResponse =
+        await http.get(Uri.parse('http://${_remoteServerUri}:$port/'));
+    if (httpResponse.statusCode == 200 &&
+        httpResponse.body == 'Domo_Server is here!') {
+      IpOK = true;
+    }
+    return IpOK;
   }
 }

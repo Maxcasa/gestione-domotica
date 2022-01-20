@@ -83,27 +83,30 @@ class SchemaSensoriModel with ChangeNotifier {
   }
 
   Future<void> _getSchemaSensori() async {
-    List listSensori = (await schemaRepository!.schema)['sensori'];
-    if (listSensori.isNotEmpty) {
-      for (var element in listSensori) {
-        String tipo = element['tipo'] ?? 'Semnsore';
-        int id = element['id'];
-        if (factories.containsKey(tipo)) {
-          if (tipo == 'Sensore') {
-            sensori.add(SensoreModel.fromJson(element));
-          } else if (tipo == 'SensoreLuce') {
-            sensori.add(SensoreLuce.fromJson(element));
-          } else if (tipo == 'SensoreInfisso') {
-            sensori.add(SensoreInfisso.fromJson(element));
-          } else if (tipo == 'Sirena') {
-            sensori.add(SensoreSirena.fromJson(element));
+    Map<String, dynamic> tmpSchema = await schemaRepository!.schema;
+    if (tmpSchema.containsKey(topicSurName)) {
+      List listSensori = tmpSchema[topicSurName];
+      if (listSensori.isNotEmpty) {
+        for (var element in listSensori) {
+          String tipo = element['tipo'] ?? 'Semnsore';
+          int id = element['id'];
+          if (factories.containsKey(tipo)) {
+            if (tipo == 'Sensore') {
+              sensori.add(SensoreModel.fromJson(element));
+            } else if (tipo == 'SensoreLuce') {
+              sensori.add(SensoreLuce.fromJson(element));
+            } else if (tipo == 'SensoreInfisso') {
+              sensori.add(SensoreInfisso.fromJson(element));
+            } else if (tipo == 'Sirena') {
+              sensori.add(SensoreSirena.fromJson(element));
+            }
           }
         }
+        // mqttClientWrapper!.publishMessage(
+        //     topicSurName: topicSurName, messageData: 'get/status');
       }
-      // mqttClientWrapper!.publishMessage(
-      //     topicSurName: topicSurName, messageData: 'get/status');
+      notifyListeners();
     }
-    notifyListeners();
   }
 
   //metodi

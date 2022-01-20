@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/drawer/main_drawer_provider.dart';
+import 'package:gestione_domotica/views/conf_page.dart';
 import 'package:provider/provider.dart';
 import 'dart:developer';
 
@@ -51,21 +52,21 @@ class MainDrawer extends StatelessWidget {
     });
   }
 
-  void _selectDestination(String? index, BuildContext context) {
+  void _selectDestination(int? index, BuildContext context) {
     log('data: $index');
     if (index == null) return;
     switch (index) {
-      case '0':
+      case 0:
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (_) => HomePage(),
           ),
         );
         break;
-      case '1':
+      case 1:
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
-            builder: (_) => HomePage(),
+            builder: (_) => ConfPage(),
           ),
         );
         break;
