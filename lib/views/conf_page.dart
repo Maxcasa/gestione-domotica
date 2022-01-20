@@ -37,6 +37,7 @@ class ConfPage extends StatelessWidget {
   final ButtonStyle style =
       ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
 
+  final _formAllowedKey = GlobalKey<FormState>();
   // @override
   // void dispose() {
   //   _controller.dispose();
@@ -70,37 +71,71 @@ class ConfPage extends StatelessWidget {
   Widget remoteConnection() {
     return Consumer<RemoteConnection>(builder: (BuildContext context,
         RemoteConnection remoteConnection, Widget? child) {
-      return Column(children: [
-        TextFormField(
-            decoration: const InputDecoration(
-              border: UnderlineInputBorder(),
-              labelText: 'Server IP',
+      final ipController = TextEditingController();
+      final wiFiController = TextEditingController();
+      final _formfKey = GlobalKey<FormState>();
+      return Form(
+        key: _formfKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            TextFormField(
+              controller: ipController,
+              decoration: const InputDecoration(
+                border: UnderlineInputBorder(),
+                labelText: 'Server IP',
+              ),
+              initialValue: remoteConnection.remoteServerUri,
+              // The validator receives the text that the user has entered.
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter some text';
+                }
+                return null;
+              },
+              onSaved: (value) {
+                remoteConnection.remoteServerUri = value;
+              },
             ),
-            initialValue: remoteConnection.remoteServerUri,
-            onFieldSubmitted: (String value) =>
-                remoteConnection.remoteServerUri = value),
-        TextFormField(
-            decoration: const InputDecoration(
-              border: UnderlineInputBorder(),
-              labelText: 'Local WiFi Name',
+            TextFormField(
+              controller: wiFiController,
+              decoration: const InputDecoration(
+                border: UnderlineInputBorder(),
+                labelText: 'Local WiFi Name',
+              ),
+              initialValue: remoteConnection.localWiFiConnectionName,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter some text';
+                }
+                return null;
+              },
+              onSaved: (value) {
+                remoteConnection.localWiFiConnectionName = value;
+              },
             ),
-            initialValue: remoteConnection.localWiFiConnectionName,
-            onFieldSubmitted: (String value) =>
-                remoteConnection.localWiFiConnectionName = value),
-        const SizedBox(height: 30),
-        const SizedBox(height: 30),
-        ElevatedButton(
-          style: style,
-          onPressed: () async {
-            if (await remoteConnection.saveConnectionInfo()) {
-              mostraSnackBar('Aggiornato', context);
-            } else {
-              mostraSnackBar('Valori errati', context);
-            }
-          },
-          child: const Text('Imposta'),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: ElevatedButton(
+                onPressed: () async {
+                  // Validate returns true if the form is valid, or false otherwise.
+                  if (_formfKey.currentState!.validate() &&
+                      await remoteConnection.checkIPInfo(ipController.text) &&
+                      await remoteConnection
+                          .checkWiFiInfo(wiFiController.text)) {
+                    _formfKey.currentState!.save();
+                    remoteConnection.saveConnectionInfo();
+                    // If the form is valid, display a snackbar. In the real world,
+                    // you'd often call a server or save the information in a database.
+                    mostraSnackBar('Aggiornato', context);
+                  }
+                },
+                child: const Text('Submit'),
+              ),
+            ),
+          ],
         ),
-      ]);
+      );
     });
   }
 

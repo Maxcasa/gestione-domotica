@@ -46,17 +46,17 @@ class RemoteConnection with ChangeNotifier {
   // prendo le info di connessioni
   Future<void> _getConnectionInfo() async {
     if (kIsWeb) {
-      // try {
-      //   // String fileString =
-      //   //     await rootBundle.loadString('assets/json/remote_connection.json');
-      //   // Map<String, dynamic> jsonData = json.decode(fileString);
-      //   // _remoteServerUri = jsonData['remoteServerUri'];
-      //   // _localWiFiConnectionName = jsonData['localWiFiConnectionName'];
-      //   notifyListeners();
-      // } on Exception catch (e) {
-      //   print('RemoteConnection :: $e');
-      //   throw Exception(e);
-      // }
+      try {
+        String fileString =
+            await rootBundle.loadString('assets/json/remote_connection.json');
+        Map<String, dynamic> jsonData = json.decode(fileString);
+        _remoteServerUri = jsonData['remoteServerUri'];
+        _localWiFiConnectionName = jsonData['localWiFiConnectionName'];
+        notifyListeners();
+      } on Exception catch (e) {
+        print('RemoteConnection :: $e');
+        throw Exception(e);
+      }
     } else {
       final directory = await getApplicationDocumentsDirectory();
       final File file = File('${directory.path}/connection_info.json');
@@ -73,26 +73,29 @@ class RemoteConnection with ChangeNotifier {
   }
 
   Future<bool> saveConnectionInfo() async {
-    if (await checkConnectionInfo()) {
+    if (!kIsWeb) {
       final directory = await getApplicationDocumentsDirectory();
       final File file = File('${directory.path}/connection_info.json');
       await file.writeAsString(
           '{"remoteServerUri": "$_remoteServerUri, "localWiFiConnectionName": $_localWiFiConnectionName}');
-      return true;
-    } else {
-      return false;
     }
+    notifyListeners();
+    return true;
   }
 
-  Future<bool> checkConnectionInfo() async {
-    bool IpOK = false;
-    bool WiFiOk = false;
+  Future<bool> checkIPInfo(String ipValue) async {
+    bool ipOK = false;
     http.Response httpResponse =
-        await http.get(Uri.parse('http://${_remoteServerUri}:$port/'));
+        await http.get(Uri.parse('http://$ipValue:$port/'));
     if (httpResponse.statusCode == 200 &&
         httpResponse.body == 'Domo_Server is here!') {
-      IpOK = true;
+      ipOK = true;
     }
-    return IpOK;
+    return ipOK;
+  }
+
+  Future<bool> checkWiFiInfo(String wiFiValue) async {
+    bool wiFiOk = true;
+    return wiFiOk;
   }
 }
