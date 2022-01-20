@@ -32,8 +32,11 @@ class SchemaSensoriModel with ChangeNotifier {
       : this.nome = topicSurName,
         super() {
     _setupMqtt();
-    _getSchemaSensori();
-    _getSensoriBack();
+    schemaRepository = SchemaRepository();
+    schemaRepository!.addListener(_getDati);
+    if (schemaRepository != null) {
+      _getDati();
+    }
   }
 
   SchemaSensoriModel.fromListSensori(
@@ -51,6 +54,7 @@ class SchemaSensoriModel with ChangeNotifier {
   List<SensoreModel> sensori = [];
   Image? sensoriBack;
   MQTTClientWrapper? mqttClientWrapper;
+  SchemaRepository? schemaRepository;
   String _nome = '';
 
   // getter e setter
@@ -72,8 +76,14 @@ class SchemaSensoriModel with ChangeNotifier {
   }
 
   //metodi
+
+  Future<void> _getDati() async {
+    _getSchemaSensori();
+    _getSensoriBack();
+  }
+
   Future<void> _getSchemaSensori() async {
-    List listSensori = (await SchemaRepository().schema)['sensori'];
+    List listSensori = (await schemaRepository!.schema)['sensori'];
     if (listSensori.isNotEmpty) {
       for (var element in listSensori) {
         String tipo = element['tipo'] ?? 'Semnsore';
@@ -98,7 +108,7 @@ class SchemaSensoriModel with ChangeNotifier {
 
   //metodi
   Future<void> _getSensoriBack() async {
-    sensoriBack = await SchemaRepository().sensoriBack;
+    sensoriBack = await schemaRepository!.sensoriBack;
   }
 
   void _setupMqtt() {
@@ -162,10 +172,6 @@ class SchemaSensoriModel with ChangeNotifier {
   // operator ==(Plan other) {
   //   return false;
   // }
-
-  void saveSchemaSensori() {
-    SchemaRepository().saveSchema();
-  }
 
   // conversione Json
   SchemaSensoriModel.fromJson(Map<String, dynamic> json)

@@ -1,8 +1,8 @@
+import 'package:gestione_domotica/models/remote_conf/remote_connection.dart';
 import 'package:mqtt_client/mqtt_browser_client.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'dart:math';
-import 'package:gestione_domotica/conf/conf_cost.dart';
 
 //import 'package:mqtt_client/mqtt_server_client.dart';
 //import 'package:flutter/material.dart';
@@ -11,10 +11,6 @@ import 'package:gestione_domotica/conf/conf_cost.dart';
 
 // final String serverUri = "test.mosquitto.org";
 //const String serverUri = "192.168.1.3";
-const String serverUri = 'ws://$remoteServerUri';
-// const int port = 1883;
-const int port = 8080;
-const String topicName = "Max/Domotica/";
 
 enum MqttCurrentConnectionState {
   IDLE,
@@ -39,6 +35,8 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   }
 
   MQTTClientWrapper._internal() {
+    remoteConnection = RemoteConnection();
+    remoteConnection!.addListener(serverChange);
     print('Istanzio l\'MQTT Client');
   }
 
@@ -48,13 +46,23 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   MqttCurrentConnectionState connectionState = MqttCurrentConnectionState.IDLE;
   MqttSubscriptionState subscriptionState = MqttSubscriptionState.IDLE;
   Map<String, Function(String)> onDataReceivedArray = {};
+  RemoteConnection? remoteConnection;
+
+  String? serverUri;
+  // const int port = 1883;
+  static const int port = 8080;
+  static const String topicName = "Max/Domotica/";
 
   Future<void> connectMqttClient() async {
-    if (connectionState != MqttCurrentConnectionState.CONNECTING &&
-        connectionState != MqttCurrentConnectionState.CONNECTED &&
-        connectionState != MqttCurrentConnectionState.RICONNECT &&
-        connectionState != MqttCurrentConnectionState.RICONNECTED &&
-        connectionState != MqttCurrentConnectionState.ERROR_WHEN_CONNECTING) {
+    if ((connectionState != MqttCurrentConnectionState.CONNECTING &&
+            connectionState != MqttCurrentConnectionState.CONNECTED &&
+            connectionState != MqttCurrentConnectionState.RICONNECT &&
+            connectionState != MqttCurrentConnectionState.RICONNECTED &&
+            connectionState !=
+                MqttCurrentConnectionState.ERROR_WHEN_CONNECTING) &&
+        (remoteConnection != null &&
+            remoteConnection!.remoteServerUri != null)) {
+      serverUri = 'ws://${remoteConnection!.remoteServerUri}';
       _setupMqttClient();
       await _connectClient();
       _listenClient();
@@ -64,8 +72,8 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   void _setupMqttClient() {
     // client = MqttServerClient.withPort(serverUri, '#', port);
     Random random = Random();
-    client = MqttBrowserClient.withPort(
-        serverUri, 'mqtt_domo_gest' + random.nextInt(1000000).toString(), port);
+    client = MqttBrowserClient.withPort(serverUri!,
+        'mqtt_domo_gest' + random.nextInt(1000000).toString(), port);
     client!.logging(on: false);
     client!.keepAlivePeriod = 60;
     client!.autoReconnect = true;
@@ -203,13 +211,29 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   }
 
   void toggleState() {
-    if (connectionState == MqttCurrentConnectionState.CONNECTED) {
+    if (connectionState != MqttCurrentConnectionState.CONNECTING &&
+        connectionState != MqttCurrentConnectionState.CONNECTED &&
+        connectionState != MqttCurrentConnectionState.RICONNECT &&
+        connectionState != MqttCurrentConnectionState.RICONNECTED &&
+        connectionState != MqttCurrentConnectionState.ERROR_WHEN_CONNECTING) {
       client!.disconnect();
       //  connect('mqtt_user', 'mqtt_user');
     } else if (connectionState == MqttCurrentConnectionState.DISCONNECTED ||
         connectionState == MqttCurrentConnectionState.IDLE) {
       _connectClient();
     }
+  }
+
+  void serverChange() {
+    if (connectionState != MqttCurrentConnectionState.CONNECTING &&
+        connectionState != MqttCurrentConnectionState.CONNECTED &&
+        connectionState != MqttCurrentConnectionState.RICONNECT &&
+        connectionState != MqttCurrentConnectionState.RICONNECTED &&
+        connectionState != MqttCurrentConnectionState.ERROR_WHEN_CONNECTING) {
+      client!.disconnect();
+      //  connect('mqtt_user', 'mqtt_user');
+    }
+    client!.connect();
   }
 }
 

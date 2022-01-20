@@ -1,6 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:gestione_domotica/models/remote_conf/allowed_devices.dart';
+import 'package:gestione_domotica/models/remote_conf/remote_layer.dart';
 import 'package:gestione_domotica/views/page_layer.dart';
 import 'package:gestione_domotica/widget/dot_indicator.dart';
 import 'package:provider/provider.dart';
@@ -44,11 +44,38 @@ class ConfPage extends StatelessWidget {
         providers: [
           ChangeNotifierProvider<AllowedDevices>(
             create: (_) => AllowedDevices(),
+          ),
+          ChangeNotifierProvider<RemoteConnection>(
+            create: (_) => RemoteConnection(),
           )
         ],
         child: Column(children: <Widget>[
           allowedDevice(),
         ]));
+  }
+
+  Widget remoteConnection() {
+    return Consumer<RemoteConnection>(builder: (BuildContext context,
+        RemoteConnection remoteConnection, Widget? child) {
+      return Column(children: [
+        TextFormField(
+            decoration: const InputDecoration(
+              border: UnderlineInputBorder(),
+              labelText: 'Server IP',
+            ),
+            initialValue: remoteConnection.remoteServerUri,
+            onFieldSubmitted: (String value) =>
+                remoteConnection.remoteServerUri = value),
+        TextFormField(
+            decoration: const InputDecoration(
+              border: UnderlineInputBorder(),
+              labelText: 'Local WiFi Name',
+            ),
+            initialValue: remoteConnection.localWiFiConnectionName,
+            onFieldSubmitted: (String value) =>
+                remoteConnection.localWiFiConnectionName = value),
+      ]);
+    });
   }
 
   Widget allowedDevice() {

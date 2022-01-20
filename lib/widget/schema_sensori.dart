@@ -17,7 +17,9 @@ class SchemaSensori extends StatelessWidget {
         Positioned(
             left: 0,
             top: 0,
-            child: Container(child: schemaSensoriModel.sensoriBack)),
+            child: Container(
+                child: schemaSensoriModel.sensoriBack ??
+                    const Image(image: AssetImage('sfondo_vuoto.png')))),
         for (var item in schemaSensoriModel.sensori)
           Positioned(
             top: item.posTop,
