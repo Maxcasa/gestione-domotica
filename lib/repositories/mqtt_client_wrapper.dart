@@ -36,7 +36,8 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
 
   MQTTClientWrapper._internal() {
     remoteConnection = RemoteConnection();
-    remoteConnection!.addListener(serverChange);
+    //remoteConnection!.addListener(serverChange);
+    remoteConnection!.getConnectionInfo();
     print('Istanzio l\'MQTT Client');
   }
 

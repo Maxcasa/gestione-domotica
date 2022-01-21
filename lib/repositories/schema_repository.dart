@@ -26,6 +26,7 @@ class SchemaRepository extends ChangeNotifier {
 
   SchemaRepository._internal() {
     remoteConnection = RemoteConnection();
+    remoteConnection!.getConnectionInfo();
     remoteConnection!.addListener(_setRemoteVariables);
     _setRemoteVariables();
     print('Istanzio il getter dello schema');

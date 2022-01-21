@@ -12,6 +12,7 @@ import 'models/drawer/main_drawer_provider.dart';
 import 'package:gestione_domotica/widget/connection_icon.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   //SchemaSensori(id: 0);
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider<Stato>(

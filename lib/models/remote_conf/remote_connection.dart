@@ -13,7 +13,7 @@ const String port = '8085';
 
 /// Classe che contiene la gestione dei dispositivi autorizzati
 // ignore: mixin_inherits_from_not_object
-class RemoteConnection with ChangeNotifier {
+class RemoteConnection extends ChangeNotifier {
   // costruttori
   static final RemoteConnection _instance = RemoteConnection._internal();
 
@@ -21,9 +21,7 @@ class RemoteConnection with ChangeNotifier {
     return _instance;
   }
 
-  RemoteConnection._internal() : super() {
-    _getConnectionInfo();
-  }
+  RemoteConnection._internal() : super();
 
   // variabili
   String? _remoteServerUri;
@@ -44,30 +42,33 @@ class RemoteConnection with ChangeNotifier {
   //metodi
 
   // prendo le info di connessioni
-  Future<void> _getConnectionInfo() async {
-    if (kIsWeb) {
-      try {
-        String fileString =
-            await rootBundle.loadString('assets/json/remote_connection.json');
-        Map<String, dynamic> jsonData = json.decode(fileString);
-        _remoteServerUri = jsonData['remoteServerUri'];
-        _localWiFiConnectionName = jsonData['localWiFiConnectionName'];
-        notifyListeners();
-      } on Exception catch (e) {
-        print('RemoteConnection :: $e');
-        throw Exception(e);
-      }
-    } else {
-      final directory = await getApplicationDocumentsDirectory();
-      final File file = File('${directory.path}/connection_info.json');
-      if (await file.exists()) {
-        String fileString = await file.readAsString();
-        Map<String, dynamic> jsonData = json.decode(fileString);
-        _remoteServerUri = jsonData['remoteServerUri'];
-        _localWiFiConnectionName = jsonData['localWiFiConnectionName'];
-        notifyListeners();
+  Future<void> getConnectionInfo() async {
+    if (_localWiFiConnectionName == null && _remoteServerUri == null) {
+      if (kIsWeb) {
+        try {
+          String fileString =
+              await rootBundle.loadString('assets/json/remote_connection.json');
+          Map<String, dynamic> jsonData = json.decode(fileString);
+          if (await checkIPInfo(jsonData['remoteServerUri']) &&
+              await checkWiFiInfo(jsonData['remoteServerUri'])) {
+            _remoteServerUri = jsonData['remoteServerUri'];
+            _localWiFiConnectionName = jsonData['localWiFiConnectionName'];
+          }
+        } on Exception catch (e) {
+          print('RemoteConnection :: $e');
+          throw Exception(e);
+        }
       } else {
-        _localWiFiConnectionName = await info.getWifiName();
+        final directory = await getApplicationDocumentsDirectory();
+        final File file = File('${directory.path}/connection_info.json');
+        if (await file.exists()) {
+          String fileString = await file.readAsString();
+          Map<String, dynamic> jsonData = json.decode(fileString);
+          _remoteServerUri = jsonData['remoteServerUri'];
+          _localWiFiConnectionName = jsonData['localWiFiConnectionName'];
+        } else {
+          _localWiFiConnectionName = await info.getWifiName();
+        }
       }
     }
   }
