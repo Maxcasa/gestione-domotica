@@ -21,7 +21,9 @@ class RemoteConnection extends ChangeNotifier {
     return _instance;
   }
 
-  RemoteConnection._internal() : super();
+  RemoteConnection._internal() : super() {
+    _getConnectionInfo();
+  }
 
   // variabili
   String? _remoteServerUri;
@@ -42,7 +44,7 @@ class RemoteConnection extends ChangeNotifier {
   //metodi
 
   // prendo le info di connessioni
-  Future<void> getConnectionInfo() async {
+  Future<void> _getConnectionInfo() async {
     if (_localWiFiConnectionName == null && _remoteServerUri == null) {
       if (kIsWeb) {
         try {
@@ -53,6 +55,7 @@ class RemoteConnection extends ChangeNotifier {
               await checkWiFiInfo(jsonData['remoteServerUri'])) {
             _remoteServerUri = jsonData['remoteServerUri'];
             _localWiFiConnectionName = jsonData['localWiFiConnectionName'];
+            notifyListeners();
           }
         } on Exception catch (e) {
           print('RemoteConnection :: $e');
@@ -66,8 +69,10 @@ class RemoteConnection extends ChangeNotifier {
           Map<String, dynamic> jsonData = json.decode(fileString);
           _remoteServerUri = jsonData['remoteServerUri'];
           _localWiFiConnectionName = jsonData['localWiFiConnectionName'];
+          notifyListeners();
         } else {
           _localWiFiConnectionName = await info.getWifiName();
+          notifyListeners();
         }
       }
     }

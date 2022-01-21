@@ -26,9 +26,7 @@ class SchemaRepository extends ChangeNotifier {
 
   SchemaRepository._internal() {
     remoteConnection = RemoteConnection();
-    remoteConnection!.getConnectionInfo();
-    remoteConnection!.addListener(_setRemoteVariables);
-    _setRemoteVariables();
+    remoteConnection!.addListener(() => {notifyListeners()});
     print('Istanzio il getter dello schema');
   }
 
@@ -40,17 +38,18 @@ class SchemaRepository extends ChangeNotifier {
   String? remoteFileUri;
   String? remoteBackUri;
 
-  void _setRemoteVariables() {
-    if (remoteConnection != null &&
-        remoteConnection!.localWiFiConnectionName != null &&
-        remoteConnection!.remoteServerUri != null) {
-      remoteFileUri =
-          'http://${remoteConnection!.remoteServerUri}:$port/get/domo_json';
-      remoteBackUri =
-          'http://${remoteConnection!.remoteServerUri}:$port/get/domo_image';
-      notifyListeners();
-    }
-  }
+  // Future<void> setRemoteVariables() async {
+  //   if (remoteConnection != null) {
+  //     if (remoteConnection!.localWiFiConnectionName != null &&
+  //         remoteConnection!.remoteServerUri != null) {
+  //       remoteFileUri =
+  //           'http://${remoteConnection!.remoteServerUri}:$port/get/domo_json';
+  //       remoteBackUri =
+  //           'http://${remoteConnection!.remoteServerUri}:$port/get/domo_image';
+  //       notifyListeners();
+  //     }
+  //   }
+  // }
 
   Future<Map<String, dynamic>> get schema async {
     if (schemaTree.isEmpty) {
@@ -70,6 +69,10 @@ class SchemaRepository extends ChangeNotifier {
     if (remoteConnection != null &&
         remoteConnection!.localWiFiConnectionName != null &&
         remoteConnection!.remoteServerUri != null) {
+      remoteFileUri =
+          'http://${remoteConnection!.remoteServerUri}:$port/get/domo_json';
+      remoteBackUri =
+          'http://${remoteConnection!.remoteServerUri}:$port/get/domo_image';
       if (kIsWeb ||
           (await info.getWifiName() ==
               remoteConnection!.localWiFiConnectionName)) {
@@ -84,6 +87,10 @@ class SchemaRepository extends ChangeNotifier {
     if (remoteConnection != null &&
         remoteConnection!.localWiFiConnectionName != null &&
         remoteConnection!.remoteServerUri != null) {
+      remoteFileUri =
+          'http://${remoteConnection!.remoteServerUri}:$port/get/domo_json';
+      remoteBackUri =
+          'http://${remoteConnection!.remoteServerUri}:$port/get/domo_image';
       if (kIsWeb ||
           (await info.getWifiName() ==
               remoteConnection!.localWiFiConnectionName)) {
@@ -153,14 +160,18 @@ class SchemaRepository extends ChangeNotifier {
   }
 
   Future<void> saveSchema(schemaData) async {
-    final directory = await getApplicationDocumentsDirectory();
-    final File file = File('${directory.path}/$localFileUri');
-    await file.writeAsString(schemaData);
+    if (!kIsWeb) {
+      final directory = await getApplicationDocumentsDirectory();
+      final File file = File('${directory.path}/$localFileUri');
+      await file.writeAsString(schemaData);
+    }
   }
 
   Future<void> saveSensoriBack(imageData) async {
-    final directory = await getApplicationDocumentsDirectory();
-    final File file = File('${directory.path}/$localBackUri');
-    await file.writeAsBytes(imageData);
+    if (!kIsWeb) {
+      final directory = await getApplicationDocumentsDirectory();
+      final File file = File('${directory.path}/$localBackUri');
+      await file.writeAsBytes(imageData);
+    }
   }
 }

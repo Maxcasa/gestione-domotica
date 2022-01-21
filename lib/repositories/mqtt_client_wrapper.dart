@@ -36,8 +36,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
 
   MQTTClientWrapper._internal() {
     remoteConnection = RemoteConnection();
-    //remoteConnection!.addListener(serverChange);
-    remoteConnection!.getConnectionInfo();
+    remoteConnection!.addListener(serverChange);
     print('Istanzio l\'MQTT Client');
   }
 
@@ -61,12 +60,13 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
             connectionState != MqttCurrentConnectionState.RICONNECTED &&
             connectionState !=
                 MqttCurrentConnectionState.ERROR_WHEN_CONNECTING) &&
-        (remoteConnection != null &&
-            remoteConnection!.remoteServerUri != null)) {
-      serverUri = 'ws://${remoteConnection!.remoteServerUri}';
-      _setupMqttClient();
-      await _connectClient();
-      _listenClient();
+        remoteConnection != null) {
+      if (remoteConnection!.remoteServerUri != null) {
+        serverUri = 'ws://${remoteConnection!.remoteServerUri}';
+        _setupMqttClient();
+        await _connectClient();
+        _listenClient();
+      }
     }
   }
 
