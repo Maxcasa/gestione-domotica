@@ -20,7 +20,7 @@ class SchemaSensori extends StatelessWidget {
             child: Container(
                 child: schemaSensoriModel.sensoriBack ??
                     const Image(
-                      image: AssetImage('images/sfondo_vuoto.png'),
+                      image: AssetImage('assets/images/sfondo_vuoto.png'),
                       height: 150,
                       width: 150,
                     ))),

@@ -73,9 +73,9 @@ class SchemaRepository extends ChangeNotifier {
           'http://${await remoteConnection!.getRemoteServerUri()}:$port/get/domo_json';
       remoteBackUri =
           'http://${await remoteConnection!.getRemoteServerUri()}:$port/get/domo_image';
-      if (kIsWeb ||
-          (await info.getWifiName() ==
-              await remoteConnection!.getLocalWiFiConnectionName())) {
+      String? localWiFi = await info.getWifiName();
+      String? savedWiFi = await remoteConnection!.getLocalWiFiConnectionName();
+      if (kIsWeb || (savedWiFi == savedWiFi)) {
         schemaTree = await _getSchemaFromRemote();
       } else {
         schemaTree = await _getSchemaFromLocal();
@@ -91,9 +91,9 @@ class SchemaRepository extends ChangeNotifier {
           'http://${await remoteConnection!.getRemoteServerUri()}:$port/get/domo_json';
       remoteBackUri =
           'http://${await remoteConnection!.getRemoteServerUri()}:$port/get/domo_image';
-      if (kIsWeb ||
-          (await info.getWifiName() ==
-              await remoteConnection!.getLocalWiFiConnectionName())) {
+      String? localWiFi = await info.getWifiName();
+      String? savedWiFi = await remoteConnection!.getLocalWiFiConnectionName();
+      if (kIsWeb || (savedWiFi == savedWiFi)) {
         _sensoriBack = await _getSensoriBackFromRemote();
       } else {
         _sensoriBack = await _getSensoriBackFromLocal();

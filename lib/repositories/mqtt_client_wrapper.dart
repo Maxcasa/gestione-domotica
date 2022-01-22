@@ -4,6 +4,8 @@ import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'dart:math';
+import 'package:mqtt_client/mqtt_browser_client.dart'
+    if (dart.library.io) 'package:mqtt_client/mqtt_server_client.dart';
 
 //import 'package:mqtt_client/mqtt_server_client.dart';
 //import 'package:flutter/material.dart';
