@@ -1,5 +1,6 @@
 import 'package:gestione_domotica/models/remote_conf/remote_connection.dart';
-import 'package:mqtt_client/mqtt_browser_client.dart';
+//import 'package:mqtt_client/mqtt_browser_client.dart';
+import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'dart:math';
@@ -41,8 +42,8 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   }
 
   // variabili
-  //MqttServerClient? client;
-  MqttBrowserClient? client;
+  MqttServerClient? client;
+  //MqttBrowserClient? client;
   MqttCurrentConnectionState connectionState = MqttCurrentConnectionState.IDLE;
   MqttSubscriptionState subscriptionState = MqttSubscriptionState.IDLE;
   Map<String, Function(String)> onDataReceivedArray = {};
@@ -61,11 +62,15 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
             connectionState !=
                 MqttCurrentConnectionState.ERROR_WHEN_CONNECTING) &&
         remoteConnection != null) {
-      if (remoteConnection!.remoteServerUri != null) {
-        serverUri = 'ws://${remoteConnection!.remoteServerUri}';
+      connectionState = MqttCurrentConnectionState.CONNECTING;
+      if (await remoteConnection!.getRemoteServerUri() != null) {
+        String? remoteServer = await remoteConnection!.getRemoteServerUri();
+        serverUri = 'ws://$remoteServer';
         _setupMqttClient();
         await _connectClient();
         _listenClient();
+      } else {
+        connectionState = MqttCurrentConnectionState.IDLE;
       }
     }
   }
@@ -73,8 +78,10 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   void _setupMqttClient() {
     // client = MqttServerClient.withPort(serverUri, '#', port);
     Random random = Random();
-    client = MqttBrowserClient.withPort(serverUri!,
-        'mqtt_domo_gest' + random.nextInt(1000000).toString(), port);
+    String cliendId = 'mqtt_domo' + random.nextInt(1000000).toString();
+    //client = MqttBrowserClient.withPort(serverUri!, cliendId, port);
+    client = MqttServerClient.withPort(serverUri!, cliendId, port);
+    client!.websocketProtocols = ['mqtt'];
     client!.logging(on: false);
     client!.keepAlivePeriod = 60;
     client!.autoReconnect = true;
@@ -88,8 +95,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
 
   Future<void> _connectClient() async {
     try {
-      print('MQTTClientWrapper::$serverUri client connecting....');
-      connectionState = MqttCurrentConnectionState.CONNECTING;
+      print('MQTTClientWrapper::$serverUri:$port client connecting....');
       notifyListeners('connectionState.connecting');
       await client!.connect('mqtt_user', 'mqtt_user');
     } on Exception catch (e) {

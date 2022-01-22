@@ -67,15 +67,15 @@ class SchemaRepository extends ChangeNotifier {
 
   Future<void> _getSchema() async {
     if (remoteConnection != null &&
-        remoteConnection!.localWiFiConnectionName != null &&
-        remoteConnection!.remoteServerUri != null) {
+        await remoteConnection!.getLocalWiFiConnectionName() != null &&
+        await remoteConnection!.getRemoteServerUri() != null) {
       remoteFileUri =
-          'http://${remoteConnection!.remoteServerUri}:$port/get/domo_json';
+          'http://${await remoteConnection!.getRemoteServerUri()}:$port/get/domo_json';
       remoteBackUri =
-          'http://${remoteConnection!.remoteServerUri}:$port/get/domo_image';
+          'http://${await remoteConnection!.getRemoteServerUri()}:$port/get/domo_image';
       if (kIsWeb ||
           (await info.getWifiName() ==
-              remoteConnection!.localWiFiConnectionName)) {
+              await remoteConnection!.getLocalWiFiConnectionName())) {
         schemaTree = await _getSchemaFromRemote();
       } else {
         schemaTree = await _getSchemaFromLocal();
@@ -85,15 +85,15 @@ class SchemaRepository extends ChangeNotifier {
 
   Future<void> _getSensoriBack() async {
     if (remoteConnection != null &&
-        remoteConnection!.localWiFiConnectionName != null &&
-        remoteConnection!.remoteServerUri != null) {
+        await remoteConnection!.getLocalWiFiConnectionName() != null &&
+        await remoteConnection!.getRemoteServerUri() != null) {
       remoteFileUri =
-          'http://${remoteConnection!.remoteServerUri}:$port/get/domo_json';
+          'http://${await remoteConnection!.getRemoteServerUri()}:$port/get/domo_json';
       remoteBackUri =
-          'http://${remoteConnection!.remoteServerUri}:$port/get/domo_image';
+          'http://${await remoteConnection!.getRemoteServerUri()}:$port/get/domo_image';
       if (kIsWeb ||
           (await info.getWifiName() ==
-              remoteConnection!.localWiFiConnectionName)) {
+              await remoteConnection!.getLocalWiFiConnectionName())) {
         _sensoriBack = await _getSensoriBackFromRemote();
       } else {
         _sensoriBack = await _getSensoriBackFromLocal();

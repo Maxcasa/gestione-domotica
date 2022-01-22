@@ -16,9 +16,7 @@ class AllowedDevices with ChangeNotifier {
   AllowedDevices() : super() {
     remoteConnection = RemoteConnection();
     remoteConnection!.addListener(_getAllowedDevice);
-    if (remoteConnection!.remoteServerUri != null) {
-      _getAllowedDevice();
-    }
+    _getAllowedDevice();
   }
 
   // variabili
@@ -36,11 +34,11 @@ class AllowedDevices with ChangeNotifier {
   Future<void> _getAllowedDevice() async {
     // abilito lo scaricamento da web o da rete locale
     if ((remoteConnection != null &&
-            remoteConnection!.localWiFiConnectionName != null &&
-            remoteConnection!.remoteServerUri != null) &&
+            await remoteConnection!.getLocalWiFiConnectionName() != null &&
+            await remoteConnection!.getRemoteServerUri() != null) &&
         (kIsWeb ||
             (await info.getWifiName() ==
-                remoteConnection!.localWiFiConnectionName))) {
+                await remoteConnection!.getLocalWiFiConnectionName()))) {
       List<Map<String, dynamic>> localJson =
           await _getAllowedDeviceFromRemote();
       if (localJson.isNotEmpty) {
@@ -53,8 +51,9 @@ class AllowedDevices with ChangeNotifier {
   }
 
   Future<List<Map<String, dynamic>>> _getAllowedDeviceFromRemote() async {
-    http.Response httpResponse = await http.get(Uri.parse(
-        'http://${remoteConnection!.remoteServerUri}:8080/get/allowed_device'));
+    String? serverUri = await remoteConnection!.getRemoteServerUri();
+    http.Response httpResponse = await http
+        .get(Uri.parse('http://${serverUri}:8080/get/allowed_device'));
     if (httpResponse.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.

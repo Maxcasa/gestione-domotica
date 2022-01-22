@@ -26,26 +26,29 @@ class RemoteConnection extends ChangeNotifier {
   }
 
   // variabili
-  String? _remoteServerUri;
-  String? _localWiFiConnectionName;
+  String? remoteServerUri;
+  String? localWiFiConnectionName;
   final info = NetworkInfo();
 
-  String? get remoteServerUri => _remoteServerUri;
-  String? get localWiFiConnectionName => _localWiFiConnectionName;
-
-  set remoteServerUri(String? remoteServerUri) {
-    _remoteServerUri = remoteServerUri;
+  Future<String?> getRemoteServerUri() async {
+    if (remoteServerUri == null) {
+      await _getConnectionInfo();
+    }
+    return remoteServerUri;
   }
 
-  set localWiFiConnectionName(String? localWiFiConnectionName) {
-    _localWiFiConnectionName = localWiFiConnectionName;
+  Future<String?> getLocalWiFiConnectionName() async {
+    if (localWiFiConnectionName == null) {
+      await _getConnectionInfo();
+    }
+    return localWiFiConnectionName;
   }
 
   //metodi
 
   // prendo le info di connessioni
   Future<void> _getConnectionInfo() async {
-    if (_localWiFiConnectionName == null && _remoteServerUri == null) {
+    if (localWiFiConnectionName == null && remoteServerUri == null) {
       if (kIsWeb) {
         try {
           String fileString =
@@ -53,9 +56,8 @@ class RemoteConnection extends ChangeNotifier {
           Map<String, dynamic> jsonData = json.decode(fileString);
           if (await checkIPInfo(jsonData['remoteServerUri']) &&
               await checkWiFiInfo(jsonData['remoteServerUri'])) {
-            _remoteServerUri = jsonData['remoteServerUri'];
-            _localWiFiConnectionName = jsonData['localWiFiConnectionName'];
-            notifyListeners();
+            remoteServerUri = jsonData['remoteServerUri'];
+            localWiFiConnectionName = jsonData['localWiFiConnectionName'];
           }
         } on Exception catch (e) {
           print('RemoteConnection :: $e');
@@ -67,12 +69,11 @@ class RemoteConnection extends ChangeNotifier {
         if (await file.exists()) {
           String fileString = await file.readAsString();
           Map<String, dynamic> jsonData = json.decode(fileString);
-          _remoteServerUri = jsonData['remoteServerUri'];
-          _localWiFiConnectionName = jsonData['localWiFiConnectionName'];
+          remoteServerUri = jsonData['remoteServerUri'];
+          localWiFiConnectionName = jsonData['localWiFiConnectionName'];
           notifyListeners();
         } else {
-          _localWiFiConnectionName = await info.getWifiName();
-          notifyListeners();
+          localWiFiConnectionName = await info.getWifiName();
         }
       }
     }
@@ -83,7 +84,7 @@ class RemoteConnection extends ChangeNotifier {
       final directory = await getApplicationDocumentsDirectory();
       final File file = File('${directory.path}/connection_info.json');
       await file.writeAsString(
-          '{"remoteServerUri": "$_remoteServerUri, "localWiFiConnectionName": $_localWiFiConnectionName}');
+          '{"remoteServerUri": "$remoteServerUri, "localWiFiConnectionName": $localWiFiConnectionName}');
     }
     notifyListeners();
     return true;
