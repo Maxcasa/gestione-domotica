@@ -18,6 +18,10 @@ class SensoreModel {
       this.posTop = 0})
       : this.nome = nome ?? "Sensore generico";
 
+  SensoreModel.vuoto() {
+    return SensoreModel(id = -1);
+  }
+
   // variabili
   int id;
   String nome;

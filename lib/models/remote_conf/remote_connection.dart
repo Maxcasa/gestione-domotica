@@ -31,16 +31,12 @@ class RemoteConnection extends ChangeNotifier {
   var lock = Lock();
 
   Future<String?> getRemoteServerUri() async {
-    if (remoteServerUri == null) {
-      await lock.synchronized(_getConnectionInfo);
-    }
+    await lock.synchronized(_getConnectionInfo);
     return remoteServerUri;
   }
 
   Future<String?> getLocalWiFiConnectionName() async {
-    if (localWiFiConnectionName == null) {
-      await lock.synchronized(_getConnectionInfo);
-    }
+    await lock.synchronized(_getConnectionInfo);
     return localWiFiConnectionName;
   }
 
@@ -76,6 +72,7 @@ class RemoteConnection extends ChangeNotifier {
         remoteServerUri = jsonData['remoteServerUri'];
         localWiFiConnectionName = jsonData['localWiFiConnectionName'];
       }
+      print('RemoteConnection :: $remoteServerUri, $localWiFiConnectionName');
     } on Exception catch (e) {
       print('RemoteConnection :: $e');
       throw Exception(e);

@@ -58,8 +58,12 @@ class SchemaSensoriModel with ChangeNotifier {
   String _nome = '';
 
   // getter e setter
-  SensoreModel getSensore(id) =>
-      sensori.singleWhere((sensore) => sensore.id == id);
+  SensoreModel? getSensore(id) {
+    SensoreModel? localSensore = sensori.firstWhere(
+      (sensore) => sensore.id == id,
+      orElse: () => null,
+    );
+  }
 
   Future<List<SensoreModel>> getSensori() async {
     if (sensori.isEmpty) {
@@ -133,7 +137,8 @@ class SchemaSensoriModel with ChangeNotifier {
   _onSensorChanged(String messageData) {
     Map<String, dynamic> jsonData = jsonDecode(messageData);
     if (jsonData.containsKey('stato')) {
-      getSensore(jsonData['id']).valore = jsonData['stato'];
+      getSensore(int.parse(jsonData['id'])).valore =
+          int.parse(jsonData['stato']);
       notifyListeners();
     }
     // if (jsonData.containsKey('set')) {
