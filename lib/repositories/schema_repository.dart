@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/remote_conf/remote_connection.dart';
-import 'package:wifi_info_flutter/wifi_info_flutter.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart' as io_client;
@@ -74,7 +73,7 @@ class SchemaRepository extends ChangeNotifier {
           'http://${await remoteConnection!.getRemoteServerUri()}:$port/get/domo_json';
       remoteBackUri =
           'http://${await remoteConnection!.getRemoteServerUri()}:$port/get/domo_image';
-      String? localWiFi = await WifiInfo().getWifiName();
+      String? localWiFi = await remoteConnection!.getWifiName();
       //  await info.getWifiName();
       String? savedWiFi = await remoteConnection!.getLocalWiFiConnectionName();
       if (kIsWeb || (savedWiFi == savedWiFi)) {
@@ -93,7 +92,7 @@ class SchemaRepository extends ChangeNotifier {
           'http://${await remoteConnection!.getRemoteServerUri()}:$port/get/domo_json';
       remoteBackUri =
           'http://${await remoteConnection!.getRemoteServerUri()}:$port/get/domo_image';
-      String? localWiFi = await WifiInfo().getWifiName();
+      String? localWiFi = await remoteConnection!.getWifiName();
       String? savedWiFi = await remoteConnection!.getLocalWiFiConnectionName();
       if (kIsWeb || (savedWiFi == savedWiFi)) {
         _sensoriBack = await _getSensoriBackFromRemote();

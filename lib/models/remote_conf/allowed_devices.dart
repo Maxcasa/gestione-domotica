@@ -37,7 +37,7 @@ class AllowedDevices with ChangeNotifier {
             await remoteConnection!.getLocalWiFiConnectionName() != null &&
             await remoteConnection!.getRemoteServerUri() != null) &&
         (kIsWeb ||
-            (await info.getWifiName() ==
+            (await remoteConnection!.getWifiName() ==
                 await remoteConnection!.getLocalWiFiConnectionName()))) {
       List<Map<String, dynamic>> localJson =
           await _getAllowedDeviceFromRemote();

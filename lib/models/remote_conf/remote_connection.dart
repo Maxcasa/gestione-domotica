@@ -8,9 +8,10 @@ import 'package:http/http.dart' as http;
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:gestione_domotica/models/remote_conf/allowed_device.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:synchronized/synchronized.dart';
 
-const String port = '8085';
+const String HTTPPort = '8085';
 
 /// Classe che contiene la gestione dei dispositivi autorizzati
 // ignore: mixin_inherits_from_not_object
@@ -27,7 +28,7 @@ class RemoteConnection extends ChangeNotifier {
   // variabili
   String? remoteServerUri;
   String? localWiFiConnectionName;
-  final info = NetworkInfo();
+  PermissionWithService locationPermission = Permission.locationWhenInUse;
   var lock = Lock();
 
   Future<String?> getRemoteServerUri() async {
@@ -93,7 +94,7 @@ class RemoteConnection extends ChangeNotifier {
   Future<bool> checkIPInfo(String ipValue) async {
     bool ipOK = false;
     http.Response httpResponse =
-        await http.get(Uri.parse('http://$ipValue:$port/'));
+        await http.get(Uri.parse('http://$ipValue:$HTTPPort/'));
     if (httpResponse.statusCode == 200 &&
         httpResponse.body == 'Domo_Server is here!') {
       ipOK = true;
@@ -104,5 +105,37 @@ class RemoteConnection extends ChangeNotifier {
   Future<bool> checkWiFiInfo(String wiFiValue) async {
     bool wiFiOk = true;
     return wiFiOk;
+  }
+
+  Future<String?> getWifiName() async {
+    if (kIsWeb) {
+      return null;
+    } else {
+      // var permissionStatus = await locationPermission.status;
+      // if (permissionStatus == PermissionStatus.denied) {
+      //   permissionStatus = await locationPermission.request();
+
+      //   if (permissionStatus == PermissionStatus.denied) {
+      //     permissionStatus = await locationPermission.request();
+      //   }
+      // }
+
+      // // Removed piece of code here, since the variable mentioned in it was not included
+
+      // if (permissionStatus == PermissionStatus.granted) {
+      //   bool isLocationServiceOn =
+      //       await locationPermission.serviceStatus.isEnabled;
+      //   if (isLocationServiceOn) {
+      //     final info = NetworkInfo();
+      //     var wifiName = await info.getWifiName();
+      //     return wifiName;
+      //     print('The wifi name is: $wifiName');
+      //   } else {
+      //     return null;
+      //     print('Location Service is not enabled');
+      //   }
+      // }
+      return null;
+    }
   }
 }
