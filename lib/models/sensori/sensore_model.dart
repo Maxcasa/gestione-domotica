@@ -18,10 +18,6 @@ class SensoreModel {
       this.posTop = 0})
       : this.nome = nome ?? "Sensore generico";
 
-  SensoreModel.vuoto() {
-    return SensoreModel(id = -1);
-  }
-
   // variabili
   int id;
   String nome;
@@ -31,6 +27,7 @@ class SensoreModel {
   int size = 30;
   double posLeft = 0;
   double posTop = 0;
+  void Function(int, String)? cambiaStatoCallBack;
 
   // getter & setter
   String get tipo => runtimeType.toString();
@@ -51,8 +48,17 @@ class SensoreModel {
         posLeft = double.parse(json['posLeft'] ?? '0'),
         posTop = double.parse(json['posTop'] ?? '0');
 
+  void setCambiaStatoListener({Function(int, String)? callback}) {
+    cambiaStatoCallBack = callback;
+  }
+
   String? cambiaStato(int valore) {
-    return json.encode({'id': id, 'stato': valore});
+    //Se c'è un callbck da chiamare lo chiamo
+    String messaggio = json.encode({'id': id, 'stato': valore});
+    if (cambiaStatoCallBack != null) {
+      cambiaStatoCallBack!(id, messaggio);
+    }
+    return messaggio;
   }
 
   Map<String, dynamic> toJson() {

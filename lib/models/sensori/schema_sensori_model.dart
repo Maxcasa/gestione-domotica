@@ -59,10 +59,12 @@ class SchemaSensoriModel with ChangeNotifier {
 
   // getter e setter
   SensoreModel? getSensore(id) {
-    SensoreModel? localSensore = sensori.firstWhere(
-      (sensore) => sensore.id == id,
-      orElse: () => null,
-    );
+    for (var i = 0; i < sensori.length; i++) {
+      if (sensori[i].id == id) {
+        return sensori[id];
+      }
+    }
+    return null;
   }
 
   Future<List<SensoreModel>> getSensori() async {
@@ -103,6 +105,7 @@ class SchemaSensoriModel with ChangeNotifier {
               sensori.add(SensoreInfisso.fromJson(element));
             } else if (tipo == 'Sirena') {
               sensori.add(SensoreSirena.fromJson(element));
+              sensori.last.setCambiaStatoListener(callback: cambiaStatoSensore);
             }
           }
         }
@@ -137,9 +140,11 @@ class SchemaSensoriModel with ChangeNotifier {
   _onSensorChanged(String messageData) {
     Map<String, dynamic> jsonData = jsonDecode(messageData);
     if (jsonData.containsKey('stato')) {
-      getSensore(int.parse(jsonData['id'])).valore =
-          int.parse(jsonData['stato']);
-      notifyListeners();
+      SensoreModel? localSensore = getSensore(int.parse(jsonData['id']));
+      if (localSensore != null) {
+        localSensore.valore = int.parse(jsonData['stato']);
+        notifyListeners();
+      }
     }
     // if (jsonData.containsKey('set')) {
     //   getSensore(jsonData['id']).valore = jsonData['set'];
@@ -156,12 +161,9 @@ class SchemaSensoriModel with ChangeNotifier {
     // }
   }
 
-  void cambiaStatoSensore(int id) {
-    String? messageData = getSensore(id).cambiaStato(1);
-    if (messageData != null) {
-      mqttClientWrapper!.publishMessage(
-          topicSurName: '${topicSurName}/set', messageData: messageData);
-    }
+  void cambiaStatoSensore(int id, String messageData) {
+    mqttClientWrapper!.publishMessage(
+        topicSurName: '${topicSurName}/set', messageData: messageData);
   }
 
   int getMaxIdSensore() {

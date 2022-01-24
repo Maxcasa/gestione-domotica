@@ -49,6 +49,13 @@ class SensoreSirena extends SensoreModel {
 
   @override
   String? cambiaStato(int valore) {
-    return jsonEncode({'id': _id, 'set': -1});
+    _valore += valore;
+    _valore %= 2;
+    //Se c'è un callbck da chiamare lo chiamo
+    String messaggio = json.encode({'id': id, 'stato': _valore});
+    if (cambiaStatoCallBack != null) {
+      cambiaStatoCallBack!(id, messaggio);
+    }
+    return messaggio;
   }
 }

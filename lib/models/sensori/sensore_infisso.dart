@@ -22,6 +22,17 @@ class SensoreInfisso extends SensoreModel {
   // variabili
   int _id;
   String _nome;
+  int _valore = 0;
+
+  @override
+  set valore(int valore) {
+    _valore = valore;
+    if (_valore > 0) {
+      colore = Colors.red;
+    } else {
+      colore = Colors.black;
+    }
+  }
 
   @override
   String? cambiaStato(int valore) {
