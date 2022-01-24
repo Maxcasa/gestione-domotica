@@ -71,8 +71,10 @@ class ConfPage extends StatelessWidget {
   Widget remoteConnection() {
     return Consumer<RemoteConnection>(builder: (BuildContext context,
         RemoteConnection remoteConnection, Widget? child) {
-      final ipController = TextEditingController();
-      final wiFiController = TextEditingController();
+      final ipController =
+          TextEditingController(text: remoteConnection.remoteServerUri);
+      final wiFiController =
+          TextEditingController(text: remoteConnection.localWiFiConnectionName);
       final _formfKey = GlobalKey<FormState>();
       return Form(
         key: _formfKey,
@@ -85,7 +87,6 @@ class ConfPage extends StatelessWidget {
                 border: UnderlineInputBorder(),
                 labelText: 'Server IP',
               ),
-              initialValue: remoteConnection.remoteServerUri,
               // The validator receives the text that the user has entered.
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -103,7 +104,6 @@ class ConfPage extends StatelessWidget {
                 border: UnderlineInputBorder(),
                 labelText: 'Local WiFi Name',
               ),
-              initialValue: remoteConnection.localWiFiConnectionName,
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter some text';
