@@ -66,7 +66,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
         remoteConnection != null) {
       connectionState = MqttCurrentConnectionState.CONNECTING;
       if (await remoteConnection!.getRemoteServerUri() != null) {
-        remoteServer = await remoteConnection!.getRemoteServerUri();
+        remoteServer = remoteConnection!.getRemoteServerUri();
         // serverUri = 'ws://$remoteServer';
         _setupMqttClient();
         await _connectClient();

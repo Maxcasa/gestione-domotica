@@ -10,8 +10,9 @@ import 'package:gestione_domotica/models/remote_conf/allowed_device.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:synchronized/synchronized.dart';
+// import 'package:wifi_iot/wifi_iot.dart';
 
-const String HTTPPort = '8085';
+const String port = '8085';
 
 /// Classe che contiene la gestione dei dispositivi autorizzati
 // ignore: mixin_inherits_from_not_object
@@ -23,21 +24,23 @@ class RemoteConnection extends ChangeNotifier {
     return _instance;
   }
 
-  RemoteConnection._internal() : super();
+  RemoteConnection._internal() : super() {
+    _getConnectionInfo();
+  }
 
   // variabili
   String? remoteServerUri;
   String? localWiFiConnectionName;
-  PermissionWithService locationPermission = Permission.locationWhenInUse;
+  // PermissionWithService locationPermission = Permission.locationWhenInUse;
   var lock = Lock();
 
-  Future<String?> getRemoteServerUri() async {
-    await lock.synchronized(_getConnectionInfo);
+  String? getRemoteServerUri() {
+    // await lock.synchronized(_getConnectionInfo);
     return remoteServerUri;
   }
 
-  Future<String?> getLocalWiFiConnectionName() async {
-    await lock.synchronized(_getConnectionInfo);
+  String? getLocalWiFiConnectionName() {
+    // await lock.synchronized(_getConnectionInfo);
     return localWiFiConnectionName;
   }
 
@@ -45,22 +48,23 @@ class RemoteConnection extends ChangeNotifier {
 
   // prendo le info di connessioni
   Future<void> _getConnectionInfo() async {
-    if (localWiFiConnectionName == null && remoteServerUri == null) {
-      if (kIsWeb) {
-        await _getAssetsInfo();
+    //if (localWiFiConnectionName == null && remoteServerUri == null) {
+    if (kIsWeb) {
+      await _getAssetsInfo();
+    } else {
+      final directory = await getApplicationDocumentsDirectory();
+      final File file = File('${directory.path}/connection_info.json');
+      if (await file.exists()) {
+        String fileString = await file.readAsString();
+        Map<String, dynamic> jsonData = json.decode(fileString);
+        remoteServerUri = jsonData['remoteServerUri'];
+        localWiFiConnectionName = jsonData['localWiFiConnectionName'];
       } else {
-        final directory = await getApplicationDocumentsDirectory();
-        final File file = File('${directory.path}/connection_info.json');
-        if (await file.exists()) {
-          String fileString = await file.readAsString();
-          Map<String, dynamic> jsonData = json.decode(fileString);
-          remoteServerUri = jsonData['remoteServerUri'];
-          localWiFiConnectionName = jsonData['localWiFiConnectionName'];
-        } else {
-          await _getAssetsInfo();
-        }
+        await _getAssetsInfo();
       }
     }
+    notifyListeners();
+    //}
   }
 
   Future<void> _getAssetsInfo() async {
@@ -87,14 +91,14 @@ class RemoteConnection extends ChangeNotifier {
       await file.writeAsString(
           '{"remoteServerUri": "$remoteServerUri, "localWiFiConnectionName": $localWiFiConnectionName}');
     }
-    notifyListeners();
+    _getConnectionInfo();
     return true;
   }
 
   Future<bool> checkIPInfo(String ipValue) async {
     bool ipOK = false;
     http.Response httpResponse =
-        await http.get(Uri.parse('http://$ipValue:$HTTPPort/'));
+        await http.get(Uri.parse('http://$ipValue:$port/'));
     if (httpResponse.statusCode == 200 &&
         httpResponse.body == 'Domo_Server is here!') {
       ipOK = true;
@@ -111,9 +115,10 @@ class RemoteConnection extends ChangeNotifier {
     if (kIsWeb) {
       return null;
     } else {
-      // var permissionStatus = await locationPermission.status;
-      // if (permissionStatus == PermissionStatus.denied) {
-      //   permissionStatus = await locationPermission.request();
+      var permissionStatus = await Permission.location.status;
+      if (permissionStatus == PermissionStatus.denied) {
+        permissionStatus = await Permission.location.request();
+      }
 
       //   if (permissionStatus == PermissionStatus.denied) {
       //     permissionStatus = await locationPermission.request();
@@ -122,19 +127,17 @@ class RemoteConnection extends ChangeNotifier {
 
       // // Removed piece of code here, since the variable mentioned in it was not included
 
-      // if (permissionStatus == PermissionStatus.granted) {
-      //   bool isLocationServiceOn =
-      //       await locationPermission.serviceStatus.isEnabled;
-      //   if (isLocationServiceOn) {
-      //     final info = NetworkInfo();
-      //     var wifiName = await info.getWifiName();
-      //     return wifiName;
-      //     print('The wifi name is: $wifiName');
-      //   } else {
-      //     return null;
-      //     print('Location Service is not enabled');
-      //   }
-      // }
+      if (permissionStatus == PermissionStatus.granted) {
+        bool isLocationServiceOn =
+            await Permission.location.serviceStatus.isEnabled;
+        if (isLocationServiceOn) {
+          final info = NetworkInfo();
+          var wifiName = await info.getWifiName();
+          return wifiName;
+        } else {
+          return null;
+        }
+      }
       return null;
     }
   }

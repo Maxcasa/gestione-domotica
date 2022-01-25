@@ -1,5 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.gestione_domotica">
+   <!-- Permissions options for the `location` group -->
+   <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
    <application
         android:label="gestione_domotica"
         android:icon="@mipmap/ic_launcher">
