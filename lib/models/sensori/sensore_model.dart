@@ -28,6 +28,7 @@ class SensoreModel {
   double posLeft = 0;
   double posTop = 0;
   void Function(int, String)? cambiaStatoCallBack;
+  void Function(int, String)? rimuoviStatoCallBack;
 
   // getter & setter
   String get tipo => runtimeType.toString();
@@ -52,6 +53,10 @@ class SensoreModel {
     cambiaStatoCallBack = callback;
   }
 
+  void setRimuoviStatoListener({Function(int, String)? callback}) {
+    rimuoviStatoCallBack = callback;
+  }
+
   String? cambiaStato(int valore) {
     //Se c'è un callbck da chiamare lo chiamo
     String messaggio = json.encode({'id': id, 'stato': valore});
@@ -72,6 +77,13 @@ class SensoreModel {
       'icona': {'codePoint': icona.codePoint, 'fontFamily': icona.fontFamily}
     };
     return result;
+  }
+
+  void rimuovi() {
+    if (rimuoviStatoCallBack != null) {
+      String messaggio = json.encode({'id': id, 'stato': 'rimuovi'});
+      rimuoviStatoCallBack!(id, messaggio);
+    }
   }
 
   // @override

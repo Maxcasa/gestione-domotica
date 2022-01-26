@@ -1,9 +1,11 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/remote_conf/remote_layer.dart';
+//import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
 import 'package:gestione_domotica/views/page_layer.dart';
 import 'package:gestione_domotica/widget/connection_icon.dart';
 import 'package:gestione_domotica/widget/dot_indicator.dart';
+import 'package:gestione_domotica/widget/remote_device_manager.dart';
 import 'package:provider/provider.dart';
 
 import 'main_drawer.dart';
@@ -17,13 +19,13 @@ class ConfPage extends StatelessWidget {
     // mqttClientWrapper!.addListener(_connect, ['connectionState.disconnected']);
   }
 
+  // variabili
   // MQTTClientWrapper? mqttClientWrapper;
 
   // void _connect() {
   //   mqttClientWrapper!.connectMqttClient();
   // }
 
-  // : super(key: key);
   PageController _controller = PageController(
     initialPage: 0,
   );
@@ -65,6 +67,7 @@ class ConfPage extends StatelessWidget {
             child: Column(children: <Widget>[
               remoteConnection(),
               allowedDevice(),
+              RemoteDeviceManage(),
             ])));
   }
 
@@ -98,21 +101,32 @@ class ConfPage extends StatelessWidget {
                 remoteConnection.remoteServerUri = value;
               },
             ),
-            TextFormField(
-              controller: wiFiController,
-              decoration: const InputDecoration(
-                border: UnderlineInputBorder(),
-                labelText: 'Local WiFi Name',
-              ),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
-                }
-                return null;
-              },
-              onSaved: (value) {
-                remoteConnection.localWiFiConnectionName = value;
-              },
+            Row(
+              children: [
+                TextFormField(
+                  controller: wiFiController,
+                  decoration: const InputDecoration(
+                    border: UnderlineInputBorder(),
+                    labelText: 'Local WiFi Name',
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter some text';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    remoteConnection.localWiFiConnectionName = value;
+                  },
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    wiFiController.text =
+                        await remoteConnection.getWifiName() ?? "";
+                  },
+                  child: const Text('Local WiFi'),
+                ),
+              ],
             ),
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -120,14 +134,17 @@ class ConfPage extends StatelessWidget {
                 onPressed: () async {
                   // Validate returns true if the form is valid, or false otherwise.
                   if (_formfKey.currentState!.validate() &&
-                      await remoteConnection.checkIPInfo(ipController.text) &&
-                      await remoteConnection
-                          .checkWiFiInfo(wiFiController.text)) {
+                      await remoteConnection.checkLocalIP(
+                          ipValue: ipController.text) &&
+                      await remoteConnection.checkLocalWiFi(
+                          wiFiValue: wiFiController.text)) {
                     _formfKey.currentState!.save();
                     remoteConnection.saveConnectionInfo();
                     // If the form is valid, display a snackbar. In the real world,
                     // you'd often call a server or save the information in a database.
                     mostraSnackBar('Aggiornato', context);
+                  } else {
+                    mostraSnackBar('Problema nell\'aggiornamento', context);
                   }
                 },
                 child: const Text('Submit'),

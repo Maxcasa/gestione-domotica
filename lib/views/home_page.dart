@@ -31,6 +31,7 @@ class _HomePageState extends State<HomePage> {
     initialPage: 0,
   );
 
+  // variabili
   int _counter = 0;
 
   static const _kDuration = const Duration(milliseconds: 300);

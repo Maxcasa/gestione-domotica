@@ -26,7 +26,11 @@ class SchemaRepository extends ChangeNotifier {
 
   SchemaRepository._internal() {
     remoteConnection = RemoteConnection();
-    remoteConnection!.addListener(() => {notifyListeners()});
+    remoteConnection!.addListener(() {
+      schemaTree = {};
+      _sensoriBack = null;
+      notifyListeners();
+    });
     print('Istanzio il getter dello schema');
   }
 
@@ -76,7 +80,9 @@ class SchemaRepository extends ChangeNotifier {
       String? localWiFi = await remoteConnection!.getWifiName();
       //  await info.getWifiName();
       String? savedWiFi = remoteConnection!.getLocalWiFiConnectionName();
-      if (kIsWeb || (localWiFi == savedWiFi)) {
+      if (kIsWeb ||
+          (await remoteConnection!.checkLocalWiFi() &&
+              await remoteConnection!.checkLocalIP())) {
         schemaTree = await _getSchemaFromRemote();
       } else {
         schemaTree = await _getSchemaFromLocal();
@@ -94,7 +100,9 @@ class SchemaRepository extends ChangeNotifier {
           'http://${remoteConnection!.getRemoteServerUri()}:$port/get/domo_image';
       String? localWiFi = await remoteConnection!.getWifiName();
       String? savedWiFi = remoteConnection!.getLocalWiFiConnectionName();
-      if (kIsWeb || (localWiFi == savedWiFi)) {
+      if (kIsWeb ||
+          (await remoteConnection!.checkLocalWiFi() &&
+              await remoteConnection!.checkLocalIP())) {
         _sensoriBack = await _getSensoriBackFromRemote();
       } else {
         _sensoriBack = await _getSensoriBackFromLocal();

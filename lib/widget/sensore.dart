@@ -8,20 +8,45 @@ class Sensore extends StatelessWidget {
 
   // variabili
   SensoreModel sensore;
+  BuildContext? _context;
+  OverlayEntry? menuOverlay;
 
   @override
   Widget build(BuildContext context) {
+    _context = context;
     //_planProviderState.id = idPlan;
     return SizedBox(
         height: sensore.size.toDouble(),
         width: sensore.size.toDouble(),
-        child: IconButton(
+        child: ElevatedButton.icon(
           icon: Icon(sensore.icona,
               color: sensore.colore, size: sensore.size.toDouble()),
+          label: Text(sensore.nome),
           onPressed: () {
             sensore.cambiaStato(1);
           },
+          onLongPress: () {
+            showMenuOverlay();
+          },
         ));
     //floatingActionButton: _buildAddTaskButton(),
+  }
+
+  void showMenuOverlay() {
+    menuOverlay = OverlayEntry(
+      builder: (_context) => Positioned(
+        left: sensore.posTop + 5,
+        top: sensore.posLeft + 5,
+        child: ElevatedButton.icon(
+          icon: Icon(Icons.delete_outline),
+          label: Text('Rimuovi'),
+          onPressed: () {
+            sensore.rimuovi();
+          },
+        ),
+      ),
+    );
+    final overlay = Overlay.of(_context!)!;
+    overlay.insert(menuOverlay!);
   }
 }

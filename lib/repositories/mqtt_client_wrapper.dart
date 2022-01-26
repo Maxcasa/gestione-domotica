@@ -50,6 +50,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   MqttSubscriptionState subscriptionState = MqttSubscriptionState.IDLE;
   Map<String, Function(String)> onDataReceivedArray = {};
   RemoteConnection? remoteConnection;
+  bool reconnect = false;
 
   String? remoteServer;
   // const int port = 1883;
@@ -65,7 +66,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
                 MqttCurrentConnectionState.ERROR_WHEN_CONNECTING) &&
         remoteConnection != null) {
       connectionState = MqttCurrentConnectionState.CONNECTING;
-      if (await remoteConnection!.getRemoteServerUri() != null) {
+      if (remoteConnection!.getRemoteServerUri() != null) {
         remoteServer = remoteConnection!.getRemoteServerUri();
         // serverUri = 'ws://$remoteServer';
         _setupMqttClient();
@@ -197,10 +198,14 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     // }
     connectionState = MqttCurrentConnectionState.DISCONNECTED;
     notifyListeners('connectionState.disconnected');
+    if (reconnect) {
+      _connectClient();
+    }
   }
 
   void _onConnected() {
     connectionState = MqttCurrentConnectionState.CONNECTED;
+    reconnect = false;
     print(
         'MQTTClientWrapper::OnConnected client callback - Client connection was sucessful');
     notifyListeners('connectionState.connected');
@@ -240,10 +245,12 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
         connectionState != MqttCurrentConnectionState.RICONNECT &&
         connectionState != MqttCurrentConnectionState.RICONNECTED &&
         connectionState != MqttCurrentConnectionState.ERROR_WHEN_CONNECTING) {
+      reconnect = true;
       client!.disconnect();
       //  connect('mqtt_user', 'mqtt_user');
+    } else {
+      connectMqttClient();
     }
-    client!.connect();
   }
 }
 

@@ -72,11 +72,8 @@ class RemoteConnection extends ChangeNotifier {
       String fileString =
           await rootBundle.loadString('assets/json/remote_connection.json');
       Map<String, dynamic> jsonData = json.decode(fileString);
-      if (await checkIPInfo(jsonData['remoteServerUri']) &&
-          await checkWiFiInfo(jsonData['remoteServerUri'])) {
-        remoteServerUri = jsonData['remoteServerUri'];
-        localWiFiConnectionName = jsonData['localWiFiConnectionName'];
-      }
+      remoteServerUri = jsonData['remoteServerUri'];
+      localWiFiConnectionName = jsonData['localWiFiConnectionName'];
       print('RemoteConnection :: $remoteServerUri, $localWiFiConnectionName');
     } on Exception catch (e) {
       print('RemoteConnection :: $e');
@@ -95,20 +92,28 @@ class RemoteConnection extends ChangeNotifier {
     return true;
   }
 
-  Future<bool> checkIPInfo(String ipValue) async {
+  Future<bool> checkLocalIP({String? ipValue}) async {
     bool ipOK = false;
-    http.Response httpResponse =
-        await http.get(Uri.parse('http://$ipValue:$port/'));
-    if (httpResponse.statusCode == 200 &&
-        httpResponse.body == 'Domo_Server is here!') {
-      ipOK = true;
+    ipValue ??= remoteServerUri;
+    try {
+      http.Response httpResponse =
+          await http.get(Uri.parse('http://$ipValue:$port/'));
+      if (httpResponse.statusCode == 200 &&
+          httpResponse.body == 'Domo_Server is here!') {
+        ipOK = true;
+      }
+    } on Exception catch (e) {
+      print('RemoteConnection :: $e');
     }
     return ipOK;
   }
 
-  Future<bool> checkWiFiInfo(String wiFiValue) async {
-    bool wiFiOk = true;
-    return wiFiOk;
+  Future<bool> checkLocalWiFi({String? wiFiValue}) async {
+    wiFiValue ??= localWiFiConnectionName;
+    if (wiFiValue != null && wiFiValue == await getWifiName()) {
+      return true;
+    }
+    return false;
   }
 
   Future<String?> getWifiName() async {
@@ -132,7 +137,7 @@ class RemoteConnection extends ChangeNotifier {
             await Permission.location.serviceStatus.isEnabled;
         if (isLocationServiceOn) {
           final info = NetworkInfo();
-          var wifiName = await info.getWifiName();
+          String? wifiName = await info.getWifiName();
           return wifiName;
         } else {
           return null;
