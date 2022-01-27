@@ -105,9 +105,8 @@ class SchemaSensoriModel with ChangeNotifier {
               sensori.add(SensoreInfisso.fromJson(element));
             } else if (tipo == 'Sirena') {
               sensori.add(SensoreSirena.fromJson(element));
-              sensori.last.setCambiaStatoListener(callback: cambiaStatoSensore);
             }
-            sensori.last.setRimuoviStatoListener(callback: rimuoviSensore);
+            sensori.last.setAzioneSensoreListener(callback: azioneSensore);
           }
         }
         // mqttClientWrapper!.publishMessage(
@@ -162,12 +161,7 @@ class SchemaSensoriModel with ChangeNotifier {
     // }
   }
 
-  void cambiaStatoSensore(int id, String messageData) {
-    mqttClientWrapper!.publishMessage(
-        topicSurName: '${topicSurName}/set', messageData: messageData);
-  }
-
-  void rimuoviSensore(int id, String messageData) {
+  void azioneSensore(int id, AzioneSensore azione, String messageData) {
     mqttClientWrapper!.publishMessage(
         topicSurName: '${topicSurName}/set', messageData: messageData);
   }

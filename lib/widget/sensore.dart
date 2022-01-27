@@ -34,18 +34,29 @@ class Sensore extends StatelessWidget {
 
   void showMenuOverlay() {
     menuOverlay = OverlayEntry(
-      builder: (_context) => Positioned(
-        left: sensore.posTop + 5,
-        top: sensore.posLeft + 5,
-        child: ElevatedButton.icon(
-          icon: Icon(Icons.delete_outline),
-          label: Text('Rimuovi'),
-          onPressed: () {
-            sensore.rimuovi();
-          },
-        ),
-      ),
-    );
+        builder: (_context) => Positioned(
+              left: sensore.posTop + 5,
+              top: sensore.posLeft + 5,
+              child: Container(
+                  alignment: Alignment.topCenter,
+                  padding: new EdgeInsets.only(
+                      top: _context.size!.height * .58,
+                      right: 20.0,
+                      left: 20.0),
+                  child: Row(children: [
+                    ElevatedButton.icon(
+                      icon: Icon(Icons.delete_outline),
+                      label: Text('Disabilita'),
+                      onPressed: () {
+                        if (sensore.abilitato) {
+                          sensore.disabilita();
+                        } else {
+                          sensore.abilita();
+                        }
+                      },
+                    ),
+                  ])),
+            ));
     final overlay = Overlay.of(_context!)!;
     overlay.insert(menuOverlay!);
   }

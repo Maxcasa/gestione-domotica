@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/hex_color.dart';
+import 'package:gestione_domotica/models/sensori/sensori_layer.dart';
 import 'sensore_model.dart';
 
 /// Classe che definisce il sensore di apertura porte e finestre
@@ -15,16 +16,11 @@ class SensoreSirena extends SensoreModel {
   SensoreSirena.fromJson(Map<String, dynamic> json)
       : _id = json['id'],
         _nome = json['nome'],
-        _valore = json['valore'] ?? 0,
-        colore = json['colore'] != null
-            ? HexColor.fromHex(json['colore'])
-            : Colors.black,
-        super(
-            id: json['id'],
-            nome: json['nome'],
-            icona: Icons.notifications_on_rounded,
-            posLeft: double.parse(json['posLeft'] ?? '0'),
-            posTop: double.parse(json['posTop'] ?? '0'));
+        // _valore = json['valore'] ?? 0,
+        // colore = json['colore'] != null
+        //     ? HexColor.fromHex(json['colore'])
+        //     : Colors.black,
+        super.fromJson(json);
 
   // variabili
   int _id;
@@ -53,8 +49,8 @@ class SensoreSirena extends SensoreModel {
     _valore %= 2;
     //Se c'è un callbck da chiamare lo chiamo
     String messaggio = json.encode({'id': id, 'stato': _valore});
-    if (cambiaStatoCallBack != null) {
-      cambiaStatoCallBack!(id, messaggio);
+    if (azioneSensoreCallBack != null) {
+      azioneSensoreCallBack!(id, AzioneSensore.imposta, messaggio);
     }
     return messaggio;
   }

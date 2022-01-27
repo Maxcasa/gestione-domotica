@@ -15,16 +15,11 @@ class SensoreLuce extends SensoreModel {
   SensoreLuce.fromJson(Map<String, dynamic> json)
       : _id = json['id'],
         _nome = json['nome'],
-        _valore = json['valore'] ?? 0,
-        colore = json['colore'] != null
-            ? HexColor.fromHex(json['colore'])
-            : Colors.black,
-        super(
-            id: json['id'],
-            nome: json['nome'],
-            icona: Icons.lightbulb_rounded,
-            posLeft: double.parse(json['posLeft'] ?? '0'),
-            posTop: double.parse(json['posTop'] ?? '0'));
+        // _valore = json['valore'] ?? 0,
+        // colore = json['colore'] != null
+        //     ? HexColor.fromHex(json['colore'])
+        //     : Colors.black,
+        super.fromJson(json);
 
   // variabili
   int _id;

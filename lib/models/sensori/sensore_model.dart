@@ -2,7 +2,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:universal_html/html.dart';
+// import 'package:universal_html/html.dart';
+import 'package:gestione_domotica/models/sensori/sensori_layer.dart';
 import 'package:gestione_domotica/models/hex_color.dart';
 
 /// Classe che definisce il generico sensore
@@ -27,8 +28,8 @@ class SensoreModel {
   int size = 30;
   double posLeft = 0;
   double posTop = 0;
-  void Function(int, String)? cambiaStatoCallBack;
-  void Function(int, String)? rimuoviStatoCallBack;
+  bool abilitato = true;
+  void Function(int, AzioneSensore, String)? azioneSensoreCallBack;
 
   // getter & setter
   String get tipo => runtimeType.toString();
@@ -47,21 +48,19 @@ class SensoreModel {
                 fontFamily: json['icona']['fontFamily'])
             : Icons.add_alert_outlined,
         posLeft = double.parse(json['posLeft'] ?? '0'),
-        posTop = double.parse(json['posTop'] ?? '0');
+        posTop = double.parse(json['posTop'] ?? '0'),
+        abilitato = json['abilitato'] ?? true;
 
-  void setCambiaStatoListener({Function(int, String)? callback}) {
-    cambiaStatoCallBack = callback;
-  }
-
-  void setRimuoviStatoListener({Function(int, String)? callback}) {
-    rimuoviStatoCallBack = callback;
+  void setAzioneSensoreListener(
+      {Function(int, AzioneSensore, String)? callback}) {
+    azioneSensoreCallBack = callback;
   }
 
   String? cambiaStato(int valore) {
     //Se c'è un callbck da chiamare lo chiamo
     String messaggio = json.encode({'id': id, 'stato': valore});
-    if (cambiaStatoCallBack != null) {
-      cambiaStatoCallBack!(id, messaggio);
+    if (azioneSensoreCallBack != null) {
+      azioneSensoreCallBack!(id, AzioneSensore.imposta, messaggio);
     }
     return messaggio;
   }
@@ -74,15 +73,32 @@ class SensoreModel {
       'tipo': runtimeType.toString(),
       //'colore': colore,
       'size': size,
+      'abilitato': abilitato,
       'icona': {'codePoint': icona.codePoint, 'fontFamily': icona.fontFamily}
     };
     return result;
   }
 
   void rimuovi() {
-    if (rimuoviStatoCallBack != null) {
+    if (azioneSensoreCallBack != null) {
       String messaggio = json.encode({'id': id, 'stato': 'rimuovi'});
-      rimuoviStatoCallBack!(id, messaggio);
+      azioneSensoreCallBack!(id, AzioneSensore.rimuovi, messaggio);
+    }
+  }
+
+  void disabilita() {
+    abilitato = false;
+    if (azioneSensoreCallBack != null) {
+      String messaggio = json.encode({'id': id, 'stato': 'disabilita'});
+      azioneSensoreCallBack!(id, AzioneSensore.disabilita, messaggio);
+    }
+  }
+
+  void abilita() {
+    abilitato = true;
+    if (azioneSensoreCallBack != null) {
+      String messaggio = json.encode({'id': id, 'stato': 'abilita'});
+      azioneSensoreCallBack!(id, AzioneSensore.abilita, messaggio);
     }
   }
 
