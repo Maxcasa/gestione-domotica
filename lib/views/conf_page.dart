@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/remote_conf/remote_layer.dart';
+import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
 //import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
 import 'package:gestione_domotica/views/page_layer.dart';
 import 'package:gestione_domotica/widget/connection_icon.dart';
@@ -12,19 +13,19 @@ import 'main_drawer.dart';
 
 class ConfPage extends StatelessWidget {
   ConfPage({Key? key}) : super(key: key) {
-    // mqttClientWrapper = MQTTClientWrapper();
-    // if (mqttClientWrapper!.connectionState == MqttCurrentConnectionState.IDLE) {
-    //   _connect();
-    // }
-    // mqttClientWrapper!.addListener(_connect, ['connectionState.disconnected']);
+    mqttClientWrapper = MQTTClientWrapper();
+    if (mqttClientWrapper!.connectionState == MqttCurrentConnectionState.IDLE) {
+      _connect();
+    }
+    mqttClientWrapper!.addListener(_connect, ['connectionState.disconnected']);
   }
 
   // variabili
-  // MQTTClientWrapper? mqttClientWrapper;
+  MQTTClientWrapper? mqttClientWrapper;
 
-  // void _connect() {
-  //   mqttClientWrapper!.connectMqttClient();
-  // }
+  void _connect() {
+    mqttClientWrapper!.connectMqttClient();
+  }
 
   PageController _controller = PageController(
     initialPage: 0,
@@ -57,17 +58,22 @@ class ConfPage extends StatelessWidget {
         endDrawer: const MainDrawer(),
         body: MultiProvider(
             providers: [
-              ChangeNotifierProvider<AllowedDevices>(
-                create: (_) => AllowedDevices(),
-              ),
+              // ChangeNotifierProvider<AllowedDevices>(
+              //   create: (_) => AllowedDevices(),
+              // ),
               ChangeNotifierProvider<RemoteConnection>(
                 create: (_) => RemoteConnection(),
               )
             ],
             child: Column(children: <Widget>[
               remoteConnection(),
-              allowedDevice(),
-              RemoteDeviceManage(),
+              //allowedDevice(),
+              Container(
+                alignment: Alignment.centerLeft,
+                margin: EdgeInsets.all(10),
+                padding: EdgeInsets.all(5),
+                child: RemoteDeviceManage(),
+              )
             ])));
   }
 
@@ -84,31 +90,17 @@ class ConfPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            TextFormField(
-              controller: ipController,
-              decoration: const InputDecoration(
-                border: UnderlineInputBorder(),
-                labelText: 'Server IP',
-              ),
-              // The validator receives the text that the user has entered.
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter some text';
-                }
-                return null;
-              },
-              onSaved: (value) {
-                remoteConnection.remoteServerUri = value;
-              },
-            ),
-            Row(
-              children: [
-                TextFormField(
-                  controller: wiFiController,
+            Container(
+                margin: EdgeInsets.all(10),
+                padding: EdgeInsets.all(5),
+                width: 200,
+                child: TextFormField(
+                  controller: ipController,
                   decoration: const InputDecoration(
                     border: UnderlineInputBorder(),
-                    labelText: 'Local WiFi Name',
+                    labelText: 'Server IP',
                   ),
+                  // The validator receives the text that the user has entered.
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter some text';
@@ -116,9 +108,31 @@ class ConfPage extends StatelessWidget {
                     return null;
                   },
                   onSaved: (value) {
-                    remoteConnection.localWiFiConnectionName = value;
+                    remoteConnection.remoteServerUri = value;
                   },
-                ),
+                )),
+            Row(
+              children: [
+                Container(
+                    margin: EdgeInsets.all(10),
+                    padding: EdgeInsets.all(5),
+                    width: 200,
+                    child: TextFormField(
+                      controller: wiFiController,
+                      decoration: const InputDecoration(
+                        border: UnderlineInputBorder(),
+                        labelText: 'Local WiFi Name',
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter some text';
+                        }
+                        return null;
+                      },
+                      onSaved: (value) {
+                        remoteConnection.localWiFiConnectionName = value;
+                      },
+                    )),
                 ElevatedButton(
                   onPressed: () async {
                     wiFiController.text =
@@ -128,7 +142,8 @@ class ConfPage extends StatelessWidget {
                 ),
               ],
             ),
-            Padding(
+            Container(
+              margin: EdgeInsets.all(10),
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: ElevatedButton(
                 onPressed: () async {
@@ -203,12 +218,14 @@ class ConfPage extends StatelessWidget {
     // and use it to show a SnackBar.
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
-  // Widget connectionState() {
-  //   if (widget.mqttClientWrapper == null ||
-  //     widget.mqttClientWrapper!.connectionState != MqttCurrentConnectionState.CONNECTED) {
-  //       return Icon(Icons.cloud_off_outlined, color: Colors.red, size: 20);
-  //   } else {
-  //     return Icon(Icons.cloud_outlined, color: Colors.green, size: 20);
-  //   }
-  // }
+
+  Widget connectionState() {
+    if (mqttClientWrapper == null ||
+        mqttClientWrapper!.connectionState !=
+            MqttCurrentConnectionState.CONNECTED) {
+      return Icon(Icons.cloud_off_outlined, color: Colors.red, size: 20);
+    } else {
+      return Icon(Icons.cloud_outlined, color: Colors.green, size: 20);
+    }
+  }
 }

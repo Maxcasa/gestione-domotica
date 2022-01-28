@@ -30,6 +30,24 @@ class _ConnectionIconState extends State<ConnectionIcon> {
     super.initState();
   }
 
+  @override
+  void dispose() {
+    mqttClientWrapper!
+        .removeListener(_connected, ['connectionState.connected']);
+    mqttClientWrapper!
+        .removeListener(_connecting, ['connectionState.connecting']);
+    mqttClientWrapper!
+        .removeListener(_disconnected, ['connectionState.disconnected']);
+    mqttClientWrapper!
+        .removeListener(_disconnecting, ['connectionState._disconnecting']);
+    mqttClientWrapper!
+        .removeListener(_riconnect, ['connectionState.riconnect']);
+    mqttClientWrapper!
+        .removeListener(_riconnected, ['connectionState.riconnected']);
+    mqttClientWrapper!.removeListener(_errore, ['connectionState.error']);
+    super.dispose();
+  }
+
   _connected() {
     setState(() {
       _icona = Icon(Icons.cloud_outlined, color: Colors.green, size: 20);

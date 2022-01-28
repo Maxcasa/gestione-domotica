@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/hex_color.dart';
 import 'package:gestione_domotica/models/sensori/sensori_layer.dart';
-import 'sensore_model.dart';
 
 /// Classe che definisce il sensore di apertura porte e finestre
 class SensoreSirena extends SensoreModel {
@@ -16,11 +15,9 @@ class SensoreSirena extends SensoreModel {
   SensoreSirena.fromJson(Map<String, dynamic> json)
       : _id = json['id'],
         _nome = json['nome'],
-        // _valore = json['valore'] ?? 0,
-        // colore = json['colore'] != null
-        //     ? HexColor.fromHex(json['colore'])
-        //     : Colors.black,
-        super.fromJson(json);
+        super.fromJson(json) {
+    icona = Icons.notifications_on_rounded;
+  }
 
   // variabili
   int _id;

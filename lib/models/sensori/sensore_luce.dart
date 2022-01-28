@@ -19,7 +19,9 @@ class SensoreLuce extends SensoreModel {
         // colore = json['colore'] != null
         //     ? HexColor.fromHex(json['colore'])
         //     : Colors.black,
-        super.fromJson(json);
+        super.fromJson(json) {
+    icona = Icons.lightbulb_rounded;
+  }
 
   // variabili
   int _id;

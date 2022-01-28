@@ -12,7 +12,7 @@ class SensoreModel {
   SensoreModel(
       {required this.id,
       String? nome,
-      this.icona = Icons.add_alert_outlined,
+      this.icona = Icons.crop_square_outlined,
       this.colore = Colors.black,
       this.size = 30,
       this.posLeft = 0,
@@ -42,11 +42,11 @@ class SensoreModel {
         colore = json['colore'] != null
             ? HexColor.fromHex(json['colore'])
             : Colors.black,
-        size = json['size'],
+        size = json['size'] ?? 30,
         icona = json['icona'] != null
             ? IconData(json['icona']['codePoint'],
                 fontFamily: json['icona']['fontFamily'])
-            : Icons.add_alert_outlined,
+            : Icons.crop_square_outlined,
         posLeft = double.parse(json['posLeft'] ?? '0'),
         posTop = double.parse(json['posTop'] ?? '0'),
         abilitato = json['abilitato'] ?? true;

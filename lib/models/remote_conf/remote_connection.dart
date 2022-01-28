@@ -24,9 +24,7 @@ class RemoteConnection extends ChangeNotifier {
     return _instance;
   }
 
-  RemoteConnection._internal() : super() {
-    _getConnectionInfo();
-  }
+  RemoteConnection._internal() : super();
 
   // variabili
   String? remoteServerUri;
@@ -47,7 +45,7 @@ class RemoteConnection extends ChangeNotifier {
   //metodi
 
   // prendo le info di connessioni
-  Future<void> _getConnectionInfo() async {
+  Future<void> getConnectionInfo() async {
     //if (localWiFiConnectionName == null && remoteServerUri == null) {
     if (kIsWeb) {
       await _getAssetsInfo();
@@ -88,7 +86,7 @@ class RemoteConnection extends ChangeNotifier {
       await file.writeAsString(
           '{"remoteServerUri": "$remoteServerUri, "localWiFiConnectionName": $localWiFiConnectionName}');
     }
-    _getConnectionInfo();
+    getConnectionInfo();
     return true;
   }
 
@@ -117,6 +115,10 @@ class RemoteConnection extends ChangeNotifier {
   }
 
   Future<String?> getWifiName() async {
+    return await lock.synchronized(_getWifiName);
+  }
+
+  Future<String?> _getWifiName() async {
     if (kIsWeb) {
       return null;
     } else {

@@ -12,7 +12,9 @@ class SensoreInfisso extends SensoreModel {
   SensoreInfisso.fromJson(Map<String, dynamic> json)
       : _id = json['id'],
         _nome = json['nome'],
-        super.fromJson(json);
+        super.fromJson(json) {
+    icona = Icons.sensor_window_outlined;
+  }
 
   // variabili
   int _id;

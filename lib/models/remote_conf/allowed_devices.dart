@@ -15,8 +15,8 @@ class AllowedDevices with ChangeNotifier {
   // costruttori
   AllowedDevices() : super() {
     remoteConnection = RemoteConnection();
-    remoteConnection!.addListener(_getAllowedDevice);
-    _getAllowedDevice();
+    remoteConnection!.addListener(getAllowedDevice);
+    remoteConnection!.getConnectionInfo();
   }
 
   // variabili
@@ -31,11 +31,11 @@ class AllowedDevices with ChangeNotifier {
 
   //metodi
   // prendo i device autorizzati dal web
-  Future<void> _getAllowedDevice() async {
+  Future<void> getAllowedDevice() async {
     // abilito lo scaricamento da web o da rete locale
     if ((remoteConnection != null &&
-            await remoteConnection!.getLocalWiFiConnectionName() != null &&
-            await remoteConnection!.getRemoteServerUri() != null) &&
+            remoteConnection!.getLocalWiFiConnectionName() != null &&
+            remoteConnection!.getRemoteServerUri() != null) &&
         (kIsWeb ||
             (await remoteConnection!.getWifiName() ==
                 await remoteConnection!.getLocalWiFiConnectionName()))) {

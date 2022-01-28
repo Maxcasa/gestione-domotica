@@ -9,9 +9,9 @@ import 'package:gestione_domotica/widget/dot_indicator.dart';
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key) {
     mqttClientWrapper = MQTTClientWrapper();
-    if (mqttClientWrapper!.connectionState == MqttCurrentConnectionState.IDLE) {
-      _connect();
-    }
+    // if (mqttClientWrapper!.connectionState == MqttCurrentConnectionState.IDLE) {
+    //   _connect();
+    // }
     mqttClientWrapper!.addListener(_connect, ['connectionState.disconnected']);
   }
 

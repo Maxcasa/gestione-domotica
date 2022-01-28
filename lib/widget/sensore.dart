@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/sensori/sensori_layer.dart';
+import 'package:gestione_domotica/widget/domo_button.dart';
 
 // /// Widget di visualizzazione del Sensore
 class Sensore extends StatelessWidget {
@@ -16,19 +17,19 @@ class Sensore extends StatelessWidget {
     _context = context;
     //_planProviderState.id = idPlan;
     return SizedBox(
-        height: sensore.size.toDouble(),
-        width: sensore.size.toDouble(),
+        // height: sensore.size.toDouble(),
+        // width: sensore.size.toDouble(),
         child: ElevatedButton.icon(
-          icon: Icon(sensore.icona,
-              color: sensore.colore, size: sensore.size.toDouble()),
-          label: Text(sensore.nome),
-          onPressed: () {
-            sensore.cambiaStato(1);
-          },
-          onLongPress: () {
-            showMenuOverlay();
-          },
-        ));
+      icon: Icon(sensore.icona,
+          color: sensore.colore, size: sensore.size.toDouble()),
+      label: Text(sensore.nome),
+      onPressed: () {
+        sensore.cambiaStato(1);
+      },
+      // onLongPress: () {
+      //   showMenuOverlay();
+      // },
+    ));
     //floatingActionButton: _buildAddTaskButton(),
   }
 
@@ -44,9 +45,8 @@ class Sensore extends StatelessWidget {
                       right: 20.0,
                       left: 20.0),
                   child: Row(children: [
-                    ElevatedButton.icon(
+                    IconButton(
                       icon: Icon(Icons.delete_outline),
-                      label: Text('Disabilita'),
                       onPressed: () {
                         if (sensore.abilitato) {
                           sensore.disabilita();

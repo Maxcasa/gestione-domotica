@@ -31,6 +31,7 @@ class SchemaRepository extends ChangeNotifier {
       _sensoriBack = null;
       notifyListeners();
     });
+    remoteConnection!.getConnectionInfo();
     print('Istanzio il getter dello schema');
   }
 

@@ -41,6 +41,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   MQTTClientWrapper._internal() {
     remoteConnection = RemoteConnection();
     remoteConnection!.addListener(serverChange);
+    remoteConnection!.getConnectionInfo();
     print('Istanzio l\'MQTT Client');
   }
 
@@ -64,17 +65,17 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
             connectionState != MqttCurrentConnectionState.RICONNECTED &&
             connectionState !=
                 MqttCurrentConnectionState.ERROR_WHEN_CONNECTING) &&
-        remoteConnection != null) {
+        (remoteConnection != null &&
+            remoteConnection!.getRemoteServerUri() != null)) {
       connectionState = MqttCurrentConnectionState.CONNECTING;
-      if (remoteConnection!.getRemoteServerUri() != null) {
-        remoteServer = remoteConnection!.getRemoteServerUri();
-        // serverUri = 'ws://$remoteServer';
-        _setupMqttClient();
-        await _connectClient();
-        _listenClient();
-      } else {
-        connectionState = MqttCurrentConnectionState.IDLE;
-      }
+      remoteServer = remoteConnection!.getRemoteServerUri();
+      // serverUri = 'ws://$remoteServer';
+      _setupMqttClient();
+      await _connectClient();
+      _listenClient();
+      // } else {
+      //   connectionState = MqttCurrentConnectionState.IDLE;
+      // }
     }
   }
 
@@ -240,15 +241,11 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   }
 
   void serverChange() {
-    if (connectionState != MqttCurrentConnectionState.CONNECTING &&
-        connectionState != MqttCurrentConnectionState.CONNECTED &&
-        connectionState != MqttCurrentConnectionState.RICONNECT &&
-        connectionState != MqttCurrentConnectionState.RICONNECTED &&
-        connectionState != MqttCurrentConnectionState.ERROR_WHEN_CONNECTING) {
+    if (connectionState == MqttCurrentConnectionState.CONNECTED) {
       reconnect = true;
       client!.disconnect();
       //  connect('mqtt_user', 'mqtt_user');
-    } else {
+    } else if (connectionState == MqttCurrentConnectionState.IDLE) {
       connectMqttClient();
     }
   }

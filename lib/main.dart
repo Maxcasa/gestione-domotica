@@ -35,9 +35,9 @@ void main() {
 class MyApp extends StatelessWidget {
   MyApp({Key? key}) : super(key: key) {
     mqttClientWrapper = MQTTClientWrapper();
-    if (mqttClientWrapper!.connectionState == MqttCurrentConnectionState.IDLE) {
-      _connect();
-    }
+    // if (mqttClientWrapper!.connectionState == MqttCurrentConnectionState.IDLE) {
+    //   _connect();
+    // }
     // mqttClientWrapper!.addListener(_connect, ['connectionState.disconnected']);
   }
 

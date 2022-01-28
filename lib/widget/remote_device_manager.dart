@@ -51,6 +51,13 @@ class _RemoteDeviceManageState extends State<RemoteDeviceManage> {
     return _button;
   }
 
+  @override
+  void dispose() {
+    mqttClientWrapper!
+        .removeListener(_subscribeTopic, ['connectionState.connected']);
+    super.dispose();
+  }
+
   void _permitedJoin(String messageData) {
     Map<String, dynamic> jsonData = jsonDecode(messageData);
     // se risponde che il join è permesso
