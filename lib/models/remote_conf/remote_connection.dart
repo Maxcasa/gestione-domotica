@@ -28,13 +28,27 @@ class RemoteConnection extends ChangeNotifier {
 
   // variabili
   String? remoteServerUri;
+  String? remoteServerName;
   String? localWiFiConnectionName;
   // PermissionWithService locationPermission = Permission.locationWhenInUse;
   var lock = Lock();
 
+  Future<void> setRemoteServerName(String remoteServerName) async {
+    List<InternetAddress> ipValues =
+        await InternetAddress.lookup(remoteServerName);
+    if (ipValues != null && ipValues.length > 0) {
+      remoteServerUri = ipValues[0].address;
+    }
+  }
+
   String? getRemoteServerUri() {
     // await lock.synchronized(_getConnectionInfo);
     return remoteServerUri;
+  }
+
+  String? getRemoteServerName() {
+    // await lock.synchronized(_getConnectionInfo);
+    return remoteServerName;
   }
 
   String? getLocalWiFiConnectionName() {
@@ -56,6 +70,7 @@ class RemoteConnection extends ChangeNotifier {
         String fileString = await file.readAsString();
         Map<String, dynamic> jsonData = json.decode(fileString);
         remoteServerUri = jsonData['remoteServerUri'];
+        remoteServerName = jsonData['remoteServerName'];
         localWiFiConnectionName = jsonData['localWiFiConnectionName'];
       } else {
         await _getAssetsInfo();
@@ -71,8 +86,10 @@ class RemoteConnection extends ChangeNotifier {
           await rootBundle.loadString('assets/json/remote_connection.json');
       Map<String, dynamic> jsonData = json.decode(fileString);
       remoteServerUri = jsonData['remoteServerUri'];
+      remoteServerName = jsonData['remoteServerName'];
       localWiFiConnectionName = jsonData['localWiFiConnectionName'];
-      print('RemoteConnection :: $remoteServerUri, $localWiFiConnectionName');
+      print(
+          'RemoteConnection :: $remoteServerName, $remoteServerUri, $localWiFiConnectionName');
     } on Exception catch (e) {
       print('RemoteConnection :: $e');
       throw Exception(e);
@@ -84,24 +101,29 @@ class RemoteConnection extends ChangeNotifier {
       final directory = await getApplicationDocumentsDirectory();
       final File file = File('${directory.path}/connection_info.json');
       await file.writeAsString(
-          '{"remoteServerUri": "$remoteServerUri, "localWiFiConnectionName": $localWiFiConnectionName}');
+          '{""remoteServerName": "$remoteServerName, remoteServerUri": "$remoteServerUri, "remoteServerUri": "$remoteServerUri, "localWiFiConnectionName": $localWiFiConnectionName}');
     }
     getConnectionInfo();
     return true;
   }
 
-  Future<bool> checkLocalIP({String? ipValue}) async {
+  Future<bool> checkLocalIP({String? nameValue}) async {
     bool ipOK = false;
-    ipValue ??= remoteServerUri;
-    try {
-      http.Response httpResponse =
-          await http.get(Uri.parse('http://$ipValue:$port/'));
-      if (httpResponse.statusCode == 200 &&
-          httpResponse.body == 'Domo_Server is here!') {
-        ipOK = true;
+    String? ipValue;
+    nameValue ?? remoteServerName;
+    List<InternetAddress> ipValues = await InternetAddress.lookup(nameValue!);
+    if (ipValues != null && ipValues.length > 0) {
+      ipValue = ipValues[0].address;
+      try {
+        http.Response httpResponse =
+            await http.get(Uri.parse('http://$ipValue:$port/'));
+        if (httpResponse.statusCode == 200 &&
+            httpResponse.body == 'Domo_Server is here!') {
+          ipOK = true;
+        }
+      } on Exception catch (e) {
+        print('RemoteConnection :: $e');
       }
-    } on Exception catch (e) {
-      print('RemoteConnection :: $e');
     }
     return ipOK;
   }

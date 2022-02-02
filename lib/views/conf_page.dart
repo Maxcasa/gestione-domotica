@@ -80,8 +80,8 @@ class ConfPage extends StatelessWidget {
   Widget remoteConnection() {
     return Consumer<RemoteConnection>(builder: (BuildContext context,
         RemoteConnection remoteConnection, Widget? child) {
-      final ipController =
-          TextEditingController(text: remoteConnection.remoteServerUri);
+      final nameController =
+          TextEditingController(text: remoteConnection.remoteServerName);
       final wiFiController =
           TextEditingController(text: remoteConnection.localWiFiConnectionName);
       final _formfKey = GlobalKey<FormState>();
@@ -95,10 +95,10 @@ class ConfPage extends StatelessWidget {
                 padding: EdgeInsets.all(5),
                 width: 200,
                 child: TextFormField(
-                  controller: ipController,
+                  controller: nameController,
                   decoration: const InputDecoration(
                     border: UnderlineInputBorder(),
-                    labelText: 'Server IP',
+                    labelText: 'Server Name',
                   ),
                   // The validator receives the text that the user has entered.
                   validator: (value) {
@@ -108,7 +108,7 @@ class ConfPage extends StatelessWidget {
                     return null;
                   },
                   onSaved: (value) {
-                    remoteConnection.remoteServerUri = value;
+                    remoteConnection.setRemoteServerName(value!);
                   },
                 )),
             Row(
@@ -150,7 +150,7 @@ class ConfPage extends StatelessWidget {
                   // Validate returns true if the form is valid, or false otherwise.
                   if (_formfKey.currentState!.validate() &&
                       await remoteConnection.checkLocalIP(
-                          ipValue: ipController.text) &&
+                          nameValue: nameController.text) &&
                       await remoteConnection.checkLocalWiFi(
                           wiFiValue: wiFiController.text)) {
                     _formfKey.currentState!.save();
@@ -174,7 +174,7 @@ class ConfPage extends StatelessWidget {
   Widget allowedDevice() {
     return Consumer<AllowedDevices>(builder:
         (BuildContext context, AllowedDevices allowedDevices, Widget? child) {
-      return Expanded(
+      return Flexible(
         child: ListView.builder(
           itemCount: allowedDevices.allowedDevices.length,
           itemBuilder: (BuildContext context, int index) {

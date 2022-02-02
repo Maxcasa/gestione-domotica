@@ -1,1 +1,3 @@
-{"remoteServerUri": "192.168.1.71", "localWiFiConnectionName": "TIM-29622213"}
+{"remoteServerName": "domo_server",
+"remoteServerUri": "192.168.1.71",
+"localWiFiConnectionName": "TIM-29622213"}

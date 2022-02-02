@@ -241,7 +241,11 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   }
 
   void serverChange() {
-    if (connectionState == MqttCurrentConnectionState.CONNECTED) {
+    if ((connectionState == MqttCurrentConnectionState.CONNECTING ||
+            connectionState == MqttCurrentConnectionState.CONNECTED ||
+            connectionState == MqttCurrentConnectionState.RICONNECT ||
+            connectionState == MqttCurrentConnectionState.RICONNECTED) &&
+        remoteServer != remoteConnection!.getRemoteServerUri()) {
       reconnect = true;
       client!.disconnect();
       //  connect('mqtt_user', 'mqtt_user');
