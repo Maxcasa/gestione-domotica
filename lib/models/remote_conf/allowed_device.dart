@@ -1,24 +1,19 @@
 class AllowedDevice {
   // costruttori
-  AllowedDevice(
-      {required this.name, required this.nameArp, required this.auth});
+  AllowedDevice({required this.nome, required this.name, required this.auth});
 
+  String nome;
   String name;
-  String nameArp;
   bool auth = false;
 
 // conversione Json
   AllowedDevice.fromJson(Map<String, dynamic> json)
-      : name = json['name'],
-        nameArp = json['name_arp'],
+      : nome = json['nome'],
+        name = json['name'],
         auth = json['auth'] ?? false;
 
   Map<String, dynamic> toJson() {
-    Map<String, dynamic> result = {
-      'name': name,
-      'name_arp': nameArp,
-      'auth': auth
-    };
+    Map<String, dynamic> result = {'nome': nome, 'name': name, 'auth': auth};
     return result;
   }
 }

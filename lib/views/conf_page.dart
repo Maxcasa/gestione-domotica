@@ -58,16 +58,18 @@ class ConfPage extends StatelessWidget {
         endDrawer: const MainDrawer(),
         body: MultiProvider(
             providers: [
-              // ChangeNotifierProvider<AllowedDevices>(
-              //   create: (_) => AllowedDevices(),
-              // ),
+              ChangeNotifierProvider<AllowedDevices>(
+                create: (_) => AllowedDevices(),
+              ),
               ChangeNotifierProvider<RemoteConnection>(
                 create: (_) => RemoteConnection(),
               )
             ],
             child: Column(children: <Widget>[
               remoteConnection(),
-              //allowedDevice(),
+              Divider(color: Colors.black),
+              allowedDevice(),
+              Divider(color: Colors.black),
               Container(
                 alignment: Alignment.centerLeft,
                 margin: EdgeInsets.all(10),
@@ -174,31 +176,65 @@ class ConfPage extends StatelessWidget {
   Widget allowedDevice() {
     return Consumer<AllowedDevices>(builder:
         (BuildContext context, AllowedDevices allowedDevices, Widget? child) {
-      return Flexible(
-        child: ListView.builder(
-          itemCount: allowedDevices.allowedDevices.length,
-          itemBuilder: (BuildContext context, int index) {
-            if (allowedDevices.allowedDevices.isEmpty) {
-              return const Text('nessuna autorizzazione trovata');
+      List<TextEditingController> _controllers = [];
+      return Column(children: [
+        Flexible(
+          child: ListView.builder(
+            itemCount: allowedDevices.allowedDevices.length,
+            itemBuilder: (BuildContext context, int index) {
+              if (allowedDevices.allowedDevices.isEmpty) {
+                return const Text('nessuna autorizzazione trovata');
+              }
+              _controllers.add(TextEditingController(text: allowedDevices.allowedDevices[index].nome));
+              final item = Row(
+                children: [
+                  Checkbox(
+                    checkColor: Colors.black,
+                    value: allowedDevices.allowedDevices[index].auth,
+                    onChanged: (bool? value) {
+                      allowedDevices.allowedDevice(value, index);
+                    },
+                  ),
+                  TextFormField(
+                    controller: _controllers[index],
+                    decoration: const InputDecoration(
+                          border: UnderlineInputBorder(),
+                          labelText: 'Device name',
+                        ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter some text';
+                      }
+                      return null;
+                    },
+                  ),                    
+                  Text(allowedDevices.allowedDevices[index].name,
+                      textAlign: TextAlign.center),
+                ],
+              );
+              return item;
             }
-            final item = Row(
-              children: [
-                Checkbox(
-                  checkColor: Colors.black,
-                  value: allowedDevices.allowedDevices[index].auth,
-                  onChanged: (bool? value) {
-                    allowedDevices.allowedDevice(value, index);
-                  },
-                ),
-                Text(allowedDevices.allowedDevices[index].name,
-                    textAlign: TextAlign.center),
-                Text(allowedDevices.allowedDevices[index].nameArp,
-                    textAlign: TextAlign.center),
-              ],
-            );
-            return item;
-          },
+          )
         ),
+        Container(
+          margin: EdgeInsets.all(10),
+          padding: const EdgeInsets.symmetric(vertical: 16.0),
+          child: ElevatedButton(
+            onPressed: () async {
+              // Validate returns true if the form is valid, or false otherwise.
+                List<String?> deviceNameList = [];
+                for (TextEditingController controller in _controllers) {
+                  deviceNameList.add(controller.text);
+                } 
+                allowedDevices.setNomeDevices(deviceNameList);
+                // If the form is valid, display a snackbar. In the real world,
+                // you'd often call a server or save the information in a database.
+                mostraSnackBar('Aggiornato', context);
+            },
+            child: const Text('Submit'),
+          ),
+        ),
+      ]
       );
     });
   }

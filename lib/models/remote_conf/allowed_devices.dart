@@ -9,6 +9,8 @@ import 'package:gestione_domotica/models/remote_conf/allowed_device.dart';
 import 'package:gestione_domotica/models/remote_conf/remote_connection.dart';
 import 'package:path_provider/path_provider.dart';
 
+const String port = '8085';
+
 /// Classe che contiene la gestione dei dispositivi autorizzati
 // ignore: mixin_inherits_from_not_object
 class AllowedDevices with ChangeNotifier {
@@ -29,6 +31,18 @@ class AllowedDevices with ChangeNotifier {
     notifyListeners();
   }
 
+  void setNomeDevice(String? nome, int i) {
+    allowedDevices[i].nome = nome ?? allowedDevices[i].name;
+    notifyListeners();
+  }
+
+  void setNomeDevices(List<String?> nomi) {
+    for (var i = 0; i < nomi.length; i++) {
+      allowedDevices[i].nome = nomi[i] ?? allowedDevices[i].name;
+    }
+    notifyListeners();
+  }
+
   //metodi
   // prendo i device autorizzati dal web
   Future<void> getAllowedDevice() async {
@@ -39,8 +53,7 @@ class AllowedDevices with ChangeNotifier {
         (kIsWeb ||
             (await remoteConnection!.getWifiName() ==
                 await remoteConnection!.getLocalWiFiConnectionName()))) {
-      List<Map<String, dynamic>> localJson =
-          await _getAllowedDeviceFromRemote();
+      List<dynamic> localJson = await _getAllowedDeviceFromRemote();
       if (localJson.isNotEmpty) {
         for (var element in localJson) {
           allowedDevices.add(AllowedDevice.fromJson(element));
@@ -50,10 +63,10 @@ class AllowedDevices with ChangeNotifier {
     }
   }
 
-  Future<List<Map<String, dynamic>>> _getAllowedDeviceFromRemote() async {
+  Future<List<dynamic>> _getAllowedDeviceFromRemote() async {
     String? serverUri = await remoteConnection!.getRemoteServerUri();
     http.Response httpResponse = await http
-        .get(Uri.parse('http://${serverUri}:8080/get/allowed_device'));
+        .get(Uri.parse('http://${serverUri}:$port/get/allowed_device'));
     if (httpResponse.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
