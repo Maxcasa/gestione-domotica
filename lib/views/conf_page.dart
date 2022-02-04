@@ -110,7 +110,7 @@ class ConfPage extends StatelessWidget {
                     return null;
                   },
                   onSaved: (value) {
-                    remoteConnection.setRemoteServerName(value!);
+                    remoteConnection.remoteServerName = value;
                   },
                 )),
             Row(
@@ -151,7 +151,7 @@ class ConfPage extends StatelessWidget {
                 onPressed: () async {
                   // Validate returns true if the form is valid, or false otherwise.
                   if (_formfKey.currentState!.validate() &&
-                      await remoteConnection.checkLocalIP(
+                      await remoteConnection.checkLocalName(
                           nameValue: nameController.text) &&
                       await remoteConnection.checkLocalWiFi(
                           wiFiValue: wiFiController.text)) {
@@ -177,65 +177,95 @@ class ConfPage extends StatelessWidget {
     return Consumer<AllowedDevices>(builder:
         (BuildContext context, AllowedDevices allowedDevices, Widget? child) {
       List<TextEditingController> _controllers = [];
-      return Column(children: [
-        Flexible(
+      for (AllowedDevice device in allowedDevices.allowedDevices) {
+        _controllers.add(TextEditingController(text: device.nome));
+      }
+      return Flexible(
           child: ListView.builder(
-            itemCount: allowedDevices.allowedDevices.length,
-            itemBuilder: (BuildContext context, int index) {
-              if (allowedDevices.allowedDevices.isEmpty) {
-                return const Text('nessuna autorizzazione trovata');
-              }
-              _controllers.add(TextEditingController(text: allowedDevices.allowedDevices[index].nome));
-              final item = Row(
-                children: [
-                  Checkbox(
-                    checkColor: Colors.black,
-                    value: allowedDevices.allowedDevices[index].auth,
-                    onChanged: (bool? value) {
-                      allowedDevices.allowedDevice(value, index);
-                    },
-                  ),
-                  TextFormField(
-                    controller: _controllers[index],
-                    decoration: const InputDecoration(
-                          border: UnderlineInputBorder(),
-                          labelText: 'Device name',
+              itemCount: allowedDevices.allowedDevices.length + 1,
+              itemBuilder: (BuildContext context, int index) {
+                if (allowedDevices.allowedDevices.isEmpty) {
+                  return const Text('nessuna autorizzazione trovata');
+                }
+                Widget item;
+                if (index != allowedDevices.allowedDevices.length) {
+                  item = Row(
+                    children: [
+                      Checkbox(
+                        checkColor: Colors.black,
+                        value: allowedDevices.allowedDevices[index].auth,
+                        onChanged: (bool? value) {
+                          allowedDevices.allowedDevice(value, index);
+                        },
+                      ),
+                      Container(
+                        margin: EdgeInsets.all(10),
+                        padding: EdgeInsets.all(5),
+                        width: 200,
+                        child: TextFormField(
+                          controller: _controllers[index],
+                          decoration: const InputDecoration(
+                            border: UnderlineInputBorder(),
+                            labelText: 'Device name',
+                          ),
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter some text';
+                            }
+                            return null;
+                          },
                         ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter some text';
-                      }
-                      return null;
-                    },
-                  ),                    
-                  Text(allowedDevices.allowedDevices[index].name,
-                      textAlign: TextAlign.center),
-                ],
-              );
-              return item;
-            }
-          )
-        ),
-        Container(
-          margin: EdgeInsets.all(10),
-          padding: const EdgeInsets.symmetric(vertical: 16.0),
-          child: ElevatedButton(
-            onPressed: () async {
-              // Validate returns true if the form is valid, or false otherwise.
-                List<String?> deviceNameList = [];
-                for (TextEditingController controller in _controllers) {
-                  deviceNameList.add(controller.text);
-                } 
-                allowedDevices.setNomeDevices(deviceNameList);
-                // If the form is valid, display a snackbar. In the real world,
-                // you'd often call a server or save the information in a database.
-                mostraSnackBar('Aggiornato', context);
-            },
-            child: const Text('Submit'),
-          ),
-        ),
-      ]
-      );
+                      ),
+                      Text(allowedDevices.allowedDevices[index].name,
+                          textAlign: TextAlign.center),
+                    ],
+                  );
+                } else {
+                  item = Container(
+                    margin: EdgeInsets.all(10),
+                    padding: const EdgeInsets.symmetric(vertical: 16.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        // Validate returns true if the form is valid, or false otherwise.
+                        List<String?> deviceNameList = [];
+                        for (TextEditingController controller in _controllers) {
+                          deviceNameList.add(controller.text);
+                        }
+                        allowedDevices.setNomiDevices(deviceNameList);
+                        allowedDevices.saveAllowedDevice();
+                        // If the form is valid, display a snackbar. In the real world,
+                        // you'd often call a server or save the information in a database.
+                        mostraSnackBar('Aggiornato', context);
+                      },
+                      child: const Text('Submit'),
+                    ),
+                  );
+                }
+                return item;
+              }));
+      // Align(
+      //   alignment: Alignment.bottomCenter,
+      //   child: Container(
+      //     margin: EdgeInsets.all(10),
+      //     padding: const EdgeInsets.symmetric(vertical: 16.0),
+      //     child: ElevatedButton(
+      //       onPressed: () {
+      //         // Validate returns true if the form is valid, or false otherwise.
+      //         List<String?> deviceNameList = [];
+      //         for (TextEditingController controller in _controllers) {
+      //           deviceNameList.add(controller.text);
+      //         }
+      //         allowedDevices.setNomiDevices(deviceNameList);
+      //         allowedDevices.saveAllowedDevice();
+      //         // If the form is valid, display a snackbar. In the real world,
+      //         // you'd often call a server or save the information in a database.
+      //         mostraSnackBar('Aggiornato', context);
+      //       },
+      //       child: const Text('Submit'),
+      //     ),
+      //   ),
+      // ),
+      //]);
     });
   }
 

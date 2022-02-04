@@ -66,9 +66,9 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
             connectionState !=
                 MqttCurrentConnectionState.ERROR_WHEN_CONNECTING) &&
         (remoteConnection != null &&
-            remoteConnection!.getRemoteServerUri() != null)) {
+            remoteConnection!.remoteServerName != null)) {
       connectionState = MqttCurrentConnectionState.CONNECTING;
-      remoteServer = remoteConnection!.getRemoteServerUri();
+      remoteServer = remoteConnection!.remoteServerName;
       // serverUri = 'ws://$remoteServer';
       _setupMqttClient();
       await _connectClient();
@@ -245,7 +245,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
             connectionState == MqttCurrentConnectionState.CONNECTED ||
             connectionState == MqttCurrentConnectionState.RICONNECT ||
             connectionState == MqttCurrentConnectionState.RICONNECTED) &&
-        remoteServer != remoteConnection!.getRemoteServerUri()) {
+        remoteServer != remoteConnection!.remoteServerName) {
       reconnect = true;
       client!.disconnect();
       //  connect('mqtt_user', 'mqtt_user');

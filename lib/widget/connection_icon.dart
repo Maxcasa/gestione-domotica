@@ -4,7 +4,14 @@ import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
 
 /// Classe WIDGET che contiene la gestione dell'icona della connessione
 class ConnectionIcon extends StatefulWidget {
-  ConnectionIcon({Key? key}) : super(key: key);
+  //ConnectionIcon({Key? key}) : super(key: key);
+  static const ConnectionIcon _instance = ConnectionIcon._internal();
+
+  factory ConnectionIcon() {
+    return _instance;
+  }
+
+  const ConnectionIcon._internal({Key? key}) : super(key: key);
 
   @override
   _ConnectionIconState createState() => _ConnectionIconState();
