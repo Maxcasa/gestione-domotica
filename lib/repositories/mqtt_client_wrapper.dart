@@ -20,7 +20,7 @@ enum MqttCurrentConnectionState {
   IDLE,
   CONNECTING,
   CONNECTED,
-  RICONNECT,
+  RICONNECTING,
   RICONNECTED,
   DISCONNECTED,
   ERROR_WHEN_CONNECTING
@@ -61,7 +61,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   Future<void> connectMqttClient() async {
     if ((connectionState != MqttCurrentConnectionState.CONNECTING &&
             connectionState != MqttCurrentConnectionState.CONNECTED &&
-            connectionState != MqttCurrentConnectionState.RICONNECT &&
+            connectionState != MqttCurrentConnectionState.RICONNECTING &&
             connectionState != MqttCurrentConnectionState.RICONNECTED &&
             connectionState !=
                 MqttCurrentConnectionState.ERROR_WHEN_CONNECTING) &&
@@ -213,7 +213,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   }
 
   void _onAutoReconnect() {
-    connectionState = MqttCurrentConnectionState.RICONNECT;
+    connectionState = MqttCurrentConnectionState.RICONNECTING;
     print(
         'MQTTClientWrapper::OnRiconnect client callback - Client riconnecti was in progress');
     notifyListeners('connectionState.riconnect');
@@ -229,7 +229,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   void toggleState() {
     if (connectionState != MqttCurrentConnectionState.CONNECTING &&
         connectionState != MqttCurrentConnectionState.CONNECTED &&
-        connectionState != MqttCurrentConnectionState.RICONNECT &&
+        connectionState != MqttCurrentConnectionState.RICONNECTING &&
         connectionState != MqttCurrentConnectionState.RICONNECTED &&
         connectionState != MqttCurrentConnectionState.ERROR_WHEN_CONNECTING) {
       client!.disconnect();
@@ -243,7 +243,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   void serverChange() {
     if ((connectionState == MqttCurrentConnectionState.CONNECTING ||
             connectionState == MqttCurrentConnectionState.CONNECTED ||
-            connectionState == MqttCurrentConnectionState.RICONNECT ||
+            connectionState == MqttCurrentConnectionState.RICONNECTING ||
             connectionState == MqttCurrentConnectionState.RICONNECTED) &&
         remoteServer != remoteConnection!.remoteServerName) {
       reconnect = true;

@@ -76,7 +76,7 @@ class Stato with ChangeNotifier {
     if (jsonData.containsKey('stato')) {
       switch (jsonData['stato']) {
         case "2":
-          colore = Colors.red;
+          colore = Colors.yellow;
           icona = Icons.home_outlined;
           valore = 2;
           notifyListeners();

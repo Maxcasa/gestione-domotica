@@ -222,6 +222,7 @@ class ConfPage extends StatelessWidget {
                   );
                 } else {
                   item = Container(
+                    width: 100,
                     margin: EdgeInsets.all(10),
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
                     child: ElevatedButton(

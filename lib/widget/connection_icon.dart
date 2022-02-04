@@ -24,35 +24,65 @@ class _ConnectionIconState extends State<ConnectionIcon> {
   @override
   void initState() {
     mqttClientWrapper = MQTTClientWrapper();
-    mqttClientWrapper!.addListener(_connected, ['connectionState.connected']);
-    mqttClientWrapper!.addListener(_connecting, ['connectionState.connecting']);
-    mqttClientWrapper!
-        .addListener(_disconnected, ['connectionState.disconnected']);
-    mqttClientWrapper!
-        .addListener(_disconnecting, ['connectionState._disconnecting']);
-    mqttClientWrapper!.addListener(_riconnect, ['connectionState.riconnect']);
-    mqttClientWrapper!
-        .addListener(_riconnected, ['connectionState.riconnected']);
-    mqttClientWrapper!.addListener(_errore, ['connectionState.error']);
+    _multiplex();
+    mqttClientWrapper!.addListener(_multiplex);
+    // mqttClientWrapper!.addListener(_connected, ['connectionState.connected']);
+    // mqttClientWrapper!.addListener(_connecting, ['connectionState.connecting']);
+    // mqttClientWrapper!
+    //     .addListener(_disconnected, ['connectionState.disconnected']);
+    // mqttClientWrapper!
+    //     .addListener(_disconnecting, ['connectionState._disconnecting']);
+    // mqttClientWrapper!.addListener(_riconnect, ['connectionState.riconnect']);
+    // mqttClientWrapper!
+    //     .addListener(_riconnected, ['connectionState.riconnected']);
+    // mqttClientWrapper!.addListener(_errore, ['connectionState.error']);
     super.initState();
   }
 
   @override
   void dispose() {
-    mqttClientWrapper!
-        .removeListener(_connected, ['connectionState.connected']);
-    mqttClientWrapper!
-        .removeListener(_connecting, ['connectionState.connecting']);
-    mqttClientWrapper!
-        .removeListener(_disconnected, ['connectionState.disconnected']);
-    mqttClientWrapper!
-        .removeListener(_disconnecting, ['connectionState._disconnecting']);
-    mqttClientWrapper!
-        .removeListener(_riconnect, ['connectionState.riconnect']);
-    mqttClientWrapper!
-        .removeListener(_riconnected, ['connectionState.riconnected']);
-    mqttClientWrapper!.removeListener(_errore, ['connectionState.error']);
+    mqttClientWrapper!.removeListener(_multiplex);
+    // mqttClientWrapper!
+    //     .removeListener(_connected, ['connectionState.connected']);
+    // mqttClientWrapper!
+    //     .removeListener(_connecting, ['connectionState.connecting']);
+    // mqttClientWrapper!
+    //     .removeListener(_disconnected, ['connectionState.disconnected']);
+    // mqttClientWrapper!
+    //     .removeListener(_disconnecting, ['connectionState._disconnecting']);
+    // mqttClientWrapper!
+    //     .removeListener(_riconnect, ['connectionState.riconnect']);
+    // mqttClientWrapper!
+    //     .removeListener(_riconnected, ['connectionState.riconnected']);
+    // mqttClientWrapper!.removeListener(_errore, ['connectionState.error']);
     super.dispose();
+  }
+
+  void _multiplex() {
+    switch (mqttClientWrapper!.connectionState) {
+      case MqttCurrentConnectionState.IDLE:
+        _icona = Icon(Icons.cloud_outlined, color: Colors.black, size: 20);
+        break;
+      case MqttCurrentConnectionState.CONNECTING:
+        _icona = Icon(Icons.cloud_outlined, color: Colors.yellow, size: 20);
+        break;
+      case MqttCurrentConnectionState.CONNECTED:
+        _icona = Icon(Icons.cloud_outlined, color: Colors.green, size: 20);
+        break;
+      case MqttCurrentConnectionState.DISCONNECTED:
+        _icona = Icon(Icons.cloud_outlined, color: Colors.red, size: 20);
+        break;
+      case MqttCurrentConnectionState.RICONNECTING:
+        _icona = Icon(Icons.cloud_outlined, color: Colors.yellow, size: 20);
+        break;
+      case MqttCurrentConnectionState.RICONNECTED:
+        _icona = Icon(Icons.cloud_outlined, color: Colors.green, size: 20);
+        break;
+      case MqttCurrentConnectionState.ERROR_WHEN_CONNECTING:
+        _icona = Icon(Icons.error_outline, color: Colors.red, size: 20);
+        break;
+    }
+    setState(() {});
   }
 
   _connected() {

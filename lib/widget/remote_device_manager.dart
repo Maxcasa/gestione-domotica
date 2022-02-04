@@ -41,7 +41,7 @@ class _RemoteDeviceManageState extends State<RemoteDeviceManage> {
 
   void _subscribeTopic() {
     mqttClientWrapper!.subscribeToTopic(
-        topicSurName: 'bridge/request/permit_join',
+        topicSurName: 'bridge/request/get',
         onDataReceived: (messageData) => _permitedJoin(messageData));
     bottonePermetti();
   }
@@ -55,14 +55,15 @@ class _RemoteDeviceManageState extends State<RemoteDeviceManage> {
   void dispose() {
     mqttClientWrapper!
         .removeListener(_subscribeTopic, ['connectionState.connected']);
+    mqttClientWrapper!.unsubscribeToTopic(topicSurName: 'bridge/request/get');
     super.dispose();
   }
 
   void _permitedJoin(String messageData) {
     Map<String, dynamic> jsonData = jsonDecode(messageData);
     // se risponde che il join è permesso
-    if (jsonData.containsKey('value')) {
-      if (jsonData['value']) {
+    if (jsonData.containsKey('permit_join')) {
+      if (jsonData['permit_join']) {
         bottoneBlocca();
       } else {
         bottonePermetti();
@@ -74,23 +75,27 @@ class _RemoteDeviceManageState extends State<RemoteDeviceManage> {
     setState(() {
       _button = ElevatedButton(
           onPressed: () {
-            String messageData = '{"value": true, "time": 600}';
+            String messageData = '{"permit_join": true, "time": 600}';
             mqttClientWrapper!.publishMessage(
-                topicSurName: 'bridge/request/permit_join',
-                messageData: messageData);
+                topicSurName: 'bridge/request/set', messageData: messageData);
+            bottoneBlocca();
           },
           child: const Text('Permetti join'));
     });
   }
 
   void bottoneBlocca() {
+    // rimetto il bottone Permetti join dopo 10 minuti
+    Future.delayed(const Duration(minutes: 10), () {
+      bottonePermetti();
+    });
     setState(() {
       _button = ElevatedButton(
           onPressed: () {
-            String messageData = '{"value": false}';
+            String messageData = '{"permit_join": false}';
             mqttClientWrapper!.publishMessage(
-                topicSurName: 'bridge/request/permit_join',
-                messageData: messageData);
+                topicSurName: 'bridge/request/set', messageData: messageData);
+            bottonePermetti();
           },
           child: const Text('Blocca join'));
     });
