@@ -150,18 +150,30 @@ class ConfPage extends StatelessWidget {
               child: ElevatedButton(
                 onPressed: () async {
                   // Validate returns true if the form is valid, or false otherwise.
-                  if (_formfKey.currentState!.validate() &&
-                      await remoteConnection.checkLocalName(
-                          nameValue: nameController.text) &&
-                      await remoteConnection.checkLocalWiFi(
+                  if (_formfKey.currentState!.validate()) {
+                    if (await remoteConnection.checkLocalName(
+                        nameValue: nameController.text)) {
+                      if (await remoteConnection.checkLocalWiFi(
                           wiFiValue: wiFiController.text)) {
-                    _formfKey.currentState!.save();
-                    remoteConnection.saveConnectionInfo();
-                    // If the form is valid, display a snackbar. In the real world,
-                    // you'd often call a server or save the information in a database.
-                    mostraSnackBar('Aggiornato', context);
+                        try {
+                          _formfKey.currentState!.save();
+                          remoteConnection.saveConnectionInfo();
+                          // If the form is valid, display a snackbar. In the real world,
+                          // you'd often call a server or save the information in a database.
+                          mostraSnackBar('Aggiornato', context);
+                        } on Exception catch (e) {
+                          mostraSnackBar(
+                              'Problema nel salvataggio $e', context);
+                          throw Exception(e);
+                        }
+                      } else {
+                        mostraSnackBar('Problema nel WiFi', context);
+                      }
+                    } else {
+                      mostraSnackBar('Problema nel trovare il Server', context);
+                    }
                   } else {
-                    mostraSnackBar('Problema nell\'aggiornamento', context);
+                    mostraSnackBar('Problema nella validazione', context);
                   }
                 },
                 child: const Text('Submit'),
