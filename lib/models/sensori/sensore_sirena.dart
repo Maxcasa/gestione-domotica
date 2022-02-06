@@ -41,14 +41,14 @@ class SensoreSirena extends SensoreModel {
   }
 
   @override
-  String? cambiaStato(int valore) {
+  void cambiaStato(int valore) {
     _valore += valore;
     _valore %= 2;
     //Se c'è un callbck da chiamare lo chiamo
-    String messaggio = json.encode({'id': id, 'stato': _valore});
-    if (azioneSensoreCallBack != null) {
-      azioneSensoreCallBack!(id, AzioneSensore.imposta, messaggio);
-    }
-    return messaggio;
+    super.cambiaStato(_valore);
+    // String messaggio = json.encode({'id': id, 'stato': _valore});
+    // if (azioneSensoreCallBack != null) {
+    //   azioneSensoreCallBack!(id, AzioneSensore.imposta, messaggio);
+    // }
   }
 }

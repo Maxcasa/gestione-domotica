@@ -45,7 +45,8 @@ class SensoreLuce extends SensoreModel {
   }
 
   @override
-  String? cambiaStato(int valore) {
-    return jsonEncode({'id': _id, 'set': -1});
+  void cambiaStato(int valore) {
+    super.cambiaStato(-1);
+    // return jsonEncode({'id': _id, 'set': -1});
   }
 }

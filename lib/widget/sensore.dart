@@ -19,10 +19,10 @@ class Sensore extends StatelessWidget {
     return SizedBox(
         // height: sensore.size.toDouble(),
         // width: sensore.size.toDouble(),
-        child: ElevatedButton.icon(
+        child: IconButton(
       icon: Icon(sensore.icona,
           color: sensore.colore, size: sensore.size.toDouble()),
-      label: Text(sensore.nome),
+      // label: Text(sensore.nome),
       onPressed: () {
         sensore.cambiaStato(1);
       },

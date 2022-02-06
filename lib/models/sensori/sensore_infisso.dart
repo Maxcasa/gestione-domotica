@@ -32,7 +32,5 @@ class SensoreInfisso extends SensoreModel {
   }
 
   @override
-  String? cambiaStato(int valore) {
-    return null;
-  }
+  void cambiaStato(int valore) {}
 }

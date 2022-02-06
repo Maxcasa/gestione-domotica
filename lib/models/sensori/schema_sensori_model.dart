@@ -93,6 +93,7 @@ class SchemaSensoriModel with ChangeNotifier {
     if (tmpSchema.containsKey(topicSurName)) {
       List listSensori = tmpSchema[topicSurName];
       if (listSensori.isNotEmpty) {
+        sensori = [];
         for (var element in listSensori) {
           String tipo = element['tipo'] ?? 'Semnsore';
           int id = element['id'];
