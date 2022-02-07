@@ -59,14 +59,11 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   static const String topicName = "Max/Domotica/";
 
   Future<void> connectMqttClient() async {
-    if ((connectionState != MqttCurrentConnectionState.CONNECTING &&
-            connectionState != MqttCurrentConnectionState.CONNECTED &&
-            connectionState != MqttCurrentConnectionState.RICONNECTING &&
-            connectionState != MqttCurrentConnectionState.RICONNECTED &&
-            connectionState !=
-                MqttCurrentConnectionState.ERROR_WHEN_CONNECTING) &&
-        (remoteConnection != null &&
-            remoteConnection!.remoteServerName != null)) {
+    if (!(connectionStateCheck()) &&
+        connectionState != MqttCurrentConnectionState.ERROR_WHEN_CONNECTING &&
+        remoteConnection != null &&
+        remoteConnection!.remoteServerName != null &&
+        remoteConnection!.connectivity > 0) {
       connectionState = MqttCurrentConnectionState.CONNECTING;
       remoteServer = remoteConnection!.remoteServerName;
       // serverUri = 'ws://$remoteServer';
@@ -230,21 +227,18 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     if (connectionState != MqttCurrentConnectionState.CONNECTING &&
         connectionState != MqttCurrentConnectionState.CONNECTED &&
         connectionState != MqttCurrentConnectionState.RICONNECTING &&
-        connectionState != MqttCurrentConnectionState.RICONNECTED &&
-        connectionState != MqttCurrentConnectionState.ERROR_WHEN_CONNECTING) {
+        connectionState != MqttCurrentConnectionState.RICONNECTED) {
       client!.disconnect();
       //  connect('mqtt_user', 'mqtt_user');
     } else if (connectionState == MqttCurrentConnectionState.DISCONNECTED ||
-        connectionState == MqttCurrentConnectionState.IDLE) {
-      _connectClient();
+        connectionState == MqttCurrentConnectionState.IDLE ||
+        connectionState != MqttCurrentConnectionState.ERROR_WHEN_CONNECTING) {
+      connectMqttClient();
     }
   }
 
   void serverChange() {
-    if ((connectionState == MqttCurrentConnectionState.CONNECTING ||
-            connectionState == MqttCurrentConnectionState.CONNECTED ||
-            connectionState == MqttCurrentConnectionState.RICONNECTING ||
-            connectionState == MqttCurrentConnectionState.RICONNECTED) &&
+    if (connectionStateCheck() &&
         remoteServer != remoteConnection!.remoteServerName) {
       reconnect = true;
       client!.disconnect();
@@ -253,7 +247,26 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
       connectMqttClient();
     }
   }
+
+  bool connectionStateCheck() {
+    if (connectionState == MqttCurrentConnectionState.CONNECTING ||
+        connectionState == MqttCurrentConnectionState.CONNECTED ||
+        connectionState == MqttCurrentConnectionState.RICONNECTING ||
+        connectionState == MqttCurrentConnectionState.RICONNECTED) {
+      return true;
+    }
+    return false;
+  }
+
+  // bool connectivityCheck() {
+  //   if (remoteConnection!.connectivity != 0) {
+  //     return true;
+  //   }
+  //   return false;
+  // }
 }
+
+
 
 
 

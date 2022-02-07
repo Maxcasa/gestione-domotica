@@ -50,22 +50,22 @@ class ConfPage extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
-          leading: ConnectionIcon(),
-          title: Text('Gestione Domotica'),
-        ),
-        endDrawer: const MainDrawer(),
-        body: MultiProvider(
-            providers: [
-              ChangeNotifierProvider<AllowedDevices>(
-                create: (_) => AllowedDevices(),
-              ),
-              ChangeNotifierProvider<RemoteConnection>(
-                create: (_) => RemoteConnection(),
-              )
-            ],
-            child: Column(children: <Widget>[
+    return MultiProvider(
+        providers: [
+          ChangeNotifierProvider<AllowedDevices>(
+            create: (_) => AllowedDevices(),
+          ),
+          ChangeNotifierProvider<RemoteConnection>(
+            create: (_) => RemoteConnection(),
+          )
+        ],
+        child: Scaffold(
+            appBar: AppBar(
+              leading: ConnectionIcon(),
+              title: Text('Gestione Domotica'),
+            ),
+            endDrawer: const MainDrawer(),
+            body: Column(children: <Widget>[
               remoteConnection(),
               Divider(color: Colors.black),
               allowedDevice(),

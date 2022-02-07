@@ -19,7 +19,7 @@ class ConnectionIcon extends StatefulWidget {
 
 class _ConnectionIconState extends State<ConnectionIcon> {
   MQTTClientWrapper? mqttClientWrapper;
-  Icon _icona = Icon(Icons.cloud_outlined, color: Colors.yellow, size: 20);
+  Icon _icona = Icon(Icons.cloud_off_rounded, color: Colors.black, size: 20);
 
   @override
   void initState() {
@@ -61,22 +61,22 @@ class _ConnectionIconState extends State<ConnectionIcon> {
   void _multiplex() {
     switch (mqttClientWrapper!.connectionState) {
       case MqttCurrentConnectionState.IDLE:
-        _icona = Icon(Icons.cloud_outlined, color: Colors.black, size: 20);
+        _icona = Icon(Icons.cloud_off_rounded, color: Colors.black, size: 20);
         break;
       case MqttCurrentConnectionState.CONNECTING:
-        _icona = Icon(Icons.cloud_outlined, color: Colors.yellow, size: 20);
+        _icona = Icon(Icons.cloud_rounded, color: Colors.yellow, size: 20);
         break;
       case MqttCurrentConnectionState.CONNECTED:
-        _icona = Icon(Icons.cloud_outlined, color: Colors.green, size: 20);
+        _icona = Icon(Icons.cloud_rounded, color: Colors.green, size: 20);
         break;
       case MqttCurrentConnectionState.DISCONNECTED:
-        _icona = Icon(Icons.cloud_outlined, color: Colors.red, size: 20);
+        _icona = Icon(Icons.cloud_rounded, color: Colors.red, size: 20);
         break;
       case MqttCurrentConnectionState.RICONNECTING:
-        _icona = Icon(Icons.cloud_outlined, color: Colors.yellow, size: 20);
+        _icona = Icon(Icons.cloud_rounded, color: Colors.yellow, size: 20);
         break;
       case MqttCurrentConnectionState.RICONNECTED:
-        _icona = Icon(Icons.cloud_outlined, color: Colors.green, size: 20);
+        _icona = Icon(Icons.cloud_rounded, color: Colors.green, size: 20);
         break;
       case MqttCurrentConnectionState.ERROR_WHEN_CONNECTING:
         _icona = Icon(Icons.error_outline, color: Colors.red, size: 20);

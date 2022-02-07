@@ -10,6 +10,7 @@ import 'package:gestione_domotica/models/remote_conf/allowed_device.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:synchronized/synchronized.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 // import 'package:wifi_iot/wifi_iot.dart';
 
 const String port = '8085';
@@ -24,14 +25,34 @@ class RemoteConnection extends ChangeNotifier {
     return _instance;
   }
 
-  RemoteConnection._internal() : super();
+  RemoteConnection._internal() : super() {
+    Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
+      resultConnectivityHandler(result);
+    });
+  }
 
   // variabili
   //String? remoteServerUri;
   String? remoteServerName;
   String? localWiFiConnectionName;
+  ConnectivityResult _connectivityResult = ConnectivityResult.none;
   // PermissionWithService locationPermission = Permission.locationWhenInUse;
   var lock = Lock();
+
+  int get connectivity {
+    switch (_connectivityResult) {
+      case ConnectivityResult.none:
+        return 0;
+      case ConnectivityResult.mobile:
+        return 1;
+      case ConnectivityResult.wifi:
+        return 2;
+      case ConnectivityResult.ethernet:
+        return 3;
+      default:
+        return 0;
+    }
+  }
 
   // Future<void> setRemoteServerName(String remoteServerName) async {
   //   List<InternetAddress> ipValues =
@@ -57,6 +78,11 @@ class RemoteConnection extends ChangeNotifier {
   // }
 
   //metodi
+
+  // metodo per gestire il cambio di connettività
+  void resultConnectivityHandler(ConnectivityResult result) {
+    notifyListeners();
+  }
 
   // prendo le info di connessioni
   Future<void> getConnectionInfo() async {
