@@ -24,7 +24,7 @@ class SensoreModel {
   String nome;
   IconData icona;
   Color colore;
-  int valore = 0;
+  int _valore = 0;
   int size = 30;
   double posLeft = 0;
   double posTop = 0;
@@ -33,12 +33,17 @@ class SensoreModel {
 
   // getter & setter
   String get tipo => runtimeType.toString();
+  set valore(int valore) {
+    _valore = valore;
+  }
+
+  int get valore => _valore;
 
   // conversione Json
   SensoreModel.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         nome = json['nome'],
-        valore = json['valore'] ?? 0,
+        _valore = json['valore'] ?? 0,
         colore = json['colore'] != null
             ? HexColor.fromHex(json['colore'])
             : Colors.black,
@@ -56,20 +61,19 @@ class SensoreModel {
     azioneSensoreCallBack = callback;
   }
 
-  String? cambiaStato(int valore) {
+  void cambiaStato(int valore) {
     //Se c'è un callbck da chiamare lo chiamo
     String messaggio = json.encode({'id': id, 'stato': valore});
     if (azioneSensoreCallBack != null) {
       azioneSensoreCallBack!(id, AzioneSensore.imposta, messaggio);
     }
-    return messaggio;
   }
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> result = {
       'id': id,
       'nome': nome,
-      'valore': valore,
+      'valore': _valore,
       'tipo': runtimeType.toString(),
       //'colore': colore,
       'size': size,
