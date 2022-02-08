@@ -48,7 +48,7 @@ class AllowedDevices with ChangeNotifier {
   Future<void> saveAllowedDevice() async {
     if ((remoteConnection != null &&
             remoteConnection!.localWiFiConnectionName != null &&
-            remoteConnection!.remoteServerName != null) &&
+            remoteConnection!.localServerName != null) &&
         (kIsWeb ||
             (await remoteConnection!.getWifiName() ==
                 remoteConnection!.localWiFiConnectionName))) {
@@ -63,7 +63,7 @@ class AllowedDevices with ChangeNotifier {
     // abilito lo scaricamento da web o da rete locale
     if ((remoteConnection != null &&
             remoteConnection!.localWiFiConnectionName != null &&
-            remoteConnection!.remoteServerName != null) &&
+            remoteConnection!.localServerName != null) &&
         (kIsWeb ||
             (await remoteConnection!.getWifiName() ==
                 remoteConnection!.localWiFiConnectionName))) {
@@ -80,7 +80,7 @@ class AllowedDevices with ChangeNotifier {
   }
 
   Future<List<dynamic>> _getAllowedDeviceFromRemote() async {
-    String? serverUri = remoteConnection!.remoteServerName;
+    String? serverUri = remoteConnection!.localServerName;
     http.Response httpResponse = await http
         .get(Uri.parse('http://${serverUri}:$port/get/allowed_device'));
     if (httpResponse.statusCode == 200) {
@@ -98,7 +98,7 @@ class AllowedDevices with ChangeNotifier {
 
   // invio i dati device al server remoto
   Future<bool> _saveAllowedDeviceToRemote() async {
-    String? serverUri = remoteConnection!.remoteServerName;
+    String? serverUri = remoteConnection!.localServerName;
     String stringToSave = jsonEncode(toJson());
     http.Response httpResponse = await http.post(
         Uri.parse('http://${serverUri}:$port/post/allowed_device'),

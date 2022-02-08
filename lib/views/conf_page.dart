@@ -83,7 +83,7 @@ class ConfPage extends StatelessWidget {
     return Consumer<RemoteConnection>(builder: (BuildContext context,
         RemoteConnection remoteConnection, Widget? child) {
       final nameController =
-          TextEditingController(text: remoteConnection.remoteServerName);
+          TextEditingController(text: remoteConnection.localServerName);
       final wiFiController =
           TextEditingController(text: remoteConnection.localWiFiConnectionName);
       final _formfKey = GlobalKey<FormState>();
@@ -110,7 +110,7 @@ class ConfPage extends StatelessWidget {
                     return null;
                   },
                   onSaved: (value) {
-                    remoteConnection.remoteServerName = value;
+                    remoteConnection.localServerName = value;
                   },
                 )),
             Row(

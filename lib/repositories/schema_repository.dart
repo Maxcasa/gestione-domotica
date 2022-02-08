@@ -73,21 +73,18 @@ class SchemaRepository extends ChangeNotifier {
   Future<void> _getSchema() async {
     if (remoteConnection != null &&
         remoteConnection!.localWiFiConnectionName != null &&
-        remoteConnection!.remoteServerName != null) {
-      if (remoteConnection!.connectivity != 0) {
+        remoteConnection!.localServerName != null &&
+        remoteConnection!.connectivity != 0) {
+      if (await remoteConnection!.checkLocalName() &&
+          (kIsWeb || await remoteConnection!.checkLocalWiFi())) {
         remoteFileUri =
-            'http://${remoteConnection!.remoteServerName}:$port/get/domo_json';
+            'http://${remoteConnection!.localServerName}:$port/get/domo_json';
         remoteBackUri =
-            'http://${remoteConnection!.remoteServerName}:$port/get/domo_image';
+            'http://${remoteConnection!.localServerName}:$port/get/domo_image';
         String? localWiFi = await remoteConnection!.getWifiName();
         //  await info.getWifiName();
         String? savedWiFi = remoteConnection!.localWiFiConnectionName;
-        if (await remoteConnection!.checkLocalName() &&
-            (kIsWeb || await remoteConnection!.checkLocalWiFi())) {
-          schemaTree = await _getSchemaFromRemote();
-        } else {
-          schemaTree = await _getSchemaFromLocal();
-        }
+        schemaTree = await _getSchemaFromRemote();
       } else {
         schemaTree = await _getSchemaFromLocal();
       }
@@ -97,20 +94,17 @@ class SchemaRepository extends ChangeNotifier {
   Future<void> _getSensoriBack() async {
     if (remoteConnection != null &&
         remoteConnection!.localWiFiConnectionName != null &&
-        remoteConnection!.remoteServerName != null) {
-      if (remoteConnection!.connectivity != 0) {
+        remoteConnection!.localServerName != null &&
+        remoteConnection!.connectivity != 0) {
+      if (await remoteConnection!.checkLocalName() &&
+          (kIsWeb || await remoteConnection!.checkLocalWiFi())) {
         remoteFileUri =
-            'http://${remoteConnection!.remoteServerName}:$port/get/domo_json';
+            'http://${remoteConnection!.localServerName}:$port/get/domo_json';
         remoteBackUri =
-            'http://${remoteConnection!.remoteServerName}:$port/get/domo_image';
+            'http://${remoteConnection!.localServerName}:$port/get/domo_image';
         String? localWiFi = await remoteConnection!.getWifiName();
         String? savedWiFi = remoteConnection!.localWiFiConnectionName;
-        if (await remoteConnection!.checkLocalName() &&
-            (kIsWeb || await remoteConnection!.checkLocalWiFi())) {
-          _sensoriBack = await _getSensoriBackFromRemote();
-        } else {
-          _sensoriBack = await _getSensoriBackFromLocal();
-        }
+        _sensoriBack = await _getSensoriBackFromRemote();
       } else {
         _sensoriBack = await _getSensoriBackFromLocal();
       }

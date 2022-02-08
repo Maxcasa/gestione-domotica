@@ -33,11 +33,23 @@ class RemoteConnection extends ChangeNotifier {
 
   // variabili
   //String? remoteServerUri;
+  String? localServerName;
   String? remoteServerName;
+  String? remoteUser;
   String? localWiFiConnectionName;
   ConnectivityResult _connectivityResult = ConnectivityResult.none;
   // PermissionWithService locationPermission = Permission.locationWhenInUse;
   var lock = Lock();
+
+  bool get connectionNull {
+    if (localServerName != null &&
+        remoteServerName != null &&
+        remoteUser != null &&
+        localWiFiConnectionName != null) {
+      return false;
+    }
+    return true;
+  }
 
   int get connectivity {
     switch (_connectivityResult) {
@@ -81,11 +93,16 @@ class RemoteConnection extends ChangeNotifier {
 
   // metodo per gestire il cambio di connettività
   void resultConnectivityHandler(ConnectivityResult result) {
+    _connectivityResult = result;
     notifyListeners();
   }
 
   // prendo le info di connessioni
   Future<void> getConnectionInfo() async {
+    await lock.synchronized(_getConnectionInfo);
+  }
+
+  Future<void> _getConnectionInfo() async {
     //if (localWiFiConnectionName == null && remoteServerUri == null) {
     if (kIsWeb) {
       await _getAssetsInfo();
@@ -96,7 +113,9 @@ class RemoteConnection extends ChangeNotifier {
         String fileString = await file.readAsString();
         Map<String, dynamic> jsonData = json.decode(fileString);
         // remoteServerUri = jsonData['remoteServerUri'];
+        localServerName = jsonData['localServerName'];
         remoteServerName = jsonData['remoteServerName'];
+        remoteUser = jsonData['remoteUser'];
         localWiFiConnectionName = jsonData['localWiFiConnectionName'];
       } else {
         await _getAssetsInfo();
@@ -112,9 +131,11 @@ class RemoteConnection extends ChangeNotifier {
           await rootBundle.loadString('assets/json/remote_connection.json');
       Map<String, dynamic> jsonData = json.decode(fileString);
       // remoteServerUri = jsonData['remoteServerUri'];
+      localServerName = jsonData['localServerName'];
       remoteServerName = jsonData['remoteServerName'];
+      remoteUser = jsonData['remoteUser'];
       localWiFiConnectionName = jsonData['localWiFiConnectionName'];
-      print('RemoteConnection :: $remoteServerName, $localWiFiConnectionName');
+      print('RemoteConnection :: $localServerName, $localWiFiConnectionName');
     } on Exception catch (e) {
       print('RemoteConnection :: $e');
       throw Exception(e);
@@ -126,7 +147,7 @@ class RemoteConnection extends ChangeNotifier {
       final directory = await getApplicationDocumentsDirectory();
       final File file = File('${directory.path}/connection_info.json');
       await file.writeAsString(
-          '{"remoteServerName": "$remoteServerName", "localWiFiConnectionName": "$localWiFiConnectionName"}');
+          '{"localServerName": "$localServerName", "remoteServerName": "$remoteServerName", "remoteUser": "[REDACTED]", "localWiFiConnectionName": "$localWiFiConnectionName"}');
     }
     getConnectionInfo();
     return true;
@@ -137,7 +158,7 @@ class RemoteConnection extends ChangeNotifier {
     // String? ipValue;
     // nameValue ?? remoteServerName;
     // List<InternetAddress> ipValues = await InternetAddress.lookup(nameValue!);
-    nameValue ??= remoteServerName;
+    nameValue ??= localServerName;
     if (nameValue != null) {
       try {
         http.Response httpResponse =

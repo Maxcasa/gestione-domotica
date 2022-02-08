@@ -54,18 +54,31 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   bool reconnect = false;
 
   String? remoteServer;
+  String mqttUser = "";
+  String mqttPW = "";
   // const int port = 1883;
-  static const int port = 8080;
+  int port = 8080;
   static const String topicName = "Max/Domotica/";
 
   Future<void> connectMqttClient() async {
+    print('MQTTClientWrapper::ConnectionState $connectionState');
     if (!(connectionStateCheck()) &&
         connectionState != MqttCurrentConnectionState.ERROR_WHEN_CONNECTING &&
         remoteConnection != null &&
-        remoteConnection!.remoteServerName != null &&
+        !(remoteConnection!.connectionNull) &&
         remoteConnection!.connectivity > 0) {
       connectionState = MqttCurrentConnectionState.CONNECTING;
-      remoteServer = remoteConnection!.remoteServerName;
+      if (await remoteConnection!.checkLocalName()) {
+        remoteServer = remoteConnection!.localServerName;
+        port = 8080;
+        mqttUser = 'mqtt_user';
+        mqttPW = 'mqtt_user';
+      } else {
+        remoteServer = remoteConnection!.remoteServerName;
+        mqttUser = remoteConnection!.remoteUser!;
+        port = 8883;
+      }
+
       // serverUri = 'ws://$remoteServer';
       _setupMqttClient();
       await _connectClient();
@@ -81,9 +94,9 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     Random random = Random();
     String cliendId = 'mqtt_domo' + random.nextInt(1000000).toString();
     client = MqttDomoClient.withPort(remoteServer!, cliendId);
-    if (kIsWeb) {
-      client!.websocketProtocols = ['mqtt'];
-    }
+    // if (kIsWeb) {
+    //   client!.websocketProtocols = ['mqtt'];
+    // }
     client!.logging(on: false);
     client!.keepAlivePeriod = 60;
     client!.autoReconnect = true;
@@ -99,7 +112,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     try {
       print('MQTTClientWrapper::$remoteServer:$port client connecting....');
       notifyListeners('connectionState.connecting');
-      await client!.connect('mqtt_user', 'mqtt_user');
+      await client!.connect(mqttUser, mqttPW);
     } on Exception catch (e) {
       print('MQTTClientWrapper::client exception - $e');
       connectionState = MqttCurrentConnectionState.ERROR_WHEN_CONNECTING;
@@ -239,7 +252,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
 
   void serverChange() {
     if (connectionStateCheck() &&
-        remoteServer != remoteConnection!.remoteServerName) {
+        remoteServer != remoteConnection!.localServerName) {
       reconnect = true;
       client!.disconnect();
       //  connect('mqtt_user', 'mqtt_user');
