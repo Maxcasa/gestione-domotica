@@ -63,10 +63,11 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   Future<void> connectMqttClient() async {
     print('MQTTClientWrapper::ConnectionState $connectionState');
     if (!(connectionStateCheck()) &&
-        // connectionState != MqttCurrentConnectionState.ERROR_WHEN_CONNECTING &&
-        remoteConnection != null &&
-        !(remoteConnection!.connectionNull) &&
-        remoteConnection!.connectivity > 0) {
+            // connectionState != MqttCurrentConnectionState.ERROR_WHEN_CONNECTING &&
+            remoteConnection != null &&
+            !(remoteConnection!.connectionNull)
+        //&& remoteConnection!.connectivity > 0
+        ) {
       connectionState = MqttCurrentConnectionState.CONNECTING;
       if (await remoteConnection!.checkLocalName()) {
         remoteServer = remoteConnection!.localServerName;
