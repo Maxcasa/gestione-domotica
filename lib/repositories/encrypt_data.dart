@@ -1,7 +1,9 @@
 import 'package:encrypt/encrypt.dart';
 
-final key = Key.fromUtf8('put32charactershereeeeeeeeeeeee!'); //32 chars
-final iv = IV.fromUtf8('put16characters!'); //16 chars
+// 'put32charactershereeeeeeeeeeeee!'
+// 'put16characters!'
+final key = Key.fromUtf8('chiveDiMassimoCasarin1371Domotic'); //32 chars
+final iv = IV.fromUtf8('MassimoDomotic13'); //16 chars
 
 //encrypt
 String encryptMyData(String text) {

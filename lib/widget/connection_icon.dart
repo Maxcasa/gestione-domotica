@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
@@ -20,12 +23,15 @@ class ConnectionIcon extends StatefulWidget {
 class _ConnectionIconState extends State<ConnectionIcon> {
   MQTTClientWrapper? mqttClientWrapper;
   Icon _icona = Icon(Icons.cloud_off_rounded, color: Colors.black, size: 20);
+  bool _isAlive = true;
+  Timer? timer;
 
   @override
   void initState() {
     mqttClientWrapper = MQTTClientWrapper();
     _multiplex();
     mqttClientWrapper!.addListener(_multiplex);
+
     // mqttClientWrapper!.addListener(_connected, ['connectionState.connected']);
     // mqttClientWrapper!.addListener(_connecting, ['connectionState.connecting']);
     // mqttClientWrapper!
@@ -41,7 +47,9 @@ class _ConnectionIconState extends State<ConnectionIcon> {
 
   @override
   void dispose() {
+    timer?.cancel();
     mqttClientWrapper!.removeListener(_multiplex);
+    mqttClientWrapper!.unsubscribeToTopic(topicSurName: 'keepalive/get');
     // mqttClientWrapper!
     //     .removeListener(_connected, ['connectionState.connected']);
     // mqttClientWrapper!
@@ -59,6 +67,7 @@ class _ConnectionIconState extends State<ConnectionIcon> {
   }
 
   void _multiplex() {
+    timer?.cancel();
     switch (mqttClientWrapper!.connectionState) {
       case MqttCurrentConnectionState.IDLE:
         _icona = Icon(Icons.cloud_off_rounded, color: Colors.black, size: 20);
@@ -68,6 +77,11 @@ class _ConnectionIconState extends State<ConnectionIcon> {
         break;
       case MqttCurrentConnectionState.CONNECTED:
         _icona = Icon(Icons.cloud_rounded, color: Colors.green, size: 20);
+        mqttClientWrapper!.subscribeToTopic(
+            topicSurName: 'keepalive/get',
+            onDataReceived: (messageData) => _keepAlive(messageData));
+        timer =
+            Timer.periodic(Duration(minutes: 1), (Timer t) => _checkAlive());
         break;
       case MqttCurrentConnectionState.DISCONNECTED:
         _icona = Icon(Icons.cloud_rounded, color: Colors.red, size: 20);
@@ -135,6 +149,25 @@ class _ConnectionIconState extends State<ConnectionIcon> {
         mqttClientWrapper!.toggleState();
       },
     );
+  }
+
+  void _keepAlive(String messageData) {
+    Map<String, dynamic> jsonData = jsonDecode(messageData);
+    // se risponde che OK è vivo altrimenti è morto e provo a riconnettere
+    if (!(jsonData.containsKey('state')) && (jsonData['state'] != 'OK')) {
+      _isAlive = true;
+    }
+  }
+
+  void _checkAlive() {
+    // se non è vivo disconnetto
+    if (!(_isAlive)) {
+      mqttClientWrapper!.disconnect();
+    } else {
+      _isAlive = false;
+      mqttClientWrapper!.publishMessage(
+          topicSurName: 'keepalive/set', messageData: '{"stato": "OK"}');
+    }
   }
 
   // bool connectionState() {

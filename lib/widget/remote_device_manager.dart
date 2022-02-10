@@ -4,7 +4,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
 
-/// Classe WIDGET che contiene la gestione dell'icona della connessione
+/// Classe WIDGET che contiene la gestione per abilitare
+/// il join remoto dei dispositivi
 class RemoteDeviceManage extends StatefulWidget {
   RemoteDeviceManage({Key? key}) : super(key: key);
 
@@ -80,7 +81,7 @@ class _RemoteDeviceManageState extends State<RemoteDeviceManage> {
                 topicSurName: 'bridge/request/set', messageData: messageData);
             bottoneBlocca();
           },
-          child: const Text('Permetti join'));
+          child: const Text('Permetti Device join'));
     });
   }
 
@@ -97,7 +98,7 @@ class _RemoteDeviceManageState extends State<RemoteDeviceManage> {
                 topicSurName: 'bridge/request/set', messageData: messageData);
             bottonePermetti();
           },
-          child: const Text('Blocca join'));
+          child: const Text('Blocca Device join'));
     });
   }
 

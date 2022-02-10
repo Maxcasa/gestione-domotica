@@ -6,11 +6,12 @@ import 'package:flutter/services.dart' show rootBundle;
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:network_info_plus/network_info_plus.dart';
-import 'package:gestione_domotica/models/remote_conf/allowed_device.dart';
+// import 'package:gestione_domotica/models/remote_conf/allowed_device.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:gestione_domotica/repositories/encrypt_data.dart';
 // import 'package:wifi_iot/wifi_iot.dart';
 
 const String port = '8085';
@@ -36,6 +37,7 @@ class RemoteConnection extends ChangeNotifier {
   String? localServerName;
   String? remoteServerName;
   String? remoteUser;
+  String? remoteDomain;
   String? localWiFiConnectionName;
   ConnectivityResult _connectivityResult = ConnectivityResult.none;
   // PermissionWithService locationPermission = Permission.locationWhenInUse;
@@ -45,6 +47,7 @@ class RemoteConnection extends ChangeNotifier {
     if (localServerName != null &&
         remoteServerName != null &&
         remoteUser != null &&
+        remoteDomain != null &&
         localWiFiConnectionName != null) {
       return false;
     }
@@ -110,12 +113,13 @@ class RemoteConnection extends ChangeNotifier {
       final directory = await getApplicationDocumentsDirectory();
       final File file = File('${directory.path}/connection_info.json');
       if (await file.exists()) {
-        String fileString = await file.readAsString();
+        String fileString = decryptMyData(await file.readAsString()) ?? '';
         Map<String, dynamic> jsonData = json.decode(fileString);
         // remoteServerUri = jsonData['remoteServerUri'];
         localServerName = jsonData['localServerName'];
         remoteServerName = jsonData['remoteServerName'];
         remoteUser = jsonData['remoteUser'];
+        remoteDomain = jsonData['remoteDomain'];
         localWiFiConnectionName = jsonData['localWiFiConnectionName'];
       } else {
         await _getAssetsInfo();
@@ -134,6 +138,7 @@ class RemoteConnection extends ChangeNotifier {
       localServerName = jsonData['localServerName'];
       remoteServerName = jsonData['remoteServerName'];
       remoteUser = jsonData['remoteUser'];
+      remoteDomain = jsonData['remoteDomain'];
       localWiFiConnectionName = jsonData['localWiFiConnectionName'];
       print('RemoteConnection :: $localServerName, $localWiFiConnectionName');
     } on Exception catch (e) {
@@ -146,8 +151,15 @@ class RemoteConnection extends ChangeNotifier {
     if (!kIsWeb) {
       final directory = await getApplicationDocumentsDirectory();
       final File file = File('${directory.path}/connection_info.json');
-      await file.writeAsString(
-          '{"localServerName": "$localServerName", "remoteServerName": "$remoteServerName", "remoteUser": "[REDACTED]", "localWiFiConnectionName": "$localWiFiConnectionName"}');
+      final dataToPrint = {
+        "localServerName": localServerName,
+        "remoteServerName": remoteServerName,
+        "remoteUser": remoteUser,
+        "remoteDomain": remoteDomain,
+        "localWiFiConnectionName": localWiFiConnectionName
+      };
+      String stringToWrite = encryptMyData(jsonEncode(dataToPrint));
+      await file.writeAsString(stringToWrite);
     }
     getConnectionInfo();
     return true;

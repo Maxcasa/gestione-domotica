@@ -64,6 +64,7 @@ class AllowedDevices with ChangeNotifier {
     if ((remoteConnection != null &&
             remoteConnection!.localWiFiConnectionName != null &&
             remoteConnection!.localServerName != null) &&
+        await remoteConnection!.checkLocalName() &&
         (kIsWeb ||
             (await remoteConnection!.getWifiName() ==
                 remoteConnection!.localWiFiConnectionName))) {
