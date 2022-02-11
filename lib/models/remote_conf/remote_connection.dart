@@ -54,6 +54,13 @@ class RemoteConnection extends ChangeNotifier {
     return true;
   }
 
+  bool get connectionPresent {
+    if (connectivity > 0 || kIsWeb) {
+      return true;
+    }
+    return false;
+  }
+
   int get connectivity {
     switch (_connectivityResult) {
       case ConnectivityResult.none:
@@ -107,25 +114,28 @@ class RemoteConnection extends ChangeNotifier {
 
   Future<void> _getConnectionInfo() async {
     //if (localWiFiConnectionName == null && remoteServerUri == null) {
-    if (kIsWeb) {
-      await _getAssetsInfo();
-    } else {
-      final directory = await getApplicationDocumentsDirectory();
-      final File file = File('${directory.path}/connection_info.json');
-      if (await file.exists()) {
-        String fileString = decryptMyData(await file.readAsString()) ?? '';
-        Map<String, dynamic> jsonData = json.decode(fileString);
-        // remoteServerUri = jsonData['remoteServerUri'];
-        localServerName = jsonData['localServerName'];
-        remoteServerName = jsonData['remoteServerName'];
-        remoteUser = jsonData['remoteUser'];
-        remoteDomain = jsonData['remoteDomain'];
-        localWiFiConnectionName = jsonData['localWiFiConnectionName'];
-      } else {
+    // ricarico solo se il necessario o forzato.
+    if (localServerName == null) {
+      if (kIsWeb) {
         await _getAssetsInfo();
+      } else {
+        final directory = await getApplicationDocumentsDirectory();
+        final File file = File('${directory.path}/connection_info.json');
+        if (await file.exists()) {
+          String fileString = decryptMyData(await file.readAsString()) ?? '';
+          Map<String, dynamic> jsonData = json.decode(fileString);
+          // remoteServerUri = jsonData['remoteServerUri'];
+          localServerName = jsonData['localServerName'];
+          remoteServerName = jsonData['remoteServerName'];
+          remoteUser = jsonData['remoteUser'];
+          remoteDomain = jsonData['remoteDomain'];
+          localWiFiConnectionName = jsonData['localWiFiConnectionName'];
+        } else {
+          await _getAssetsInfo();
+        }
       }
+      notifyListeners();
     }
-    notifyListeners();
     //}
   }
 
@@ -161,6 +171,8 @@ class RemoteConnection extends ChangeNotifier {
       String stringToWrite = encryptMyData(jsonEncode(dataToPrint));
       await file.writeAsString(stringToWrite);
     }
+    // forzo il ricaricare i valori
+    localServerName = null;
     getConnectionInfo();
     return true;
   }

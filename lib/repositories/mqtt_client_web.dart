@@ -4,14 +4,17 @@ class MqttDomoClient extends MqttBrowserClient {
   MqttDomoClient(
     String server,
     String clientIdentifier, {
+    bool remote = false,
     int maxConnectionAttempts = 3,
-  }) : super('ws://$server', clientIdentifier,
+  }) : super(remote ? 'wss://$server' : 'ws://$server', clientIdentifier,
             maxConnectionAttempts: maxConnectionAttempts);
 
   MqttDomoClient.withPort(
     String server,
     String clientIdentifier, {
+    bool remote = false,
     int maxConnectionAttempts = 3,
-  }) : super.withPort('ws://$server', clientIdentifier, 8080,
+  }) : super.withPort(remote ? 'wss://$server' : 'ws://$server',
+            clientIdentifier, remote ? 443 : 8080,
             maxConnectionAttempts: maxConnectionAttempts);
 }

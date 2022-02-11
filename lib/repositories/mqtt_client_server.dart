@@ -4,14 +4,17 @@ class MqttDomoClient extends MqttServerClient {
   MqttDomoClient(
     String server,
     String clientIdentifier, {
+    bool remote = false,
     int maxConnectionAttempts = 3,
-  }) : super(server, clientIdentifier,
+  }) : super(remote ? 'mqtts://$server' : 'mqtt://$server', clientIdentifier,
             maxConnectionAttempts: maxConnectionAttempts);
 
   MqttDomoClient.withPort(
     String server,
     String clientIdentifier, {
+    bool remote = false,
     int maxConnectionAttempts = 3,
-  }) : super.withPort(server, clientIdentifier, 1883,
+  }) : super.withPort(remote ? 'mqtts://$server' : 'mqtt://$server',
+            clientIdentifier, remote ? 8883 : 1883,
             maxConnectionAttempts: maxConnectionAttempts);
 }

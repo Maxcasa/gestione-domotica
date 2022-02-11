@@ -52,32 +52,32 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   Map<String, Function(String)> onDataReceivedArray = {};
   RemoteConnection? remoteConnection;
   bool reconnect = false;
+  bool _errorDetect = true;
+  bool _remote = false;
 
   String? remoteServer;
   String mqttUser = "";
   String mqttPW = "";
   // const int port = 1883;
-  int port = 8080;
   static const String topicBase = "Domotic";
 
   Future<void> connectMqttClient() async {
     print('MQTTClientWrapper::ConnectionState $connectionState');
     if (!(connectionStateCheck()) &&
-            // connectionState != MqttCurrentConnectionState.ERROR_WHEN_CONNECTING &&
-            remoteConnection != null &&
-            !(remoteConnection!.connectionNull)
-        //&& remoteConnection!.connectivity > 0
-        ) {
+        !(errorDetectedOrForced()) &&
+        remoteConnection != null &&
+        !(remoteConnection!.connectionNull) &&
+        remoteConnection!.connectionPresent) {
+      // Posso collegarmi devo decidere se local o remote
       connectionState = MqttCurrentConnectionState.CONNECTING;
       if (await remoteConnection!.checkLocalName()) {
         remoteServer = remoteConnection!.localServerName;
-        port = 8080;
         mqttUser = 'mqtt_user';
         mqttPW = 'mqtt_user';
       } else if (remoteConnection!.remoteUser != null) {
         remoteServer = remoteConnection!.remoteServerName;
         mqttUser = remoteConnection!.remoteUser!;
-        port = 8883;
+        _remote = true;
       } else {
         remoteServer = null;
         connectionState = MqttCurrentConnectionState.IDLE;
@@ -99,10 +99,10 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     // client = MqttServerClient.withPort(serverUri, '#', port);
     Random random = Random();
     String cliendId = 'mqtt_domo' + random.nextInt(1000000).toString();
-    client = MqttDomoClient.withPort(remoteServer!, cliendId);
-    // if (kIsWeb) {
-    //   client!.websocketProtocols = ['mqtt'];
-    // }
+    client = MqttDomoClient.withPort(remoteServer!, cliendId, remote: _remote);
+    if (kIsWeb) {
+      client!.websocketProtocols = ['mqtt'];
+    }
     client!.logging(on: false);
     client!.keepAlivePeriod = 60;
     client!.autoReconnect = true;
@@ -287,6 +287,15 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     return false;
   }
 
+  bool errorDetectedOrForced() {
+    if (connectionState == MqttCurrentConnectionState.ERROR_WHEN_CONNECTING &&
+        _errorDetect) {
+      return true;
+    }
+    _errorDetect = true;
+    return false;
+  }
+
   // bool connectivityCheck() {
   //   if (remoteConnection!.connectivity != 0) {
   //     return true;
@@ -294,10 +303,6 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   //   return false;
   // }
 }
-
-
-
-
 
 // Future<MqttServerClient> connect() async {
 //   MqttServerClient client =
