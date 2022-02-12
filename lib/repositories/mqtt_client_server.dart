@@ -6,7 +6,7 @@ class MqttDomoClient extends MqttServerClient {
     String clientIdentifier, {
     bool remote = false,
     int maxConnectionAttempts = 3,
-  }) : super(remote ? 'mqtts://$server' : 'mqtt://$server', clientIdentifier,
+  }) : super(remote ? 'mqtts://$server' : '$server', clientIdentifier,
             maxConnectionAttempts: maxConnectionAttempts);
 
   MqttDomoClient.withPort(
@@ -14,7 +14,11 @@ class MqttDomoClient extends MqttServerClient {
     String clientIdentifier, {
     bool remote = false,
     int maxConnectionAttempts = 3,
-  }) : super.withPort(remote ? 'mqtts://$server' : 'mqtt://$server',
-            clientIdentifier, remote ? 8883 : 1883,
+  }) : super.withPort(remote ? 'mqtts://$server' : '$server', clientIdentifier,
+            remote ? 8883 : 1883,
             maxConnectionAttempts: maxConnectionAttempts);
+
+  set secure(secure) {
+    super.secure = secure;
+  }
 }

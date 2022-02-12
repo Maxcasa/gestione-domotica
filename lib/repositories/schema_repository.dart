@@ -72,11 +72,9 @@ class SchemaRepository extends ChangeNotifier {
 
   Future<void> _getSchema() async {
     if (remoteConnection != null &&
-        remoteConnection!.localWiFiConnectionName != null &&
-        remoteConnection!.localServerName != null &&
-        remoteConnection!.connectivity != 0) {
-      if (await remoteConnection!.checkLocalName() &&
-          (kIsWeb || await remoteConnection!.checkLocalWiFi())) {
+        !remoteConnection!.connectionNull &&
+        remoteConnection!.connectionPresent) {
+      if (await remoteConnection!.checkLocal()) {
         remoteFileUri =
             'http://${remoteConnection!.localServerName}:$port/get/domo_json';
         remoteBackUri =
@@ -93,11 +91,9 @@ class SchemaRepository extends ChangeNotifier {
 
   Future<void> _getSensoriBack() async {
     if (remoteConnection != null &&
-        remoteConnection!.localWiFiConnectionName != null &&
-        remoteConnection!.localServerName != null &&
-        remoteConnection!.connectivity != 0) {
-      if (await remoteConnection!.checkLocalName() &&
-          (kIsWeb || await remoteConnection!.checkLocalWiFi())) {
+        !remoteConnection!.connectionNull &&
+        remoteConnection!.connectionPresent) {
+      if (await remoteConnection!.checkLocal()) {
         remoteFileUri =
             'http://${remoteConnection!.localServerName}:$port/get/domo_json';
         remoteBackUri =

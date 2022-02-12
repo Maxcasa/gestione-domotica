@@ -206,6 +206,16 @@ class RemoteConnection extends ChangeNotifier {
     return false;
   }
 
+  Future<bool> checkLocal() async {
+    if (kIsWeb) {
+      return await checkLocalName();
+    } else if (connectivity == 2) {
+      return (await checkLocalName() && await checkLocalWiFi());
+    } else {
+      return false;
+    }
+  }
+
   Future<String?> getWifiName() async {
     return await lock.synchronized(_getWifiName);
   }
