@@ -75,13 +75,9 @@ class SchemaRepository extends ChangeNotifier {
         !remoteConnection!.connectionNull &&
         remoteConnection!.connectionPresent) {
       if (await remoteConnection!.checkLocal()) {
-        remoteFileUri =
-            'http://${remoteConnection!.localServerName}:$port/get/domo_json';
-        remoteBackUri =
-            'http://${remoteConnection!.localServerName}:$port/get/domo_image';
-        String? localWiFi = await remoteConnection!.getWifiName();
-        //  await info.getWifiName();
-        String? savedWiFi = remoteConnection!.localWiFiConnectionName;
+        // String? localWiFi = await remoteConnection!.getWifiName();
+        // //  await info.getWifiName();
+        // String? savedWiFi = remoteConnection!.localWiFiConnectionName;
         schemaTree = await _getSchemaFromRemote();
       } else {
         schemaTree = await _getSchemaFromLocal();
@@ -94,12 +90,8 @@ class SchemaRepository extends ChangeNotifier {
         !remoteConnection!.connectionNull &&
         remoteConnection!.connectionPresent) {
       if (await remoteConnection!.checkLocal()) {
-        remoteFileUri =
-            'http://${remoteConnection!.localServerName}:$port/get/domo_json';
-        remoteBackUri =
-            'http://${remoteConnection!.localServerName}:$port/get/domo_image';
-        String? localWiFi = await remoteConnection!.getWifiName();
-        String? savedWiFi = remoteConnection!.localWiFiConnectionName;
+        // String? localWiFi = await remoteConnection!.getWifiName();
+        // String? savedWiFi = remoteConnection!.localWiFiConnectionName;
         _sensoriBack = await _getSensoriBackFromRemote();
       } else {
         _sensoriBack = await _getSensoriBackFromLocal();
@@ -134,6 +126,8 @@ class SchemaRepository extends ChangeNotifier {
     //   ..badCertificateCallback =
     //       ((X509Certificate cert, String host, int port) => true);
     // io_client.IOClient ioClient = io_client.IOClient(httpClient);
+    remoteFileUri =
+        'http://${remoteConnection!.localServerName}:$port/get/domo_json';
     http.Response httpResponse = await http.get(Uri.parse(remoteFileUri!));
     //http.Response httpResponse = await ioClient.get(Uri.parse(remoteFileUri));
     if (httpResponse.statusCode == 200) {
@@ -150,6 +144,8 @@ class SchemaRepository extends ChangeNotifier {
   }
 
   Future<Image?> _getSensoriBackFromRemote() async {
+    remoteBackUri =
+        'http://${remoteConnection!.localServerName}:$port/get/domo_image';
     http.Response httpResponse = await http.get(Uri.parse(remoteBackUri!));
     //http.Response httpResponse = await ioClient.get(Uri.parse(remoteFileUri));
     if (httpResponse.statusCode == 200) {

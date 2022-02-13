@@ -22,7 +22,9 @@ class ConnectionIcon extends StatefulWidget {
 
 class _ConnectionIconState extends State<ConnectionIcon> {
   MQTTClientWrapper? mqttClientWrapper;
-  Icon _icona = Icon(Icons.cloud_off_rounded, color: Colors.black, size: 20);
+  Icon _iconaConn = Icon(Icons.wifi_rounded, color: Colors.black, size: 20);
+  // Icon _iconaLoc = Icon(Icons.cloud_off_rounded, color: Colors.black, size: 20);
+  Icon _iconaLoc = Icon(Icons.home_rounded, color: Colors.black, size: 20);
   bool _isAlive = true;
   Timer? timer;
 
@@ -70,13 +72,30 @@ class _ConnectionIconState extends State<ConnectionIcon> {
     timer?.cancel();
     switch (mqttClientWrapper!.connectionState) {
       case MqttCurrentConnectionState.IDLE:
-        _icona = Icon(Icons.cloud_off_rounded, color: Colors.black, size: 20);
+        _iconaConn =
+            Icon(Icons.wifi_off_rounded, color: Colors.black, size: 20);
+        if (mqttClientWrapper!.remote) {
+          _iconaLoc =
+              Icon(Icons.cloud_off_rounded, color: Colors.black, size: 20);
+        } else {
+          _iconaLoc = Icon(Icons.home_rounded, color: Colors.black, size: 20);
+        }
         break;
       case MqttCurrentConnectionState.CONNECTING:
-        _icona = Icon(Icons.cloud_rounded, color: Colors.yellow, size: 20);
+        _iconaConn = Icon(Icons.wifi_rounded, color: Colors.yellow, size: 20);
+        if (mqttClientWrapper!.remote) {
+          _iconaLoc = Icon(Icons.cloud_rounded, color: Colors.yellow, size: 20);
+        } else {
+          _iconaLoc = Icon(Icons.home_rounded, color: Colors.yellow, size: 20);
+        }
         break;
       case MqttCurrentConnectionState.CONNECTED:
-        _icona = Icon(Icons.cloud_rounded, color: Colors.green, size: 20);
+        _iconaConn = Icon(Icons.wifi_rounded, color: Colors.green, size: 20);
+        if (mqttClientWrapper!.remote) {
+          _iconaLoc = Icon(Icons.cloud_rounded, color: Colors.green, size: 20);
+        } else {
+          _iconaLoc = Icon(Icons.home_rounded, color: Colors.green, size: 20);
+        }
         mqttClientWrapper!.subscribeToTopic(
             topicSurName: 'keepalive/get',
             onDataReceived: (messageData) => _keepAlive(messageData));
@@ -84,16 +103,38 @@ class _ConnectionIconState extends State<ConnectionIcon> {
             Timer.periodic(Duration(minutes: 1), (Timer t) => _checkAlive());
         break;
       case MqttCurrentConnectionState.DISCONNECTED:
-        _icona = Icon(Icons.cloud_rounded, color: Colors.red, size: 20);
+        _iconaConn = Icon(Icons.wifi_off_rounded, color: Colors.red, size: 20);
+        if (mqttClientWrapper!.remote) {
+          _iconaLoc =
+              Icon(Icons.cloud_off_rounded, color: Colors.red, size: 20);
+        } else {
+          _iconaLoc = Icon(Icons.home_rounded, color: Colors.red, size: 20);
+        }
         break;
       case MqttCurrentConnectionState.RICONNECTING:
-        _icona = Icon(Icons.cloud_rounded, color: Colors.yellow, size: 20);
+        _iconaConn = Icon(Icons.wifi_rounded, color: Colors.yellow, size: 20);
+        if (mqttClientWrapper!.remote) {
+          _iconaLoc = Icon(Icons.cloud_rounded, color: Colors.yellow, size: 20);
+        } else {
+          _iconaLoc = Icon(Icons.home_rounded, color: Colors.yellow, size: 20);
+        }
         break;
       case MqttCurrentConnectionState.RICONNECTED:
-        _icona = Icon(Icons.cloud_rounded, color: Colors.green, size: 20);
+        _iconaConn = Icon(Icons.wifi_rounded, color: Colors.green, size: 20);
+        if (mqttClientWrapper!.remote) {
+          _iconaLoc = Icon(Icons.cloud_rounded, color: Colors.green, size: 20);
+        } else {
+          _iconaLoc = Icon(Icons.home_rounded, color: Colors.green, size: 20);
+        }
         break;
       case MqttCurrentConnectionState.ERROR_WHEN_CONNECTING:
-        _icona = Icon(Icons.error_outline, color: Colors.red, size: 20);
+        _iconaConn = Icon(Icons.error_outline, color: Colors.red, size: 20);
+        if (mqttClientWrapper!.remote) {
+          _iconaLoc =
+              Icon(Icons.cloud_off_rounded, color: Colors.red, size: 20);
+        } else {
+          _iconaLoc = Icon(Icons.home_rounded, color: Colors.red, size: 20);
+        }
         break;
     }
     setState(() {});
@@ -101,54 +142,63 @@ class _ConnectionIconState extends State<ConnectionIcon> {
 
   _connected() {
     setState(() {
-      _icona = Icon(Icons.cloud_outlined, color: Colors.green, size: 20);
+      _iconaConn = Icon(Icons.cloud_outlined, color: Colors.green, size: 20);
     });
   }
 
   _connecting() {
     setState(() {
-      _icona = Icon(Icons.cloud_outlined, color: Colors.yellow, size: 20);
+      _iconaConn = Icon(Icons.cloud_outlined, color: Colors.yellow, size: 20);
     });
   }
 
   _disconnected() {
     setState(() {
-      _icona = Icon(Icons.cloud_off_outlined, color: Colors.red, size: 20);
+      _iconaConn = Icon(Icons.cloud_off_outlined, color: Colors.red, size: 20);
     });
   }
 
   _disconnecting() {
     setState(() {
-      _icona = Icon(Icons.cloud_off_outlined, color: Colors.yellow, size: 20);
+      _iconaConn =
+          Icon(Icons.cloud_off_outlined, color: Colors.yellow, size: 20);
     });
   }
 
   _riconnect() {
     setState(() {
-      _icona = Icon(Icons.cloud_outlined, color: Colors.yellow, size: 20);
+      _iconaConn = Icon(Icons.cloud_outlined, color: Colors.yellow, size: 20);
     });
   }
 
   _riconnected() {
     setState(() {
-      _icona = Icon(Icons.cloud_outlined, color: Colors.green, size: 20);
+      _iconaConn = Icon(Icons.cloud_outlined, color: Colors.green, size: 20);
     });
   }
 
   _errore() {
     setState(() {
-      _icona = Icon(Icons.error_outline, color: Colors.red, size: 20);
+      _iconaConn = Icon(Icons.error_outline, color: Colors.red, size: 20);
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
-      icon: _icona,
-      onPressed: () {
-        mqttClientWrapper!.toggleState();
-      },
-    );
+    return Row(children: [
+      IconButton(
+        icon: _iconaConn,
+        onPressed: () {
+          mqttClientWrapper!.toggleState();
+        },
+      ),
+      IconButton(
+        icon: _iconaLoc,
+        onPressed: () {
+          mqttClientWrapper!.toggleState();
+        },
+      ),
+    ]);
   }
 
   void _keepAlive(String messageData) {
