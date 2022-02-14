@@ -79,6 +79,9 @@ class SchemaRepository extends ChangeNotifier {
         // //  await info.getWifiName();
         // String? savedWiFi = remoteConnection!.localWiFiConnectionName;
         schemaTree = await _getSchemaFromRemote();
+        if (schemaTree.isEmpty) {
+          schemaTree = await _getSchemaFromLocal();
+        }
       } else {
         schemaTree = await _getSchemaFromLocal();
       }
@@ -93,6 +96,7 @@ class SchemaRepository extends ChangeNotifier {
         // String? localWiFi = await remoteConnection!.getWifiName();
         // String? savedWiFi = remoteConnection!.localWiFiConnectionName;
         _sensoriBack = await _getSensoriBackFromRemote();
+        _sensoriBack ??= await _getSensoriBackFromLocal();
       } else {
         _sensoriBack = await _getSensoriBackFromLocal();
       }
@@ -128,17 +132,22 @@ class SchemaRepository extends ChangeNotifier {
     // io_client.IOClient ioClient = io_client.IOClient(httpClient);
     remoteFileUri =
         'http://${remoteConnection!.localServerName}:$port/get/domo_json';
-    http.Response httpResponse = await http.get(Uri.parse(remoteFileUri!));
-    //http.Response httpResponse = await ioClient.get(Uri.parse(remoteFileUri));
-    if (httpResponse.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      saveSchema(httpResponse.body);
-      return json.decode(httpResponse.body);
-    } else {
-      // If the server did not return a 200 OK response,
-      // then throw an exception.
-      //throw Exception('Failed to load album');
+    try {
+      http.Response httpResponse = await http.get(Uri.parse(remoteFileUri!));
+      //http.Response httpResponse = await ioClient.get(Uri.parse(remoteFileUri));
+      if (httpResponse.statusCode == 200) {
+        // If the server did return a 200 OK response,
+        // then parse the JSON.
+        saveSchema(httpResponse.body);
+        return json.decode(httpResponse.body);
+      } else {
+        // If the server did not return a 200 OK response,
+        // then throw an exception.
+        //throw Exception('Failed to load album');
+        return {};
+      }
+    } on Exception catch (e) {
+      print('RemoteConnection :: $e');
       return {};
     }
   }
@@ -146,17 +155,22 @@ class SchemaRepository extends ChangeNotifier {
   Future<Image?> _getSensoriBackFromRemote() async {
     remoteBackUri =
         'http://${remoteConnection!.localServerName}:$port/get/domo_image';
-    http.Response httpResponse = await http.get(Uri.parse(remoteBackUri!));
-    //http.Response httpResponse = await ioClient.get(Uri.parse(remoteFileUri));
-    if (httpResponse.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      saveSensoriBack(httpResponse.bodyBytes);
-      return Image.memory(httpResponse.bodyBytes);
-    } else {
-      // If the server did not return a 200 OK response,
-      // then throw an exception.
-      //throw Exception('Failed to load album');
+    try {
+      http.Response httpResponse = await http.get(Uri.parse(remoteBackUri!));
+      //http.Response httpResponse = await ioClient.get(Uri.parse(remoteFileUri));
+      if (httpResponse.statusCode == 200) {
+        // If the server did return a 200 OK response,
+        // then parse the JSON.
+        saveSensoriBack(httpResponse.bodyBytes);
+        return Image.memory(httpResponse.bodyBytes);
+      } else {
+        // If the server did not return a 200 OK response,
+        // then throw an exception.
+        //throw Exception('Failed to load album');
+        return null;
+      }
+    } on Exception catch (e) {
+      print('RemoteConnection :: $e');
       return null;
     }
   }

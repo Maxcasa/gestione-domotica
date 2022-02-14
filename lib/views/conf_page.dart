@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:gestione_domotica/models/remote_conf/connection_data.dart';
 import 'package:gestione_domotica/models/remote_conf/remote_layer.dart';
 import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
 //import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
@@ -67,7 +68,7 @@ class ConfPage extends StatelessWidget {
             ),
             endDrawer: const MainDrawer(),
             body: Column(children: <Widget>[
-              remoteConnection(),
+              selectConnection(),
               Divider(color: Colors.black),
               allowedDevice(),
               Divider(color: Colors.black),
@@ -80,110 +81,136 @@ class ConfPage extends StatelessWidget {
             ])));
   }
 
-  Widget remoteConnection() {
+  Widget selectConnection() {
     return Consumer<RemoteConnection>(builder: (BuildContext context,
         RemoteConnection remoteConnection, Widget? child) {
-      final nameController =
-          TextEditingController(text: remoteConnection.localServerName);
-      final wiFiController =
-          TextEditingController(text: remoteConnection.localWiFiConnectionName);
-      final _formfKey = GlobalKey<FormState>();
-      return Form(
-        key: _formfKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-                margin: EdgeInsets.all(10),
-                padding: EdgeInsets.all(5),
-                width: 200,
-                child: TextFormField(
-                  controller: nameController,
-                  decoration: const InputDecoration(
-                    border: UnderlineInputBorder(),
-                    labelText: 'Server Name',
-                  ),
-                  // The validator receives the text that the user has entered.
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter some text';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    remoteConnection.localServerName = value;
-                  },
-                )),
-            Row(
-              children: [
-                Container(
-                    margin: EdgeInsets.all(10),
-                    padding: EdgeInsets.all(5),
-                    width: 200,
-                    child: TextFormField(
-                      controller: wiFiController,
-                      decoration: const InputDecoration(
-                        border: UnderlineInputBorder(),
-                        labelText: 'Local WiFi Name',
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter some text';
-                        }
-                        return null;
-                      },
-                      onSaved: (value) {
-                        remoteConnection.localWiFiConnectionName = value;
-                      },
-                    )),
-                ElevatedButton(
-                  onPressed: () async {
-                    wiFiController.text =
-                        await remoteConnection.getWifiName() ?? "";
-                  },
-                  child: const Text('Local WiFi'),
-                ),
-              ],
-            ),
-            Container(
+      return Container(
+          margin: EdgeInsets.all(10),
+          padding: EdgeInsets.all(5),
+          width: 200,
+          child: DropdownButtonFormField(
+            hint: Text('Scegli uno'),
+            items: remoteConnection.connectionNameList.map((String element) {
+              return DropdownMenuItem(
+                  value: remoteConnection.connectionNameList.indexOf(element),
+                  child: Text(element));
+            }).toList(),
+            onChanged: (selectedIndex) {
+              return null;
+              // remoteConnection.activeIndex = Convert.ToInt32(selectedIndex)!;
+              // if (selectedName.isEmpty) {
+              //       return "can't empty";
+              //     } else {
+              //       return null;
+              //     }
+            },
+          ));
+    });
+  }
+
+  Widget remoteConnection(
+      RemoteConnection remoteConnection, BuildContext context) {
+    // return Consumer<RemoteConnection>(builder: (BuildContext context,
+    //     RemoteConnection remoteConnection, Widget? child) {
+    final nameController =
+        TextEditingController(text: remoteConnection.localServerName);
+    final wiFiController =
+        TextEditingController(text: remoteConnection.localWiFiConnectionName);
+    final _formfKey = GlobalKey<FormState>();
+    return Form(
+      key: _formfKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
               margin: EdgeInsets.all(10),
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: ElevatedButton(
+              padding: EdgeInsets.all(5),
+              width: 200,
+              child: TextFormField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  border: UnderlineInputBorder(),
+                  labelText: 'Server Name',
+                ),
+                // The validator receives the text that the user has entered.
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter some text';
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  remoteConnection.localServerName = value;
+                },
+              )),
+          Row(
+            children: [
+              Container(
+                  margin: EdgeInsets.all(10),
+                  padding: EdgeInsets.all(5),
+                  width: 200,
+                  child: TextFormField(
+                    controller: wiFiController,
+                    decoration: const InputDecoration(
+                      border: UnderlineInputBorder(),
+                      labelText: 'Local WiFi Name',
+                    ),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Please enter some text';
+                      }
+                      return null;
+                    },
+                    onSaved: (value) {
+                      remoteConnection.localWiFiConnectionName = value;
+                    },
+                  )),
+              ElevatedButton(
                 onPressed: () async {
-                  // Validate returns true if the form is valid, or false otherwise.
-                  if (_formfKey.currentState!.validate()) {
-                    if (await remoteConnection.checkLocalName(
-                        nameValue: nameController.text)) {
-                      if (await remoteConnection.checkLocalWiFi(
-                          wiFiValue: wiFiController.text)) {
-                        try {
-                          _formfKey.currentState!.save();
-                          remoteConnection.saveConnectionInfo();
-                          // If the form is valid, display a snackbar. In the real world,
-                          // you'd often call a server or save the information in a database.
-                          mostraSnackBar('Aggiornato', context);
-                        } on Exception catch (e) {
-                          mostraSnackBar(
-                              'Problema nel salvataggio $e', context);
-                          throw Exception(e);
-                        }
-                      } else {
-                        mostraSnackBar('Problema nel WiFi', context);
+                  wiFiController.text =
+                      await remoteConnection.getWifiName() ?? "";
+                },
+                child: const Text('Local WiFi'),
+              ),
+            ],
+          ),
+          Container(
+            margin: EdgeInsets.all(10),
+            padding: const EdgeInsets.symmetric(vertical: 16.0),
+            child: ElevatedButton(
+              onPressed: () async {
+                // Validate returns true if the form is valid, or false otherwise.
+                if (_formfKey.currentState!.validate()) {
+                  if (await remoteConnection.checkLocalName(
+                      nameValue: nameController.text)) {
+                    if (await remoteConnection.checkLocalWiFi(
+                        wiFiValue: wiFiController.text)) {
+                      try {
+                        _formfKey.currentState!.save();
+                        remoteConnection.saveConnectionInfo();
+                        // If the form is valid, display a snackbar. In the real world,
+                        // you'd often call a server or save the information in a database.
+                        mostraSnackBar('Aggiornato', context);
+                      } on Exception catch (e) {
+                        mostraSnackBar('Problema nel salvataggio $e', context);
+                        throw Exception(e);
                       }
                     } else {
-                      mostraSnackBar('Problema nel trovare il Server', context);
+                      mostraSnackBar('Problema nel WiFi', context);
                     }
                   } else {
-                    mostraSnackBar('Problema nella validazione', context);
+                    mostraSnackBar('Problema nel trovare il Server', context);
                   }
-                },
-                child: const Text('Submit'),
-              ),
+                } else {
+                  mostraSnackBar('Problema nella validazione', context);
+                }
+              },
+              child: const Text('Submit'),
             ),
-          ],
-        ),
-      );
-    });
+          ),
+        ],
+      ),
+    );
   }
 
   Widget allowedDevice() {

@@ -1,11 +1,18 @@
-{"Massimo": {"localServerName": "domoserver",
-    "remoteServerName": "mqtt.flespi.io",
-    "remoteUser": "[REDACTED]",
-    "remoteDomain": "Massimo",
-    "localWiFiConnectionName": "TIM-29622213"},
-"Valeria": {"localServerName": "domoserver",
-    "remoteServerName": "mqtt.flespi.io",
-    "remoteUser": "[REDACTED]",
-    "remoteDomain": "Valeria",
-    "localWiFiConnectionName": "TIM-29622213"}
-}
+[
+    {
+        "connectionName": "Massimo",
+        "localServerName": "domoserver",
+        "remoteServerName": "mqtt.flespi.io",
+        "remoteUser": "[REDACTED]",
+        "remoteDomain": "Massimo",
+        "localWiFiConnectionName": "TIM-29622213"
+    },
+    {
+        "connectionName": "Valeria",
+        "localServerName": "domoserver",
+        "remoteServerName": "mqtt.flespi.io",
+        "remoteUser": "[REDACTED]",
+        "remoteDomain": "Valeria",
+        "localWiFiConnectionName": "TIM-29622213"
+    }
+]

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:gestione_domotica/models/remote_conf/connection_data.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:network_info_plus/network_info_plus.dart';
@@ -12,6 +13,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:gestione_domotica/repositories/encrypt_data.dart';
+import 'package:gestione_domotica/models/remote_conf/connection_data.dart';
 // import 'package:wifi_iot/wifi_iot.dart';
 
 const String port = '8085';
@@ -34,17 +36,100 @@ class RemoteConnection extends ChangeNotifier {
 
   // variabili
   //String? remoteServerUri;
-  String? localServerName;
-  String? remoteServerName;
-  String? remoteUser;
-  String? remoteDomain;
-  String? localWiFiConnectionName;
+  List<ConnectionData> connectionDataList = [];
+  int _activeIndex = 0;
+  //String? connectionName;
+  //String? localServerName;
+  //String? remoteServerName;
+  //String? remoteUser;
+  //String? remoteDomain;
+  //String? localWiFiConnectionName;
   ConnectivityResult _connectivityResult = ConnectivityResult.none;
   // PermissionWithService locationPermission = Permission.locationWhenInUse;
   var lock = Lock(reentrant: true);
 
+  // getter & setter
+  int get activeIndex => _activeIndex;
+
+  set activeIndex(int activeIndex) {
+    if (connectionDataList.length <= activeIndex) {
+      _activeIndex = connectionDataList.length;
+    } else if (activeIndex < 0) {
+      _activeIndex = 0;
+    } else {
+      _activeIndex = activeIndex;
+    }
+    notifyListeners();
+  }
+
+  String? get connectionName {
+    if (connectionDataList.length > _activeIndex) {
+      return connectionDataList[_activeIndex].connectionName;
+    } else {
+      return null;
+    }
+  }
+
+  List<String> get connectionNameList {
+    final List<String> nameList = [];
+    for (var element in connectionDataList) {
+      nameList.add(element.connectionName);
+    }
+    return nameList;
+  }
+
+  String? get localServerName {
+    if (connectionDataList.length > _activeIndex) {
+      return connectionDataList[_activeIndex].localServerName;
+    } else {
+      return null;
+    }
+  }
+
+  set localServerName(String? localServerName) {
+    connectionDataList[_activeIndex].localServerName = localServerName ?? '';
+  }
+
+  String? get remoteServerName {
+    if (connectionDataList.length > _activeIndex) {
+      return connectionDataList[_activeIndex].remoteServerName;
+    } else {
+      return null;
+    }
+  }
+
+  String? get remoteUser {
+    if (connectionDataList.length > _activeIndex) {
+      return connectionDataList[_activeIndex].remoteUser;
+    } else {
+      return null;
+    }
+  }
+
+  String? get remoteDomain {
+    if (connectionDataList.length > _activeIndex) {
+      return connectionDataList[_activeIndex].remoteDomain;
+    } else {
+      return null;
+    }
+  }
+
+  String? get localWiFiConnectionName {
+    if (connectionDataList.length > _activeIndex) {
+      return connectionDataList[_activeIndex].localWiFiConnectionName;
+    } else {
+      return null;
+    }
+  }
+
+  set localWiFiConnectionName(String? localWiFiConnectionName) {
+    connectionDataList[_activeIndex].localWiFiConnectionName =
+        localWiFiConnectionName ?? '';
+  }
+
   bool get connectionNull {
-    if (localServerName != null &&
+    if (connectionName != null &&
+        localServerName != null &&
         remoteServerName != null &&
         remoteUser != null &&
         remoteDomain != null &&
@@ -76,29 +161,6 @@ class RemoteConnection extends ChangeNotifier {
     }
   }
 
-  // Future<void> setRemoteServerName(String remoteServerName) async {
-  //   List<InternetAddress> ipValues =
-  //       await InternetAddress.lookup(remoteServerName);
-  //   if (ipValues != null && ipValues.length > 0) {
-  //     remoteServerUri = ipValues[0].address;
-  //   }
-  // }
-
-  // String? getRemoteServerUri() {
-  //   // await lock.synchronized(_getConnectionInfo);
-  //   return remoteServerUri;
-  // }
-
-  // String? getRemoteServerName() {
-  //   // await lock.synchronized(_getConnectionInfo);
-  //   return remoteServerName;
-  // }
-
-  // String? getLocalWiFiConnectionName() {
-  //   // await lock.synchronized(_getConnectionInfo);
-  //   return localWiFiConnectionName;
-  // }
-
   //metodi
 
   // metodo per gestire il cambio di connettività
@@ -114,8 +176,8 @@ class RemoteConnection extends ChangeNotifier {
 
   Future<void> _getConnectionInfo() async {
     //if (localWiFiConnectionName == null && remoteServerUri == null) {
-    // ricarico solo se il necessario o forzato.
-    if (localServerName == null) {
+    // ricarico solo se necessario o forzato.
+    if (connectionDataList.isEmpty) {
       if (kIsWeb) {
         await _getAssetsInfo();
       } else {
@@ -123,13 +185,20 @@ class RemoteConnection extends ChangeNotifier {
         final File file = File('${directory.path}/connection_info.json');
         if (await file.exists()) {
           String fileString = decryptMyData(await file.readAsString()) ?? '';
-          Map<String, dynamic> jsonData = json.decode(fileString);
+          List<dynamic> jsonData = json.decode(fileString);
           // remoteServerUri = jsonData['remoteServerUri'];
-          localServerName = jsonData['localServerName'];
-          remoteServerName = jsonData['remoteServerName'];
-          remoteUser = jsonData['remoteUser'];
-          remoteDomain = jsonData['remoteDomain'];
-          localWiFiConnectionName = jsonData['localWiFiConnectionName'];
+          for (var element in jsonData) {
+            connectionDataList.add(ConnectionData.fromJson(element));
+          }
+          final File configFile = File('${directory.path}/config.json');
+          fileString = decryptMyData(await configFile.readAsString()) ?? '';
+          Map<String, dynamic> jsonConfig = json.decode(fileString);
+          _activeIndex = jsonConfig['activeIndex'];
+          // localServerName = jsonData['localServerName'];
+          // remoteServerName = jsonData['remoteServerName'];
+          // remoteUser = jsonData['remoteUser'];
+          // remoteDomain = jsonData['remoteDomain'];
+          // localWiFiConnectionName = jsonData['localWiFiConnectionName'];
         } else {
           await _getAssetsInfo();
         }
@@ -143,13 +212,12 @@ class RemoteConnection extends ChangeNotifier {
     try {
       String fileString =
           await rootBundle.loadString('assets/json/remote_connection.json');
-      Map<String, dynamic> jsonData = json.decode(fileString);
+      List<dynamic> jsonData = json.decode(fileString);
       // remoteServerUri = jsonData['remoteServerUri'];
-      localServerName = jsonData['localServerName'];
-      remoteServerName = jsonData['remoteServerName'];
-      remoteUser = jsonData['remoteUser'];
-      remoteDomain = jsonData['remoteDomain'];
-      localWiFiConnectionName = jsonData['localWiFiConnectionName'];
+      for (var element in jsonData) {
+        connectionDataList.add(ConnectionData.fromJson(element));
+      }
+      _activeIndex = 0;
       print('RemoteConnection :: $localServerName, $localWiFiConnectionName');
     } on Exception catch (e) {
       print('RemoteConnection :: $e');
@@ -161,18 +229,21 @@ class RemoteConnection extends ChangeNotifier {
     if (!kIsWeb) {
       final directory = await getApplicationDocumentsDirectory();
       final File file = File('${directory.path}/connection_info.json');
-      final dataToPrint = {
-        "localServerName": localServerName,
-        "remoteServerName": remoteServerName,
-        "remoteUser": remoteUser,
-        "remoteDomain": remoteDomain,
-        "localWiFiConnectionName": localWiFiConnectionName
-      };
-      String stringToWrite = encryptMyData(jsonEncode(dataToPrint));
+      // final dataToPrint = {
+      //   "localServerName": localServerName,
+      //   "remoteServerName": remoteServerName,
+      //   "remoteUser": remoteUser,
+      //   "remoteDomain": remoteDomain,
+      //   "localWiFiConnectionName": localWiFiConnectionName
+      // };
+      String stringToWrite = encryptMyData(jsonEncode(connectionDataList));
       await file.writeAsString(stringToWrite);
+      final File configFile = File('${directory.path}/config.json');
+      stringToWrite = encryptMyData(jsonEncode({"activeIndex": _activeIndex}));
+      await configFile.writeAsString(stringToWrite);
     }
     // forzo il ricaricare i valori
-    localServerName = null;
+    connectionDataList = [];
     getConnectionInfo();
     return true;
   }

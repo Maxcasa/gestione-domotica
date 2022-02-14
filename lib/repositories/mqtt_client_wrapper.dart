@@ -277,6 +277,8 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
 
   void serverChange() {
     if (connectionStateCheck() &&
+        remoteConnection != null &&
+        !remoteConnection!.connectionNull &&
         remoteServer != remoteConnection!.localServerName) {
       reconnect = true;
       client!.disconnect();
