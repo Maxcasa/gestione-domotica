@@ -54,7 +54,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   RemoteConnection? remoteConnection;
   bool reconnect = false;
   bool _errorDetect = true;
-  bool _remote = false;
+  bool remote = false;
 
   String? remoteServer;
   String mqttUser = "";
@@ -71,14 +71,14 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
         remoteConnection!.connectionPresent) {
       // Posso collegarmi devo decidere se local o remote
       connectionState = MqttCurrentConnectionState.CONNECTING;
-      if (await remoteConnection!.checkLocalName()) {
+      if (await remoteConnection!.checkLocal()) {
         remoteServer = remoteConnection!.localServerName;
         mqttUser = 'mqtt_user';
         mqttPW = 'mqtt_user';
       } else if (remoteConnection!.remoteUser != null) {
         remoteServer = remoteConnection!.remoteServerName;
         mqttUser = remoteConnection!.remoteUser!;
-        _remote = true;
+        remote = true;
       } else {
         remoteServer = null;
         connectionState = MqttCurrentConnectionState.IDLE;
@@ -100,9 +100,12 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     // client = MqttServerClient.withPort(serverUri, '#', port);
     Random random = Random();
     String cliendId = 'mqtt_domo' + random.nextInt(1000000).toString();
-    client = MqttDomoClient.withPort(remoteServer!, cliendId, remote: _remote);
+    client = MqttDomoClient.withPort(remoteServer!, cliendId, remote: remote);
     if (kIsWeb) {
       client!.websocketProtocols = ['mqtt'];
+    } else if (remote) {
+      print('MQTTClientWrapper::Secure activated');
+      client!.secure = true;
     }
     client!.logging(on: false);
     client!.keepAlivePeriod = 60;

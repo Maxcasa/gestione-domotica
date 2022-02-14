@@ -17,4 +17,6 @@ class MqttDomoClient extends MqttBrowserClient {
   }) : super.withPort(remote ? 'wss://$server' : 'ws://$server',
             clientIdentifier, remote ? 443 : 8080,
             maxConnectionAttempts: maxConnectionAttempts);
+
+  set secure(secure) {}
 }

@@ -61,6 +61,7 @@ class ConfPage extends StatelessWidget {
         ],
         child: Scaffold(
             appBar: AppBar(
+              leadingWidth: 100,
               leading: ConnectionIcon(),
               title: Text('Gestione Domotica'),
             ),

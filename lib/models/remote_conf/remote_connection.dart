@@ -41,7 +41,7 @@ class RemoteConnection extends ChangeNotifier {
   String? localWiFiConnectionName;
   ConnectivityResult _connectivityResult = ConnectivityResult.none;
   // PermissionWithService locationPermission = Permission.locationWhenInUse;
-  var lock = Lock();
+  var lock = Lock(reentrant: true);
 
   bool get connectionNull {
     if (localServerName != null &&
@@ -206,8 +206,18 @@ class RemoteConnection extends ChangeNotifier {
     return false;
   }
 
+  Future<bool> checkLocal() async {
+    if (kIsWeb) {
+      return await checkLocalName();
+    } else if (connectivity == 2) {
+      return await checkLocalWiFi();
+    } else {
+      return false;
+    }
+  }
+
   Future<String?> getWifiName() async {
-    return await lock.synchronized(_getWifiName);
+    return await _getWifiName();
   }
 
   Future<String?> _getWifiName() async {
