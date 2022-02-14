@@ -23,6 +23,7 @@ enum MqttCurrentConnectionState {
   RICONNECTING,
   RICONNECTED,
   DISCONNECTED,
+  TOGGLE_DISCONNECTED,
   ERROR_WHEN_CONNECTING
 }
 
@@ -220,7 +221,9 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     // if (client.connectionStatus.returnCode == MqttConnectReturnCode.solicited) {
     //   print('MQTTClientWrapper::OnDisconnected callback is solicited, this is correct');
     // }
-    connectionState = MqttCurrentConnectionState.DISCONNECTED;
+    if (connectionState != MqttCurrentConnectionState.TOGGLE_DISCONNECTED) {
+      connectionState = MqttCurrentConnectionState.DISCONNECTED;
+    }
     notifyListeners('connectionState.disconnected');
     if (reconnect) {
       _connectClient();
@@ -251,11 +254,14 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
 
   void toggleState() {
     if (connectionStateCheck()) {
+      connectionState = MqttCurrentConnectionState.TOGGLE_DISCONNECTED;
+      reconnect = false;
       client!.disconnect();
       //  connect('mqtt_user', 'mqtt_user');
     } else if (connectionState == MqttCurrentConnectionState.DISCONNECTED ||
         connectionState == MqttCurrentConnectionState.IDLE ||
-        connectionState == MqttCurrentConnectionState.ERROR_WHEN_CONNECTING) {
+        connectionState == MqttCurrentConnectionState.ERROR_WHEN_CONNECTING ||
+        connectionState == MqttCurrentConnectionState.TOGGLE_DISCONNECTED) {
       connectMqttClient();
     }
   }
