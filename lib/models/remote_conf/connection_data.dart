@@ -2,6 +2,7 @@
 class ConnectionData {
   // costruttori
   ConnectionData({
+    required this.id,
     required this.connectionName,
     required this.localServerName,
     required this.remoteServerName,
@@ -11,6 +12,7 @@ class ConnectionData {
   });
 
   // variabili
+  int id;
   String connectionName;
   String localServerName;
   String remoteServerName;
@@ -20,7 +22,8 @@ class ConnectionData {
 
   // conversione Json
   ConnectionData.fromJson(Map<String, dynamic> json)
-      : connectionName = json['connectionName'] ?? 'Vuoto',
+      : id = json['id'] ?? -1,
+        connectionName = json['connectionName'] ?? 'Vuoto',
         localServerName = json['localServerName'] ?? '',
         remoteServerName = json['remoteServerName'] ?? '',
         remoteUser = json['remoteUser'] ?? '',
@@ -29,6 +32,7 @@ class ConnectionData {
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> result = {
+      'id': id,
       'connectionName': connectionName,
       'localServerName': localServerName,
       'remoteServerName': remoteServerName,

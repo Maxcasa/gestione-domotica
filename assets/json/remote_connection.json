@@ -1,15 +1,17 @@
 [
     {
+        "id": 0,
         "connectionName": "Massimo",
-        "localServerName": "domoserver",
+        "localServerName": "MassimoDomoS",
         "remoteServerName": "mqtt.flespi.io",
         "remoteUser": "[REDACTED]",
         "remoteDomain": "Massimo",
         "localWiFiConnectionName": "TIM-29622213"
     },
     {
+        "id": 1,
         "connectionName": "Valeria",
-        "localServerName": "domoserver",
+        "localServerName": "ValeriaDomoS",
         "remoteServerName": "mqtt.flespi.io",
         "remoteUser": "[REDACTED]",
         "remoteDomain": "Valeria",

@@ -228,9 +228,9 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
       connectionState = MqttCurrentConnectionState.DISCONNECTED;
     }
     notifyListeners('connectionState.disconnected');
-    if (reconnect) {
-      _connectClient();
-    }
+    // if (reconnect) {
+    //   _connectClient();
+    // }
   }
 
   void _onConnected() {
@@ -283,7 +283,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
       reconnect = true;
       client!.disconnect();
       //  connect('mqtt_user', 'mqtt_user');
-    } else if (connectionState == MqttCurrentConnectionState.IDLE) {
+    } else if (!connectionStateCheck()) {
       connectMqttClient();
     }
   }

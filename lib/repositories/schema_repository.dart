@@ -9,10 +9,11 @@ import 'package:path_provider/path_provider.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:network_info_plus/network_info_plus.dart';
+import 'package:synchronized/synchronized.dart';
 
 // http constant
-const String localFileUri = 'domo_conf.json';
-const String localBackUri = 'domo_conf.jpg';
+// const String localFileUri = 'domo_conf.json';
+// const String localBackUri = 'domo_conf.jpg';
 const String port = '8085';
 
 /// Classe che contiene lo schema del sistema
@@ -26,10 +27,11 @@ class SchemaRepository extends ChangeNotifier {
 
   SchemaRepository._internal() {
     remoteConnection = RemoteConnection();
-    remoteConnection!.addListener(() {
+    remoteConnection!.addListener(() async {
       schemaTree = {};
       _sensoriBack = null;
-      notifyListeners();
+      reload = true;
+      await lock.synchronized(_getInfo);
     });
     remoteConnection!.getConnectionInfo();
     print('Istanzio il getter dello schema');
@@ -42,6 +44,8 @@ class SchemaRepository extends ChangeNotifier {
   RemoteConnection? remoteConnection;
   String? remoteFileUri;
   String? remoteBackUri;
+  bool reload = true;
+  var lock = Lock();
 
   // Future<void> setRemoteVariables() async {
   //   if (remoteConnection != null) {
@@ -57,17 +61,23 @@ class SchemaRepository extends ChangeNotifier {
   // }
 
   Future<Map<String, dynamic>> get schema async {
-    if (schemaTree.isEmpty) {
-      await _getSchema();
-    }
+    await lock.synchronized(_getInfo);
     return schemaTree;
   }
 
   Future<Image?> get sensoriBack async {
-    if (_sensoriBack == null) {
-      await _getSensoriBack();
-    }
+    await lock.synchronized(_getInfo);
     return _sensoriBack;
+  }
+
+  // prendo le info
+  Future<void> _getInfo() async {
+    if (reload) {
+      await _getSchema();
+      await _getSensoriBack();
+      reload = false;
+      notifyListeners();
+    }
   }
 
   Future<void> _getSchema() async {
@@ -79,10 +89,7 @@ class SchemaRepository extends ChangeNotifier {
         // //  await info.getWifiName();
         // String? savedWiFi = remoteConnection!.localWiFiConnectionName;
         schemaTree = await _getSchemaFromRemote();
-        if (schemaTree.isEmpty) {
-          schemaTree = await _getSchemaFromLocal();
-        }
-      } else {
+      } else if (!kIsWeb) {
         schemaTree = await _getSchemaFromLocal();
       }
     }
@@ -96,8 +103,7 @@ class SchemaRepository extends ChangeNotifier {
         // String? localWiFi = await remoteConnection!.getWifiName();
         // String? savedWiFi = remoteConnection!.localWiFiConnectionName;
         _sensoriBack = await _getSensoriBackFromRemote();
-        _sensoriBack ??= await _getSensoriBackFromLocal();
-      } else {
+      } else if (!kIsWeb) {
         _sensoriBack = await _getSensoriBackFromLocal();
       }
     }
@@ -105,7 +111,8 @@ class SchemaRepository extends ChangeNotifier {
 
   Future<Map<String, dynamic>> _getSchemaFromLocal() async {
     final directory = await getApplicationDocumentsDirectory();
-    final File file = File('${directory.path}/$localFileUri');
+    final File file =
+        File('${directory.path}/domo_${remoteConnection!.connectionName}.json');
     if (await file.exists()) {
       String fileString = await file.readAsString();
       return json.decode(fileString);
@@ -117,7 +124,8 @@ class SchemaRepository extends ChangeNotifier {
 
   Future<Image?> _getSensoriBackFromLocal() async {
     final directory = await getApplicationDocumentsDirectory();
-    final File file = File('${directory.path}/$localBackUri');
+    final File file =
+        File('${directory.path}/domo_${remoteConnection!.connectionName}.jpg');
     if (await file.exists()) {
       return Image.file(file);
     } else {
@@ -132,22 +140,20 @@ class SchemaRepository extends ChangeNotifier {
     // io_client.IOClient ioClient = io_client.IOClient(httpClient);
     remoteFileUri =
         'http://${remoteConnection!.localServerName}:$port/get/domo_json';
-    try {
-      http.Response httpResponse = await http.get(Uri.parse(remoteFileUri!));
-      //http.Response httpResponse = await ioClient.get(Uri.parse(remoteFileUri));
-      if (httpResponse.statusCode == 200) {
-        // If the server did return a 200 OK response,
-        // then parse the JSON.
-        saveSchema(httpResponse.body);
-        return json.decode(httpResponse.body);
-      } else {
-        // If the server did not return a 200 OK response,
-        // then throw an exception.
-        //throw Exception('Failed to load album');
-        return {};
-      }
-    } on Exception catch (e) {
-      print('RemoteConnection :: $e');
+    // http.Response? httpResponse = await lock.synchronized(() async {
+    //   return http.get(Uri.parse(remoteFileUri!));
+    // });
+    http.Response httpResponse = await http.get(Uri.parse(remoteFileUri!));
+    //http.Response httpResponse = await ioClient.get(Uri.parse(remoteFileUri));
+    if (httpResponse.statusCode == 200) {
+      // If the server did return a 200 OK response,
+      // then parse the JSON.
+      saveSchema(httpResponse.body);
+      return json.decode(httpResponse.body);
+    } else {
+      // If the server did not return a 200 OK response,
+      // then throw an exception.
+      //throw Exception('Failed to load album');
       return {};
     }
   }
@@ -155,22 +161,20 @@ class SchemaRepository extends ChangeNotifier {
   Future<Image?> _getSensoriBackFromRemote() async {
     remoteBackUri =
         'http://${remoteConnection!.localServerName}:$port/get/domo_image';
-    try {
-      http.Response httpResponse = await http.get(Uri.parse(remoteBackUri!));
-      //http.Response httpResponse = await ioClient.get(Uri.parse(remoteFileUri));
-      if (httpResponse.statusCode == 200) {
-        // If the server did return a 200 OK response,
-        // then parse the JSON.
-        saveSensoriBack(httpResponse.bodyBytes);
-        return Image.memory(httpResponse.bodyBytes);
-      } else {
-        // If the server did not return a 200 OK response,
-        // then throw an exception.
-        //throw Exception('Failed to load album');
-        return null;
-      }
-    } on Exception catch (e) {
-      print('RemoteConnection :: $e');
+    // http.Response? httpResponse = await lock.synchronized(() async {
+    //   return http.get(Uri.parse(remoteBackUri!));
+    // });
+    http.Response httpResponse = await http.get(Uri.parse(remoteBackUri!));
+    //http.Response httpResponse = await ioClient.get(Uri.parse(remoteFileUri));
+    if (httpResponse.statusCode == 200) {
+      // If the server did return a 200 OK response,
+      // then parse the JSON.
+      saveSensoriBack(httpResponse.bodyBytes);
+      return Image.memory(httpResponse.bodyBytes);
+    } else {
+      // If the server did not return a 200 OK response,
+      // then throw an exception.
+      //throw Exception('Failed to load album');
       return null;
     }
   }
@@ -178,7 +182,8 @@ class SchemaRepository extends ChangeNotifier {
   Future<void> saveSchema(schemaData) async {
     if (!kIsWeb) {
       final directory = await getApplicationDocumentsDirectory();
-      final File file = File('${directory.path}/$localFileUri');
+      final File file = File(
+          '${directory.path}/domo_${remoteConnection!.connectionName}.json');
       await file.writeAsString(schemaData);
     }
   }
@@ -186,7 +191,8 @@ class SchemaRepository extends ChangeNotifier {
   Future<void> saveSensoriBack(imageData) async {
     if (!kIsWeb) {
       final directory = await getApplicationDocumentsDirectory();
-      final File file = File('${directory.path}/$localBackUri');
+      final File file = File(
+          '${directory.path}/domo_${remoteConnection!.connectionName}.jpg');
       await file.writeAsBytes(imageData);
     }
   }

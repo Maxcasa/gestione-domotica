@@ -23,7 +23,7 @@ void main() {
     ),
     ChangeNotifierProvider<SchemaSensoriModel>(
         //   create: (_) => SchemaSensori(id: 0),
-        create: (context) => SchemaSensoriModel(id: 0)),
+        create: (_) => SchemaSensoriModel()),
     // nome: 'test sensori',
     // sensori: [
     //   SensoreInfisso(id: 1, nome: 'Sensore 1'),

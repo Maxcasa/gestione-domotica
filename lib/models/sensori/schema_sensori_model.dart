@@ -28,7 +28,14 @@ final factories = <String, Object Function(int id)>{
 // ignore: mixin_inherits_from_not_object
 class SchemaSensoriModel with ChangeNotifier {
   // costruttori
-  SchemaSensoriModel({this.id = 0})
+  static final SchemaSensoriModel _instance = SchemaSensoriModel._internal();
+
+  factory SchemaSensoriModel() {
+    return _instance;
+  }
+
+  // costruttori
+  SchemaSensoriModel._internal({this.id = 0})
       : this.nome = topicSurName,
         super() {
     _setupMqtt();
@@ -39,14 +46,14 @@ class SchemaSensoriModel with ChangeNotifier {
     }
   }
 
-  SchemaSensoriModel.fromListSensori(
-      {required this.id, String? nome, required List<SensoreModel> sensori})
-      : this.nome = nome ?? '',
-        super() {
-    this.sensori.addAll(sensori);
-    _setupMqtt();
-    //saveSchemaSensori();
-  }
+  // SchemaSensoriModel.fromListSensori(
+  //     {required this.id, String? nome, required List<SensoreModel> sensori})
+  //     : this.nome = nome ?? '',
+  //       super() {
+  //   this.sensori.addAll(sensori);
+  //   _setupMqtt();
+  //   //saveSchemaSensori();
+  // }
 
   // variabili
   int id;
@@ -86,14 +93,15 @@ class SchemaSensoriModel with ChangeNotifier {
   Future<void> _getDati() async {
     _getSchemaSensori();
     _getSensoriBack();
+    notifyListeners();
   }
 
   Future<void> _getSchemaSensori() async {
     Map<String, dynamic> tmpSchema = await schemaRepository!.schema;
+    sensori = [];
     if (tmpSchema.containsKey(topicSurName)) {
       List listSensori = tmpSchema[topicSurName];
       if (listSensori.isNotEmpty) {
-        sensori = [];
         for (var element in listSensori) {
           String tipo = element['tipo'] ?? 'Semnsore';
           int id = element['id'];
@@ -113,7 +121,6 @@ class SchemaSensoriModel with ChangeNotifier {
         // mqttClientWrapper!.publishMessage(
         //     topicSurName: topicSurName, messageData: 'get/status');
       }
-      notifyListeners();
     }
   }
 

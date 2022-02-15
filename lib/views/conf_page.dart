@@ -69,6 +69,7 @@ class ConfPage extends StatelessWidget {
             endDrawer: const MainDrawer(),
             body: Column(children: <Widget>[
               selectConnection(),
+              remoteConnection(),
               Divider(color: Colors.black),
               allowedDevice(),
               Divider(color: Colors.black),
@@ -88,15 +89,16 @@ class ConfPage extends StatelessWidget {
           margin: EdgeInsets.all(10),
           padding: EdgeInsets.all(5),
           width: 200,
-          child: DropdownButtonFormField(
+          child: DropdownButton(
             hint: Text('Scegli uno'),
-            items: remoteConnection.connectionNameList.map((String element) {
+            value: remoteConnection.activeIndex,
+            items: remoteConnection.connectionDataList
+                .map((ConnectionData element) {
               return DropdownMenuItem(
-                  value: remoteConnection.connectionNameList.indexOf(element),
-                  child: Text(element));
+                  value: element.id, child: Text(element.connectionName));
             }).toList(),
-            onChanged: (selectedIndex) {
-              return null;
+            onChanged: (int? selectedId) {
+              remoteConnection.activeIndex = selectedId ?? 0;
               // remoteConnection.activeIndex = Convert.ToInt32(selectedIndex)!;
               // if (selectedName.isEmpty) {
               //       return "can't empty";
@@ -108,109 +110,110 @@ class ConfPage extends StatelessWidget {
     });
   }
 
-  Widget remoteConnection(
-      RemoteConnection remoteConnection, BuildContext context) {
-    // return Consumer<RemoteConnection>(builder: (BuildContext context,
-    //     RemoteConnection remoteConnection, Widget? child) {
-    final nameController =
-        TextEditingController(text: remoteConnection.localServerName);
-    final wiFiController =
-        TextEditingController(text: remoteConnection.localWiFiConnectionName);
-    final _formfKey = GlobalKey<FormState>();
-    return Form(
-      key: _formfKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-              margin: EdgeInsets.all(10),
-              padding: EdgeInsets.all(5),
-              width: 200,
-              child: TextFormField(
-                controller: nameController,
-                decoration: const InputDecoration(
-                  border: UnderlineInputBorder(),
-                  labelText: 'Server Name',
+  Widget remoteConnection() {
+    return Consumer<RemoteConnection>(builder: (BuildContext context,
+        RemoteConnection remoteConnection, Widget? child) {
+      final nameController =
+          TextEditingController(text: remoteConnection.localServerName);
+      final wiFiController =
+          TextEditingController(text: remoteConnection.localWiFiConnectionName);
+      final _formfKey = GlobalKey<FormState>();
+      return Form(
+        key: _formfKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+                margin: EdgeInsets.all(10),
+                padding: EdgeInsets.all(5),
+                width: 200,
+                child: TextFormField(
+                  controller: nameController,
+                  decoration: const InputDecoration(
+                    border: UnderlineInputBorder(),
+                    labelText: 'Server Name',
+                  ),
+                  // The validator receives the text that the user has entered.
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter some text';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    remoteConnection.localServerName = value;
+                  },
+                )),
+            Row(
+              children: [
+                Container(
+                    margin: EdgeInsets.all(10),
+                    padding: EdgeInsets.all(5),
+                    width: 200,
+                    child: TextFormField(
+                      controller: wiFiController,
+                      decoration: const InputDecoration(
+                        border: UnderlineInputBorder(),
+                        labelText: 'Local WiFi Name',
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter some text';
+                        }
+                        return null;
+                      },
+                      onSaved: (value) {
+                        remoteConnection.localWiFiConnectionName = value;
+                      },
+                    )),
+                ElevatedButton(
+                  onPressed: () async {
+                    wiFiController.text =
+                        await remoteConnection.getWifiName() ?? "";
+                  },
+                  child: const Text('Local WiFi'),
                 ),
-                // The validator receives the text that the user has entered.
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Please enter some text';
-                  }
-                  return null;
-                },
-                onSaved: (value) {
-                  remoteConnection.localServerName = value;
-                },
-              )),
-          Row(
-            children: [
-              Container(
-                  margin: EdgeInsets.all(10),
-                  padding: EdgeInsets.all(5),
-                  width: 200,
-                  child: TextFormField(
-                    controller: wiFiController,
-                    decoration: const InputDecoration(
-                      border: UnderlineInputBorder(),
-                      labelText: 'Local WiFi Name',
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter some text';
-                      }
-                      return null;
-                    },
-                    onSaved: (value) {
-                      remoteConnection.localWiFiConnectionName = value;
-                    },
-                  )),
-              ElevatedButton(
+              ],
+            ),
+            Container(
+              margin: EdgeInsets.all(10),
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: ElevatedButton(
                 onPressed: () async {
-                  wiFiController.text =
-                      await remoteConnection.getWifiName() ?? "";
-                },
-                child: const Text('Local WiFi'),
-              ),
-            ],
-          ),
-          Container(
-            margin: EdgeInsets.all(10),
-            padding: const EdgeInsets.symmetric(vertical: 16.0),
-            child: ElevatedButton(
-              onPressed: () async {
-                // Validate returns true if the form is valid, or false otherwise.
-                if (_formfKey.currentState!.validate()) {
-                  if (await remoteConnection.checkLocalName(
-                      nameValue: nameController.text)) {
-                    if (await remoteConnection.checkLocalWiFi(
-                        wiFiValue: wiFiController.text)) {
-                      try {
-                        _formfKey.currentState!.save();
-                        remoteConnection.saveConnectionInfo();
-                        // If the form is valid, display a snackbar. In the real world,
-                        // you'd often call a server or save the information in a database.
-                        mostraSnackBar('Aggiornato', context);
-                      } on Exception catch (e) {
-                        mostraSnackBar('Problema nel salvataggio $e', context);
-                        throw Exception(e);
+                  // Validate returns true if the form is valid, or false otherwise.
+                  if (_formfKey.currentState!.validate()) {
+                    if (await remoteConnection.checkLocalName(
+                        nameValue: nameController.text)) {
+                      if (await remoteConnection.checkLocalWiFi(
+                          wiFiValue: wiFiController.text)) {
+                        try {
+                          _formfKey.currentState!.save();
+                          remoteConnection.saveConnectionInfo();
+                          // If the form is valid, display a snackbar. In the real world,
+                          // you'd often call a server or save the information in a database.
+                          mostraSnackBar('Aggiornato', context);
+                        } on Exception catch (e) {
+                          mostraSnackBar(
+                              'Problema nel salvataggio $e', context);
+                          throw Exception(e);
+                        }
+                      } else {
+                        mostraSnackBar('Problema nel WiFi', context);
                       }
                     } else {
-                      mostraSnackBar('Problema nel WiFi', context);
+                      mostraSnackBar('Problema nel trovare il Server', context);
                     }
                   } else {
-                    mostraSnackBar('Problema nel trovare il Server', context);
+                    mostraSnackBar('Problema nella validazione', context);
                   }
-                } else {
-                  mostraSnackBar('Problema nella validazione', context);
-                }
-              },
-              child: const Text('Submit'),
+                },
+                child: const Text('Submit'),
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    });
   }
 
   Widget allowedDevice() {
