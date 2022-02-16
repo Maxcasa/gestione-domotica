@@ -66,6 +66,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     print('MQTTClientWrapper::ConnectionState $connectionState');
     if (!(connectionStateCheck()) &&
         !(errorDetectedOrForced()) &&
+        connectionState != MqttCurrentConnectionState.TOGGLE_DISCONNECTED &&
         remoteConnection != null &&
         !(remoteConnection!.connectionNull) &&
         remoteConnection!.connectionPresent) {
@@ -265,6 +266,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
         connectionState == MqttCurrentConnectionState.IDLE ||
         connectionState == MqttCurrentConnectionState.ERROR_WHEN_CONNECTING ||
         connectionState == MqttCurrentConnectionState.TOGGLE_DISCONNECTED) {
+      connectionState = MqttCurrentConnectionState.IDLE;
       connectMqttClient();
     }
   }

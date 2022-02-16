@@ -1,6 +1,7 @@
 // import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:gestione_domotica/models/remote_conf/remote_connection.dart';
 import 'package:gestione_domotica/views/home_page.dart';
 import 'package:gestione_domotica/views/main_drawer.dart';
 import 'package:provider/provider.dart';
@@ -24,6 +25,9 @@ void main() {
     ChangeNotifierProvider<SchemaSensoriModel>(
         //   create: (_) => SchemaSensori(id: 0),
         create: (_) => SchemaSensoriModel()),
+    ChangeNotifierProvider<RemoteConnection>(
+      create: (_) => RemoteConnection(),
+    )
     // nome: 'test sensori',
     // sensori: [
     //   SensoreInfisso(id: 1, nome: 'Sensore 1'),

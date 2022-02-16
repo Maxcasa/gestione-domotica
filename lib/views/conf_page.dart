@@ -56,9 +56,6 @@ class ConfPage extends StatelessWidget {
           ChangeNotifierProvider<AllowedDevices>(
             create: (_) => AllowedDevices(),
           ),
-          ChangeNotifierProvider<RemoteConnection>(
-            create: (_) => RemoteConnection(),
-          )
         ],
         child: Scaffold(
             appBar: AppBar(

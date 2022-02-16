@@ -19,6 +19,9 @@ class AllowedDevices with ChangeNotifier {
     remoteConnection = RemoteConnection();
     remoteConnection!.addListener(getAllowedDevice);
     remoteConnection!.getConnectionInfo();
+    if (!remoteConnection!.connectionNull) {
+      getAllowedDevice();
+    }
   }
 
   // variabili
@@ -46,12 +49,10 @@ class AllowedDevices with ChangeNotifier {
 
   // Salvo il devices e li ricarico
   Future<void> saveAllowedDevice() async {
-    if ((remoteConnection != null &&
-            remoteConnection!.localWiFiConnectionName != null &&
-            remoteConnection!.localServerName != null) &&
-        (kIsWeb ||
-            (await remoteConnection!.getWifiName() ==
-                remoteConnection!.localWiFiConnectionName))) {
+    if (remoteConnection != null &&
+        !remoteConnection!.connectionNull &&
+        remoteConnection!.connectionPresent &&
+        await remoteConnection!.checkLocal()) {
       if (await _saveAllowedDeviceToRemote()) {
         await getAllowedDevice();
       }
@@ -61,13 +62,10 @@ class AllowedDevices with ChangeNotifier {
   // prendo i device autorizzati dal web
   Future<void> getAllowedDevice() async {
     // abilito lo scaricamento da web o da rete locale
-    if ((remoteConnection != null &&
-            remoteConnection!.localWiFiConnectionName != null &&
-            remoteConnection!.localServerName != null) &&
-        await remoteConnection!.checkLocalName() &&
-        (kIsWeb ||
-            (await remoteConnection!.getWifiName() ==
-                remoteConnection!.localWiFiConnectionName))) {
+    if (remoteConnection != null &&
+        !remoteConnection!.connectionNull &&
+        remoteConnection!.connectionPresent &&
+        await remoteConnection!.checkLocal()) {
       List<dynamic> localJson = await _getAllowedDeviceFromRemote();
       if (localJson.isNotEmpty) {
         for (var element in localJson) {

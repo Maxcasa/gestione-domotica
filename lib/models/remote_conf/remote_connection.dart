@@ -37,7 +37,7 @@ class RemoteConnection extends ChangeNotifier {
   // variabili
   //String? remoteServerUri;
   List<ConnectionData> connectionDataList = [];
-  int _activeIndex = 0;
+  int _activeIndex = -1;
   //String? connectionName;
   //String? localServerName;
   //String? remoteServerName;
@@ -63,7 +63,7 @@ class RemoteConnection extends ChangeNotifier {
   }
 
   String? get connectionName {
-    if (connectionDataList.length > _activeIndex) {
+    if (connectionDataList.length > _activeIndex && _activeIndex >= 0) {
       return connectionDataList[_activeIndex].connectionName;
     } else {
       return null;
@@ -79,7 +79,7 @@ class RemoteConnection extends ChangeNotifier {
   }
 
   String? get localServerName {
-    if (connectionDataList.length > _activeIndex) {
+    if (connectionDataList.length > _activeIndex && _activeIndex >= 0) {
       return connectionDataList[_activeIndex].localServerName;
     } else {
       return null;
@@ -91,7 +91,7 @@ class RemoteConnection extends ChangeNotifier {
   }
 
   String? get remoteServerName {
-    if (connectionDataList.length > _activeIndex) {
+    if (connectionDataList.length > _activeIndex && _activeIndex >= 0) {
       return connectionDataList[_activeIndex].remoteServerName;
     } else {
       return null;
@@ -99,7 +99,7 @@ class RemoteConnection extends ChangeNotifier {
   }
 
   String? get remoteUser {
-    if (connectionDataList.length > _activeIndex) {
+    if (connectionDataList.length > _activeIndex && _activeIndex >= 0) {
       return connectionDataList[_activeIndex].remoteUser;
     } else {
       return null;
@@ -107,7 +107,7 @@ class RemoteConnection extends ChangeNotifier {
   }
 
   String? get remoteDomain {
-    if (connectionDataList.length > _activeIndex) {
+    if (connectionDataList.length > _activeIndex && _activeIndex >= 0) {
       return connectionDataList[_activeIndex].remoteDomain;
     } else {
       return null;
@@ -115,7 +115,7 @@ class RemoteConnection extends ChangeNotifier {
   }
 
   String? get localWiFiConnectionName {
-    if (connectionDataList.length > _activeIndex) {
+    if (connectionDataList.length > _activeIndex && _activeIndex >= 0) {
       return connectionDataList[_activeIndex].localWiFiConnectionName;
     } else {
       return null;
@@ -172,6 +172,7 @@ class RemoteConnection extends ChangeNotifier {
   // prendo le info di connessioni
   Future<void> getConnectionInfo() async {
     await lock.synchronized(_getConnectionInfo);
+    await lock.synchronized(_getConnectionConf);
   }
 
   Future<void> _getConnectionInfo() async {
@@ -190,10 +191,6 @@ class RemoteConnection extends ChangeNotifier {
           for (var element in jsonData) {
             connectionDataList.add(ConnectionData.fromJson(element));
           }
-          final File configFile = File('${directory.path}/config.json');
-          fileString = decryptMyData(await configFile.readAsString()) ?? '';
-          Map<String, dynamic> jsonConfig = json.decode(fileString);
-          _activeIndex = jsonConfig['activeIndex'];
           // localServerName = jsonData['localServerName'];
           // remoteServerName = jsonData['remoteServerName'];
           // remoteUser = jsonData['remoteUser'];
@@ -208,6 +205,27 @@ class RemoteConnection extends ChangeNotifier {
     //}
   }
 
+  Future<void> _getConnectionConf() async {
+    //if (localWiFiConnectionName == null && remoteServerUri == null) {
+    // ricarico solo se necessario o forzato.
+    if (_activeIndex < 0) {
+      if (kIsWeb) {
+        await _getAssetsConf();
+      } else {
+        final directory = await getApplicationDocumentsDirectory();
+        final File file = File('${directory.path}/config.json');
+        if (await file.exists()) {
+          String fileString = decryptMyData(await file.readAsString()) ?? '';
+          Map<String, dynamic> jsonConfig = json.decode(fileString);
+          _activeIndex = jsonConfig['activeIndex'];
+        } else {
+          await _getAssetsConf();
+        }
+      }
+      notifyListeners();
+    }
+  }
+
   Future<void> _getAssetsInfo() async {
     try {
       String fileString =
@@ -217,12 +235,15 @@ class RemoteConnection extends ChangeNotifier {
       for (var element in jsonData) {
         connectionDataList.add(ConnectionData.fromJson(element));
       }
-      _activeIndex = 0;
-      print('RemoteConnection :: $localServerName, $localWiFiConnectionName');
     } on Exception catch (e) {
       print('RemoteConnection :: $e');
       throw Exception(e);
     }
+  }
+
+  Future<void> _getAssetsConf() async {
+    _activeIndex = 0;
+    print('RemoteConnection :: $localServerName, $localWiFiConnectionName');
   }
 
   Future<bool> saveConnectionInfo() async {
@@ -244,6 +265,20 @@ class RemoteConnection extends ChangeNotifier {
     }
     // forzo il ricaricare i valori
     connectionDataList = [];
+    getConnectionInfo();
+    return true;
+  }
+
+  Future<bool> saveConnectionConf() async {
+    if (!kIsWeb) {
+      final directory = await getApplicationDocumentsDirectory();
+      final File file = File('${directory.path}/config.json');
+      String stringToWrite =
+          encryptMyData(jsonEncode({"activeIndex": _activeIndex}));
+      await file.writeAsString(stringToWrite);
+    }
+    // forzo il ricaricare i valori
+    _activeIndex = -1;
     getConnectionInfo();
     return true;
   }
@@ -281,7 +316,7 @@ class RemoteConnection extends ChangeNotifier {
     if (kIsWeb) {
       return await checkLocalName();
     } else if (connectivity == 2) {
-      return (await checkLocalWiFi() && await checkLocalName());
+      return ((await checkLocalWiFi()) && (await checkLocalName()));
     } else {
       return false;
     }

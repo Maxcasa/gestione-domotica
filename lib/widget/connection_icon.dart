@@ -112,12 +112,13 @@ class _ConnectionIconState extends State<ConnectionIcon> {
         }
         break;
       case MqttCurrentConnectionState.TOGGLE_DISCONNECTED:
-        _iconaConn = Icon(Icons.wifi_off_rounded, color: Colors.red, size: 20);
+        _iconaConn =
+            Icon(Icons.wifi_off_rounded, color: Colors.black, size: 20);
         if (mqttClientWrapper!.remote) {
           _iconaLoc =
-              Icon(Icons.cloud_off_rounded, color: Colors.red, size: 20);
+              Icon(Icons.cloud_off_rounded, color: Colors.black, size: 20);
         } else {
-          _iconaLoc = Icon(Icons.home_rounded, color: Colors.red, size: 20);
+          _iconaLoc = Icon(Icons.home_rounded, color: Colors.black, size: 20);
         }
         break;
       case MqttCurrentConnectionState.RICONNECTING:

@@ -28,8 +28,6 @@ class SchemaRepository extends ChangeNotifier {
   SchemaRepository._internal() {
     remoteConnection = RemoteConnection();
     remoteConnection!.addListener(() async {
-      schemaTree = {};
-      _sensoriBack = null;
       reload = true;
       await lock.synchronized(_getInfo);
     });
@@ -73,6 +71,8 @@ class SchemaRepository extends ChangeNotifier {
   // prendo le info
   Future<void> _getInfo() async {
     if (reload) {
+      schemaTree = {};
+      _sensoriBack = null;
       await _getSchema();
       await _getSensoriBack();
       reload = false;
