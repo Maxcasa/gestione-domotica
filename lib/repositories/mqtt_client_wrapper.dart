@@ -121,7 +121,6 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
 
   Future<void> _connectClient() async {
     try {
-      print('MQTTClientWrapper::$remoteServer:$port client connecting....');
       notifyListeners('connectionState.connecting');
       await client!.connect(mqttUser, mqttPW);
     } on Exception catch (e) {

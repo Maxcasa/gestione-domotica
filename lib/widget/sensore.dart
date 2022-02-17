@@ -19,10 +19,10 @@ class Sensore extends StatelessWidget {
     return SizedBox(
         // height: sensore.size.toDouble(),
         // width: sensore.size.toDouble(),
-        child: IconButton(
+        child: ElevatedButton.icon(
       icon: Icon(sensore.icona,
           color: sensore.colore, size: sensore.size.toDouble()),
-      // label: Text(sensore.nome),
+      label: Text(''),
       onPressed: () {
         sensore.cambiaStato(1);
       },
@@ -55,6 +55,17 @@ class Sensore extends StatelessWidget {
                         }
                       },
                     ),
+                    // if (sensore.tipo == 'Sirena')
+                    //   IconButton(
+                    //     icon: const Icon(Icons.handyman_rounded),
+                    //     onPressed: () {
+                    //       if (sensore.abilitato) {
+                    //         sensore.disabilita();
+                    //       } else {
+                    //         sensore.abilita();
+                    //       }
+                    //     },
+                    //   ),
                   ])),
             ));
     final overlay = Overlay.of(_context!)!;

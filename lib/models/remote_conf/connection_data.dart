@@ -37,6 +37,7 @@ class ConnectionData {
       'localServerName': localServerName,
       'remoteServerName': remoteServerName,
       'remoteUser': remoteUser,
+      'remoteDomain': remoteDomain,
       'localWiFiConnectionName': localWiFiConnectionName
     };
     return result;
