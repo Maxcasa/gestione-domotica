@@ -28,19 +28,7 @@ class SensoreSirena extends SensoreModel {
 
   @override
   set valore(int valore) {
-    if (valore > 0) {
-      if ((_valore & 1) == 1) {
-        _valore &= ~1;
-      } else {
-        _valore |= 1;
-      }
-    } else if (valore < 0) {
-      if ((_valore & 2) == 1) {
-        _valore &= ~2;
-      } else {
-        _valore |= 2;
-      }
-    }
+    _valore = valore;
     setColore();
   }
 
@@ -56,18 +44,19 @@ class SensoreSirena extends SensoreModel {
 
   @override
   void cambiaStato(int valore) {
+    // se valore
     int locValore = 0;
     if (valore > 0) {
       if ((_valore & 1) == 1) {
-        locValore = 0;
+        locValore &= ~1;
       } else {
-        locValore = 1;
+        locValore |= 1;
       }
     } else if (valore < 0) {
       if ((_valore & 2) == 1) {
-        locValore = 0;
+        locValore &= ~2;
       } else {
-        locValore = 2;
+        locValore |= 2;
       }
     }
     // this.valore = locValore;

@@ -12,6 +12,10 @@ class SchemaSensori extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    List<Sensore> sensoreList = [];
+    for (var item in schemaSensoriModel.sensori) {
+      sensoreList.add(Sensore(sensore: item));
+    }
     return Stack(
       children: [
         Positioned(
@@ -24,12 +28,21 @@ class SchemaSensori extends StatelessWidget {
                       height: 150,
                       width: 150,
                     ))),
-        for (var item in schemaSensoriModel.sensori)
-          Positioned(
-            top: item.posTop,
-            left: item.posLeft, //give the values according to your requirement
-            child: Sensore(sensore: item),
-          ),
+        for (var item in sensoreList) item,
+        GestureDetector(
+          onTap: () {
+            // When the icon is pressed the OverlayEntry
+            // is removed from Overlay
+            for (var item in sensoreList) {
+              if (item.overlayVisible) {
+                item.removeOverlay();
+              }
+            }
+          },
+          child: Icon(Icons.close,
+              color: Colors.green,
+              size: MediaQuery.of(context).size.height * 0.025),
+        )
         // Column(children: <Widget>[
         //   Expanded(
         //     child: ListView.builder(

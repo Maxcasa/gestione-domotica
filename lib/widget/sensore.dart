@@ -10,43 +10,54 @@ class Sensore extends StatelessWidget {
   // variabili
   SensoreModel sensore;
   BuildContext? _context;
-  OverlayEntry? menuOverlay;
+  OverlayEntry? _menuOverlay;
+  bool overlayVisible = false;
 
   @override
   Widget build(BuildContext context) {
     _context = context;
     //_planProviderState.id = idPlan;
-    return SizedBox(
-        // height: sensore.size.toDouble(),
-        // width: sensore.size.toDouble(),
-        child: ElevatedButton.icon(
-      icon: Icon(sensore.icona,
-          color: sensore.colore, size: sensore.size.toDouble()),
-      label: Text(''),
-      onPressed: () {
-        sensore.cambiaStato(1);
-      },
-      // onLongPress: () {
-      //   showMenuOverlay();
-      // },
-    ));
+    return Positioned(
+        top: sensore.posTop,
+        left: sensore.posLeft,
+        child: SizedBox(
+            // height: sensore.size.toDouble(),
+            // width: sensore.size.toDouble(),
+            child: ElevatedButton.icon(
+          icon: Icon(sensore.icona,
+              color: sensore.colore, size: sensore.size.toDouble()),
+          label: Text(''),
+          onPressed: () {
+            sensore.cambiaStato(1);
+          },
+          onLongPress: () {
+            _menuOverlay = _MenuOverlay();
+            Overlay.of(context)?.insert(_menuOverlay!);
+            overlayVisible = true;
+          },
+        )));
     //floatingActionButton: _buildAddTaskButton(),
   }
 
-  void showMenuOverlay() {
-    menuOverlay = OverlayEntry(
+  OverlayEntry _MenuOverlay() {
+    RenderBox renderBox = _context!.findRenderObject() as RenderBox;
+    var size = renderBox.size;
+    var offset = renderBox.localToGlobal(Offset.zero);
+    return OverlayEntry(
         builder: (_context) => Positioned(
-              left: sensore.posTop + 5,
-              top: sensore.posLeft + 5,
+            left: offset.dx + 5,
+            top: offset.dy + size.height + 5,
+            child: Material(
+              elevation: 4,
               child: Container(
                   alignment: Alignment.topCenter,
-                  padding: new EdgeInsets.only(
-                      top: _context.size!.height * .58,
+                  padding: const EdgeInsets.only(
+                      //top: size.height * .58,
                       right: 20.0,
                       left: 20.0),
                   child: Row(children: [
                     IconButton(
-                      icon: Icon(Icons.delete_outline),
+                      icon: const Icon(Icons.delete_outline, size: 20),
                       onPressed: () {
                         if (sensore.abilitato) {
                           sensore.disabilita();
@@ -55,20 +66,24 @@ class Sensore extends StatelessWidget {
                         }
                       },
                     ),
-                    // if (sensore.tipo == 'Sirena')
-                    //   IconButton(
-                    //     icon: const Icon(Icons.handyman_rounded),
-                    //     onPressed: () {
-                    //       if (sensore.abilitato) {
-                    //         sensore.disabilita();
-                    //       } else {
-                    //         sensore.abilita();
-                    //       }
-                    //     },
-                    //   ),
+                    if (sensore is SensoreSirena)
+                      IconButton(
+                        icon: const Icon(Icons.handyman_rounded),
+                        onPressed: () {
+                          if (sensore.abilitato) {
+                            sensore.cambiaStato(-1);
+                          } else {
+                            sensore.cambiaStato(-1);
+                          }
+                        },
+                      ),
                   ])),
-            ));
-    final overlay = Overlay.of(_context!)!;
-    overlay.insert(menuOverlay!);
+            )));
+  }
+
+  void removeOverlay() {
+    if (_menuOverlay != null && overlayVisible) {
+      _menuOverlay!.remove();
+    }
   }
 }
