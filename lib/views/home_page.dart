@@ -40,8 +40,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    widget.mqttClientWrapper!.publishMessage(
-        topicSurName: 'request/set', messageData: "{\"status\": \"OK\"}");
+    widget.mqttClientWrapper!.status();
     super.initState();
   }
 

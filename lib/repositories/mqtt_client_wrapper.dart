@@ -55,6 +55,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   bool reconnect = false;
   bool _errorDetect = true;
   bool remote = false;
+  bool _statusRequest = false;
 
   String? remoteServer;
   String mqttUser = "";
@@ -193,6 +194,20 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     }
   }
 
+  void status() {
+    if (connectionState == MqttCurrentConnectionState.CONNECTED) {
+      _getstatus();
+    } else {
+      _statusRequest = true;
+    }
+  }
+
+  void _getstatus() {
+    _statusRequest = false;
+    publishMessage(
+        topicSurName: 'request/set', messageData: "{\"status\": \"OK\"}");
+  }
+
   // metodo per la pubblicazione di un messaggio
   // topicSurName: postfisso del topic (es. sensori)
   // messageData: ModelData da inviare
@@ -236,6 +251,9 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   void _onConnected() {
     connectionState = MqttCurrentConnectionState.CONNECTED;
     reconnect = false;
+    if (_statusRequest) {
+      _getstatus();
+    }
     print(
         'MQTTClientWrapper::OnConnected client callback - Client connection was sucessful');
     notifyListeners('connectionState.connected');
