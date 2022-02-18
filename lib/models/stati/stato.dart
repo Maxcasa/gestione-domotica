@@ -67,8 +67,8 @@ class Stato with ChangeNotifier {
     mqttClientWrapper!.subscribeToTopic(
         topicSurName: '${topicSurName}/get',
         onDataReceived: (messageData) => _onAllarmChanged(messageData));
-    mqttClientWrapper!.publishMessage(
-        topicSurName: '${topicSurName}/get', messageData: "{\"status\": \"\"}");
+    // mqttClientWrapper!.publishMessage(
+    //     topicSurName: '${topicSurName}/get', messageData: "{\"status\": \"\"}");
   }
 
   _onAllarmChanged(String messageData) {

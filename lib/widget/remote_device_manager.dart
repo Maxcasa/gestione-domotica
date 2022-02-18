@@ -42,7 +42,7 @@ class _RemoteDeviceManageState extends State<RemoteDeviceManage> {
 
   void _subscribeTopic() {
     mqttClientWrapper!.subscribeToTopic(
-        topicSurName: 'bridge/request/get',
+        topicSurName: 'request/get',
         onDataReceived: (messageData) => _permitedJoin(messageData));
     bottonePermetti();
   }
@@ -56,7 +56,7 @@ class _RemoteDeviceManageState extends State<RemoteDeviceManage> {
   void dispose() {
     mqttClientWrapper!
         .removeListener(_subscribeTopic, ['connectionState.connected']);
-    mqttClientWrapper!.unsubscribeToTopic(topicSurName: 'bridge/request/get');
+    mqttClientWrapper!.unsubscribeToTopic(topicSurName: 'request/get');
     super.dispose();
   }
 
@@ -78,7 +78,7 @@ class _RemoteDeviceManageState extends State<RemoteDeviceManage> {
           onPressed: () {
             String messageData = '{"permit_join": true, "time": 600}';
             mqttClientWrapper!.publishMessage(
-                topicSurName: 'bridge/request/set', messageData: messageData);
+                topicSurName: 'request/set', messageData: messageData);
             bottoneBlocca();
           },
           child: const Text('Permetti Device join'));
@@ -95,7 +95,7 @@ class _RemoteDeviceManageState extends State<RemoteDeviceManage> {
           onPressed: () {
             String messageData = '{"permit_join": false}';
             mqttClientWrapper!.publishMessage(
-                topicSurName: 'bridge/request/set', messageData: messageData);
+                topicSurName: 'request/set', messageData: messageData);
             bottonePermetti();
           },
           child: const Text('Blocca Device join'));

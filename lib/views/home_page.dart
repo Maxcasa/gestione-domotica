@@ -39,6 +39,13 @@ class _HomePageState extends State<HomePage> {
   static const _kCurve = Curves.ease;
 
   @override
+  void initState() {
+    widget.mqttClientWrapper!.publishMessage(
+        topicSurName: 'request/set', messageData: "{\"status\": \"OK\"}");
+    super.initState();
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     super.dispose();

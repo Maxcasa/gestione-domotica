@@ -22,15 +22,6 @@ class AllarmPage extends StatelessWidget {
     return Consumer<Stato>(
         builder: (BuildContext context, Stato allarme, Widget? child) {
       return visalizzaAllarme(allarme);
-      // SizedBox(
-      //     height: 200.0,
-      //     width: 200.0,
-      //     child: IconButton(
-      //       icon: Icon(allarme.icona, color: allarme.colore, size: 200.0),
-      //       onPressed: () {
-      //         allarme.cambiaStatoAllarme();
-      //       },
-      //     ));
     });
     //floatingActionButton: _buildAddTaskButton(),
   }

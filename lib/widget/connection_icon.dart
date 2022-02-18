@@ -51,7 +51,7 @@ class _ConnectionIconState extends State<ConnectionIcon> {
   void dispose() {
     timer?.cancel();
     mqttClientWrapper!.removeListener(_multiplex);
-    mqttClientWrapper!.unsubscribeToTopic(topicSurName: 'keepalive/get');
+    mqttClientWrapper!.unsubscribeToTopic(topicSurName: 'request/get');
     // mqttClientWrapper!
     //     .removeListener(_connected, ['connectionState.connected']);
     // mqttClientWrapper!
@@ -97,7 +97,7 @@ class _ConnectionIconState extends State<ConnectionIcon> {
           _iconaLoc = Icon(Icons.home_rounded, color: Colors.green, size: 20);
         }
         mqttClientWrapper!.subscribeToTopic(
-            topicSurName: 'keepalive/get',
+            topicSurName: 'request/get',
             onDataReceived: (messageData) => _keepAlive(messageData));
         timer =
             Timer.periodic(Duration(minutes: 1), (Timer t) => _checkAlive());
@@ -214,7 +214,8 @@ class _ConnectionIconState extends State<ConnectionIcon> {
   void _keepAlive(String messageData) {
     Map<String, dynamic> jsonData = jsonDecode(messageData);
     // se risponde che OK è vivo altrimenti è morto e provo a riconnettere
-    if (!(jsonData.containsKey('state')) && (jsonData['state'] != 'OK')) {
+    if (!(jsonData.containsKey('keepalive')) &&
+        (jsonData['keepalive'] != 'OK')) {
       _isAlive = true;
     }
   }
@@ -226,7 +227,7 @@ class _ConnectionIconState extends State<ConnectionIcon> {
     } else {
       _isAlive = false;
       mqttClientWrapper!.publishMessage(
-          topicSurName: 'keepalive/set', messageData: '{"stato": "OK"}');
+          topicSurName: 'request/set', messageData: '{"keepalive": "OK"}');
     }
   }
 
