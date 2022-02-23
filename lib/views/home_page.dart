@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
+import 'package:gestione_domotica/repositories/multi_message_provider.dart';
 import 'package:gestione_domotica/views/main_drawer.dart';
 import 'package:gestione_domotica/views/page_layer.dart';
 import 'package:gestione_domotica/widget/connection_icon.dart';
@@ -30,6 +31,7 @@ class _HomePageState extends State<HomePage> {
   PageController _controller = PageController(
     initialPage: 0,
   );
+  MultiMessageProvider multiMessageProvider = MultiMessageProvider();
 
   // variabili
   int _counter = 0;
@@ -40,7 +42,10 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    widget.mqttClientWrapper!.status();
+    multiMessageProvider.addMessage(
+        'request/set', "{\"status\": \"sensori\"}", ['sensori/get']);
+    multiMessageProvider
+        .addMessage('request/set', "{\"status\": \"stati\"}", ['stati/get']);
     super.initState();
   }
 

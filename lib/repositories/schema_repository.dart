@@ -82,7 +82,7 @@ class SchemaRepository extends ChangeNotifier {
 
   Future<void> _getSchema() async {
     if (remoteConnection != null &&
-        !remoteConnection!.connectionNull &&
+        !remoteConnection!.connectionDataNull &&
         remoteConnection!.connectionPresent) {
       if (await remoteConnection!.checkLocal()) {
         // String? localWiFi = await remoteConnection!.getWifiName();
@@ -97,7 +97,7 @@ class SchemaRepository extends ChangeNotifier {
 
   Future<void> _getSensoriBack() async {
     if (remoteConnection != null &&
-        !remoteConnection!.connectionNull &&
+        !remoteConnection!.connectionDataNull &&
         remoteConnection!.connectionPresent) {
       if (await remoteConnection!.checkLocal()) {
         // String? localWiFi = await remoteConnection!.getWifiName();

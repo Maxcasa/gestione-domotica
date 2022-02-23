@@ -38,12 +38,12 @@ class SchemaSensoriModel with ChangeNotifier {
   SchemaSensoriModel._internal({this.id = 0})
       : this.nome = topicSurName,
         super() {
-    _setupMqtt();
     schemaRepository = SchemaRepository();
     schemaRepository!.addListener(_getDati);
     if (schemaRepository != null) {
       _getDati();
     }
+    _setupMqtt();
   }
 
   // SchemaSensoriModel.fromListSensori(
@@ -63,6 +63,7 @@ class SchemaSensoriModel with ChangeNotifier {
   MQTTClientWrapper? mqttClientWrapper;
   SchemaRepository? schemaRepository;
   String _nome = '';
+  List<Map<String, dynamic>> waitingSensoreStato = [];
 
   // getter e setter
   SensoreModel? getSensore(id) {
@@ -122,6 +123,7 @@ class SchemaSensoriModel with ChangeNotifier {
         //     topicSurName: topicSurName, messageData: 'get/status');
       }
     }
+    _consumeWaitingSensore();
   }
 
   //metodi
@@ -145,13 +147,32 @@ class SchemaSensoriModel with ChangeNotifier {
         onDataReceived: (messageData) => _onSensorChanged(messageData));
   }
 
+  void _consumeWaitingSensore() {
+    for (var element in waitingSensoreStato) {
+      _onSensorChanged(jsonEncode(element));
+    }
+  }
+
   _onSensorChanged(String messageData) {
     Map<String, dynamic> jsonData = jsonDecode(messageData);
     if (jsonData.containsKey('stato')) {
       SensoreModel? localSensore = getSensore(int.parse(jsonData['id']));
       if (localSensore != null) {
         localSensore.valore = int.parse(jsonData['stato']);
+        int findIndex = waitingSensoreStato
+            .indexWhere((element) => element['id'] == jsonData['id']);
+        if (findIndex >= 0) {
+          waitingSensoreStato.remove(jsonData);
+        }
         notifyListeners();
+      } else {
+        int findIndex = waitingSensoreStato
+            .indexWhere((element) => element['id'] == jsonData['id']);
+        if (findIndex >= 0) {
+          waitingSensoreStato[findIndex]['stato'] = jsonData['stato'];
+        } else {
+          waitingSensoreStato.add(jsonData);
+        }
       }
     }
     // if (jsonData.containsKey('set')) {

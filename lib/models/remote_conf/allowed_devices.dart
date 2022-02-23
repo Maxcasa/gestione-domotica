@@ -19,7 +19,7 @@ class AllowedDevices with ChangeNotifier {
     remoteConnection = RemoteConnection();
     remoteConnection!.addListener(getAllowedDevice);
     remoteConnection!.getConnectionInfo();
-    if (!remoteConnection!.connectionNull) {
+    if (!remoteConnection!.connectionDataNull) {
       getAllowedDevice();
     }
   }
@@ -50,7 +50,7 @@ class AllowedDevices with ChangeNotifier {
   // Salvo il devices e li ricarico
   Future<void> saveAllowedDevice() async {
     if (remoteConnection != null &&
-        !remoteConnection!.connectionNull &&
+        !remoteConnection!.connectionDataNull &&
         remoteConnection!.connectionPresent &&
         await remoteConnection!.checkLocal()) {
       if (await _saveAllowedDeviceToRemote()) {
@@ -63,7 +63,7 @@ class AllowedDevices with ChangeNotifier {
   Future<void> getAllowedDevice() async {
     // abilito lo scaricamento da web o da rete locale
     if (remoteConnection != null &&
-        !remoteConnection!.connectionNull &&
+        !remoteConnection!.connectionDataNull &&
         remoteConnection!.connectionPresent &&
         await remoteConnection!.checkLocal()) {
       List<dynamic> localJson = await _getAllowedDeviceFromRemote();

@@ -127,7 +127,7 @@ class RemoteConnection extends ChangeNotifier {
         localWiFiConnectionName ?? '';
   }
 
-  bool get connectionNull {
+  bool get connectionDataNull {
     if (connectionName != null &&
         localServerName != null &&
         remoteServerName != null &&
