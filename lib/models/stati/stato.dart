@@ -1,8 +1,12 @@
+import 'package:gestione_domotica/models/logging.dart';
 import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
 import 'package:flutter/material.dart';
+import 'package:gestione_domotica/repositories/multi_message_provider.dart';
 import 'package:gestione_domotica/repositories/schema_repository.dart';
 import 'package:gestione_domotica/models/hex_color.dart';
 import 'dart:convert';
+
+// import 'package:logger/logger.dart';
 
 const String topicSurName = "stati";
 
@@ -17,6 +21,7 @@ class Stato with ChangeNotifier {
     if (schemaRepository != null) {
       _getDati();
     }
+    getStatus();
   }
 
   // variabili
@@ -28,9 +33,18 @@ class Stato with ChangeNotifier {
   SchemaRepository? schemaRepository;
   MQTTClientWrapper? mqttClientWrapper;
 
+  final log = logger(Stato);
+
   //metodi
   Future<void> _getDati() async {
     _getSchemaAllarme();
+  }
+
+  void getStatus() {
+    MultiMessageProvider multiMessageProvider = MultiMessageProvider();
+    log.v("Creo lo Stato");
+    multiMessageProvider
+        .addMessage('request/set', "{\"status\": \"stati\"}", ['stati/get']);
   }
 
   Future<void> _getSchemaAllarme() async {

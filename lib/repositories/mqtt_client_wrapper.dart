@@ -383,6 +383,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
         remote == (await remoteConnection!.checkLocal()) &&
         !reconnect) {
       reconnect = true;
+      client!.autoReconnect = false;
       client!.disconnect();
       //  connect('mqtt_user', 'mqtt_user');
     } else if (!connectionStateCheck() && remoteConnection!.connectionPresent) {

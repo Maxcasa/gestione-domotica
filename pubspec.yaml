@@ -41,6 +41,8 @@ dependencies:
   localstorage: ^4.0.0
   synchronized: ^3.0.0
   permission_handler: ^8.3.0
+  logger: ^1.0.2
+  #logger_flutter: ^0.7.1
   # wifi_iot: ^0.3.14
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

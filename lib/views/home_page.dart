@@ -7,6 +7,8 @@ import 'package:gestione_domotica/views/page_layer.dart';
 import 'package:gestione_domotica/widget/connection_icon.dart';
 import 'package:gestione_domotica/widget/dot_indicator.dart';
 
+// import 'package:logger_flutter/logger_flutter.dart';
+
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key) {
     mqttClientWrapper = MQTTClientWrapper();
@@ -28,9 +30,10 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   // : super(key: key);
-  PageController _controller = PageController(
+  final PageController _controller = PageController(
     initialPage: 0,
   );
+
   MultiMessageProvider multiMessageProvider = MultiMessageProvider();
 
   // variabili
@@ -42,10 +45,10 @@ class _HomePageState extends State<HomePage> {
 
   @override
   void initState() {
-    multiMessageProvider.addMessage(
-        'request/set', "{\"status\": \"sensori\"}", ['sensori/get']);
-    multiMessageProvider
-        .addMessage('request/set', "{\"status\": \"stati\"}", ['stati/get']);
+    // multiMessageProvider.addMessage(
+    //     'request/set', "{\"status\": \"sensori\"}", ['sensori/get']);
+    // multiMessageProvider
+    //     .addMessage('request/set', "{\"status\": \"stati\"}", ['stati/get']);
     super.initState();
   }
 
@@ -95,7 +98,13 @@ class _HomePageState extends State<HomePage> {
                         );
                       },
                     ),
-                  )))
+                  ))),
+          // LogConsoleOnShake(
+          //   dark: true,
+          //   child: Center(
+          //     child: Text("Shake Phone to open Console."),
+          //   ),
+          // )
         ]));
   }
 

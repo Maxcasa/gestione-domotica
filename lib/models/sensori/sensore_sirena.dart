@@ -7,12 +7,12 @@ import 'package:gestione_domotica/models/sensori/sensori_layer.dart';
 /// Classe che definisce il sensore di apertura porte e finestre
 class SensoreSirena extends SensoreModel {
   // costruttori
-  SensoreSirena({required int id, String? nome})
+  SensoreSirena({required int id, String? nome, int numeroRele = 1})
       : _id = id,
         _nome = nome ?? "Sensore Sirena generico",
         super(id: id, nome: nome, icona: Icons.notifications_on_rounded);
 
-  SensoreSirena.fromJson(Map<String, dynamic> json)
+  SensoreSirena.fromJson(Map<String, dynamic> json, {int numeroRele = 1})
       : _id = json['id'],
         _nome = json['nome'],
         super.fromJson(json) {
@@ -25,6 +25,7 @@ class SensoreSirena extends SensoreModel {
   @override
   Color colore = Colors.black;
   int _valore = 0;
+  int numeroRele = 0;
 
   @override
   set valore(int valore) {
@@ -52,7 +53,7 @@ class SensoreSirena extends SensoreModel {
       } else {
         locValore |= 1;
       }
-    } else if (valore < 0) {
+    } else if (valore < 0 && numeroRele > 1) {
       if ((_valore & 2) == 1) {
         locValore &= ~2;
       } else {

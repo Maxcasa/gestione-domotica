@@ -17,16 +17,16 @@ void main() {
   //SchemaSensori(id: 0);
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider<Stato>(
-      create: (_) => Stato(id: 0),
+      create: (context) => Stato(id: 0),
     ),
     ChangeNotifierProvider<MainDrawerProvider>(
-      create: (_) => MainDrawerProvider('assets/json/drawer_list.json'),
+      create: (context) => MainDrawerProvider('assets/json/drawer_list.json'),
     ),
     ChangeNotifierProvider<SchemaSensoriModel>(
         //   create: (_) => SchemaSensori(id: 0),
-        create: (_) => SchemaSensoriModel()),
+        create: (context) => SchemaSensoriModel()),
     ChangeNotifierProvider<RemoteConnection>(
-      create: (_) => RemoteConnection(),
+      create: (context) => RemoteConnection(),
     )
     // nome: 'test sensori',
     // sensori: [

@@ -1,4 +1,5 @@
 import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
+// import 'package:logger/logger.dart';
 
 class MultiMessageProvider {
 // class MQTTClientWrapper with ChangeNotifier {
@@ -17,9 +18,12 @@ class MultiMessageProvider {
 
   MQTTClientWrapper? mqttClientWrapper;
   List<Map<String, Object>> waitingMessageList = [];
+  // var logger = Logger();
 
   void addMessage(String topic, String message, List<String> listeners) {
+    // logger.v("Aggiungo il messaggio Topic: ${topic} ${message}");
     if (checkListeners(listeners)) {
+      // logger.v("Pubblico subito il messaggio Topic: ${topic} ${message}");
       mqttClientWrapper!
           .publishMessage(topicSurName: topic, messageData: message);
     } else {
@@ -33,6 +37,8 @@ class MultiMessageProvider {
     if (waitingMessageList.isNotEmpty) {
       for (var element in waitingMessageList) {
         if (checkListeners(element['listeners'] as List<String>)) {
+          // logger.v(
+          //     "Pubblico dopo il messaggio Topic: ${element['topic'] as String} ${element['message'] as String}");
           mqttClientWrapper!.publishMessage(
               topicSurName: element['topic'] as String,
               messageData: element['message'] as String);
