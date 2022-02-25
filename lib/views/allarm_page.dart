@@ -34,23 +34,23 @@ class AllarmPage extends StatelessWidget {
 
   Widget visalizzaAllarme(Stato allarme) {
     return SizedBox(
-      height: 200.0,
-      width: 200.0,
-      child: Column(children: [
-        IconButton(
-          icon:
-              Icon(Icons.add_circle_rounded, color: Colors.black, size: 200.0),
+        height: 200.0,
+        width: 200.0,
+        child:
+            // IconButton(
+            //   icon:
+            //       Icon(Icons.add_circle_rounded, color: Colors.black, size: 200.0),
+            //   onPressed: () {
+            //     allarme.cambiaStatoAllarme();
+            //   },
+            // ),
+            IconButton(
+          icon: Icon(allarme.icona, color: allarme.colore, size: 200.0),
           onPressed: () {
             allarme.cambiaStatoAllarme();
           },
-        ),
-        // IconButton(
-        //   icon: Icon(allarme.icona, color: allarme.colore, size: 50.0),
-        //   onPressed: () {
-        //     allarme.getStatus();
-        //   },
-        // )
-      ]),
-    );
+        )
+        // ]),
+        );
   }
 }

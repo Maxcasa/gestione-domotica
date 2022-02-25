@@ -114,7 +114,7 @@ class SchemaSensoriModel with ChangeNotifier {
               sensori.add(SensoreLuce.fromJson(element));
             } else if (tipo == 'SensoreInfisso') {
               sensori.add(SensoreInfisso.fromJson(element));
-            } else if (tipo == 'Sirena_1') {
+            } else if (tipo == 'Sirena' || tipo == 'Sirena_1') {
               sensori.add(SensoreSirena.fromJson(element, numeroRele: 1));
             } else if (tipo == 'Sirena_2') {
               sensori.add(SensoreSirena.fromJson(element, numeroRele: 2));
