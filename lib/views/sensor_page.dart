@@ -12,9 +12,9 @@ import 'package:provider/provider.dart';
 /// Classe WIDGET che contiene la gestione degli allarmi
 class SensorPage extends StatelessWidget {
   SensorPage({Key? key}) : super(key: key) {
-    MultiMessageProvider multiMessageProvider = MultiMessageProvider();
-    multiMessageProvider.addMessage(
-        'request/set', "{\"status\": \"sensori\"}", ['sensori/get']);
+    // MultiMessageProvider multiMessageProvider = MultiMessageProvider();
+    // multiMessageProvider.addMessage(
+    //     'request/set', "{\"status\": \"sensori\"}", ['sensori/get']);
   }
 
   // varible for visualization control

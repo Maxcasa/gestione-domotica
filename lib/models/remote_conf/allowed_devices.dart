@@ -17,10 +17,10 @@ class AllowedDevices with ChangeNotifier {
   // costruttori
   AllowedDevices() : super() {
     remoteConnection = RemoteConnection();
-    remoteConnection!.addListener(getAllowedDevice);
+    remoteConnection!.addListener(getAllowedDevices);
     remoteConnection!.getConnectionInfo();
     if (!remoteConnection!.connectionDataNull) {
-      getAllowedDevice();
+      getAllowedDevices();
     }
   }
 
@@ -47,26 +47,26 @@ class AllowedDevices with ChangeNotifier {
     notifyListeners();
   }
 
-  // Salvo il devices e li ricarico
-  Future<void> saveAllowedDevice() async {
+  // Salvo i devices e li ricarico
+  Future<void> saveAllowedDevices() async {
     if (remoteConnection != null &&
         !remoteConnection!.connectionDataNull &&
         remoteConnection!.connectionPresent &&
         await remoteConnection!.checkLocal()) {
-      if (await _saveAllowedDeviceToRemote()) {
-        await getAllowedDevice();
+      if (await _saveAllowedDevicesToRemote()) {
+        await getAllowedDevices();
       }
     }
   }
 
   // prendo i device autorizzati dal web
-  Future<void> getAllowedDevice() async {
+  Future<void> getAllowedDevices() async {
     // abilito lo scaricamento da web o da rete locale
     if (remoteConnection != null &&
         !remoteConnection!.connectionDataNull &&
         remoteConnection!.connectionPresent &&
         await remoteConnection!.checkLocal()) {
-      List<dynamic> localJson = await _getAllowedDeviceFromRemote();
+      List<dynamic> localJson = await _getAllowedDevicesFromRemote();
       if (localJson.isNotEmpty) {
         for (var element in localJson) {
           allowedDevices.add(AllowedDevice.fromJson(element));
@@ -78,10 +78,10 @@ class AllowedDevices with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<List<dynamic>> _getAllowedDeviceFromRemote() async {
+  Future<List<dynamic>> _getAllowedDevicesFromRemote() async {
     String? serverUri = remoteConnection!.localServerName;
     http.Response httpResponse = await http
-        .get(Uri.parse('http://${serverUri}:$port/get/allowed_device'));
+        .get(Uri.parse('http://${serverUri}:$port/get/allowed_devices'));
     if (httpResponse.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
@@ -96,11 +96,11 @@ class AllowedDevices with ChangeNotifier {
   }
 
   // invio i dati device al server remoto
-  Future<bool> _saveAllowedDeviceToRemote() async {
+  Future<bool> _saveAllowedDevicesToRemote() async {
     String? serverUri = remoteConnection!.localServerName;
     String stringToSave = jsonEncode(toJson());
     http.Response httpResponse = await http.post(
-        Uri.parse('http://${serverUri}:$port/post/allowed_device'),
+        Uri.parse('http://${serverUri}:$port/post/allowed_devices'),
         headers: <String, String>{
           'Content-Type': 'application/json; charset=UTF-8',
         },

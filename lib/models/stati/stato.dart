@@ -41,10 +41,10 @@ class Stato with ChangeNotifier {
   }
 
   void getStatus() {
-    MultiMessageProvider multiMessageProvider = MultiMessageProvider();
-    log.v("Creo lo Stato");
-    multiMessageProvider
-        .addMessage('request/set', "{\"status\": \"stati\"}", ['stati/get']);
+    // MultiMessageProvider multiMessageProvider = MultiMessageProvider();
+    // log.v("Creo lo Stato");
+    // multiMessageProvider
+    //     .addMessage('request/set', "{\"status\": \"stati\"}", ['stati/get']);
   }
 
   Future<void> _getSchemaAllarme() async {

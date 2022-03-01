@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
+import 'package:gestione_domotica/repositories/multi_message_provider.dart';
 
 /// Classe WIDGET che contiene la gestione dell'icona della connessione
 class ConnectionIcon extends StatefulWidget {
@@ -106,6 +107,12 @@ class _ConnectionIconState extends State<ConnectionIcon> {
               onDataReceived: (messageData) => _keepAlive(messageData));
           timer =
               Timer.periodic(Duration(minutes: 1), (Timer t) => _checkAlive());
+          MultiMessageProvider multiMessageProvider = MultiMessageProvider();
+          multiMessageProvider.addMessage(
+              'request/set', "{\"status\": \"stati\"}", ['stati/get']);
+          multiMessageProvider.addMessage(
+              'request/set', "{\"status\": \"sensori\"}", ['sensori/get']);
+
           break;
         case MqttCurrentConnectionState.DISCONNECTED:
           _iconaConn =

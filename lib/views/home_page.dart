@@ -34,7 +34,7 @@ class _HomePageState extends State<HomePage> {
     initialPage: 0,
   );
 
-  MultiMessageProvider multiMessageProvider = MultiMessageProvider();
+  // MultiMessageProvider multiMessageProvider = MultiMessageProvider();
 
   // variabili
   int _counter = 0;

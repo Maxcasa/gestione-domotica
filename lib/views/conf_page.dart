@@ -5,6 +5,7 @@ import 'package:gestione_domotica/models/remote_conf/remote_layer.dart';
 import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
 //import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
 import 'package:gestione_domotica/views/page_layer.dart';
+import 'package:gestione_domotica/widget/allowed_button.dart';
 import 'package:gestione_domotica/widget/connection_icon.dart';
 import 'package:gestione_domotica/widget/dot_indicator.dart';
 import 'package:gestione_domotica/widget/remote_device_manager.dart';
@@ -67,6 +68,13 @@ class ConfPage extends StatelessWidget {
             body: Column(children: <Widget>[
               selectConnection(),
               remoteConnection(),
+              Divider(color: Colors.black),
+              Container(
+                alignment: Alignment.centerLeft,
+                margin: EdgeInsets.all(10),
+                padding: EdgeInsets.all(5),
+                child: AllowedButton(),
+              ),
               Divider(color: Colors.black),
               allowedDevice(),
               Divider(color: Colors.black),
@@ -272,7 +280,7 @@ class ConfPage extends StatelessWidget {
                           deviceNameList.add(controller.text);
                         }
                         allowedDevices.setNomiDevices(deviceNameList);
-                        allowedDevices.saveAllowedDevice();
+                        allowedDevices.saveAllowedDevices();
                         // If the form is valid, display a snackbar. In the real world,
                         // you'd often call a server or save the information in a database.
                         mostraSnackBar('Aggiornato', context);
