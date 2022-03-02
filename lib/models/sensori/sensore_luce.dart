@@ -26,27 +26,36 @@ class SensoreLuce extends SensoreModel {
   // variabili
   int _id;
   String _nome;
-  @override
-  Color colore = Colors.black;
-  int _valore = 0;
+  // @override
+  // Color colore = Colors.black;
+  // @override
+  // int valoreInt = 0;
 
+  // funzione chiamata quando arriva un valore da remoto
   @override
   set valore(int valore) {
-    if (valore < 0) {
-      _valore = (_valore + 1) % 2;
-    } else {
-      _valore = valore;
-    }
-    if (_valore > 0) {
+    valoreInt = valore;
+    setColore();
+  }
+
+  void setColore() {
+    if (valoreInt > 0) {
       colore = Colors.yellow;
     } else {
       colore = Colors.black;
     }
   }
 
+  // funzione invocata dall'interfaccia quando si cambia il valore
   @override
   void cambiaStato(int valore) {
-    super.cambiaStato(-1);
+    int locValore;
+    if (valore > 0) {
+      locValore = (valoreInt + 1) % 2;
+    } else {
+      locValore = valore;
+    }
+    super.cambiaStato(locValore);
     // return jsonEncode({'id': _id, 'set': -1});
   }
 }

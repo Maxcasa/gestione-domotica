@@ -165,7 +165,7 @@ class SchemaSensoriModel with ChangeNotifier {
         int findIndex = waitingSensoreStato
             .indexWhere((element) => element['id'] == jsonData['id']);
         if (findIndex >= 0) {
-          waitingSensoreStato.remove(jsonData);
+          waitingSensoreStato.removeAt(findIndex);
         }
         notifyListeners();
       } else {

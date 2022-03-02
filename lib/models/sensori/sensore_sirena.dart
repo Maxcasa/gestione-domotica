@@ -22,23 +22,24 @@ class SensoreSirena extends SensoreModel {
   // variabili
   int _id;
   String _nome;
-  @override
-  Color colore = Colors.black;
-  int _valore = 0;
+  // @override
+  // Color colore = Colors.black;
+  // @override
+  // int valoreInt = 0;
   int numeroRele = 0;
 
   @override
   set valore(int valore) {
-    _valore = valore;
+    valoreInt = valore;
     setColore();
   }
 
   void setColore() {
-    if (_valore == 0) {
+    if (valoreInt == 0) {
       colore = Colors.black;
-    } else if (_valore == 1) {
+    } else if (valoreInt == 1) {
       colore = Colors.red;
-    } else if (_valore > 1) {
+    } else if (valoreInt > 1) {
       colore = Colors.yellow;
     }
   }
@@ -48,13 +49,13 @@ class SensoreSirena extends SensoreModel {
     // se valore
     int locValore = 0;
     if (valore > 0) {
-      if ((_valore & 1) == 1) {
+      if ((valoreInt & 1) == 1) {
         locValore &= ~1;
       } else {
         locValore |= 1;
       }
     } else if (valore < 0 && numeroRele > 1) {
-      if ((_valore & 2) == 1) {
+      if ((valoreInt & 2) == 1) {
         locValore &= ~2;
       } else {
         locValore |= 2;
