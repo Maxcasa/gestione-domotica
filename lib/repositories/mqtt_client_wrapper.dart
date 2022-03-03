@@ -359,6 +359,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     if (connectionStateCheck()) {
       connectionState = MqttCurrentConnectionState.TOGGLE_DISCONNECTED;
       reconnect = false;
+      client!.autoReconnect = false;
       client!.disconnect();
       //  connect('mqtt_user', 'mqtt_user');
     } else if (connectionState == MqttCurrentConnectionState.DISCONNECTED ||
