@@ -159,8 +159,26 @@ class SchemaSensoriModel with ChangeNotifier {
   _onSensorChanged(String messageData) {
     Map<String, dynamic> jsonData = jsonDecode(messageData);
     if (jsonData.containsKey('stato')) {
-      SensoreModel? localSensore = getSensore(int.parse(jsonData['id']));
-      if (localSensore != null) {
+      List<SensoreModel> localSensori = [];
+      if (jsonData['id'] == "*") {
+        localSensori.addAll(sensori);
+      } else if (int.tryParse(jsonData['id']) != null) {
+        // se paso un id intero
+        if (getSensore(int.parse(jsonData['id'])) != null) {
+          // se è l'id è auello di un sensore registrato
+          localSensori.add(getSensore(int.parse(jsonData['id']))!);
+        } else {
+          // se l'id non è registrato metto il comando in attesa
+          int findIndex = waitingSensoreStato
+              .indexWhere((element) => element['id'] == jsonData['id']);
+          if (findIndex >= 0) {
+            waitingSensoreStato[findIndex]['stato'] = jsonData['stato'];
+          } else {
+            waitingSensoreStato.add(jsonData);
+          }
+        }
+      }
+      for (SensoreModel localSensore in localSensori) {
         localSensore.valore = int.parse(jsonData['stato']);
         int findIndex = waitingSensoreStato
             .indexWhere((element) => element['id'] == jsonData['id']);
@@ -168,14 +186,6 @@ class SchemaSensoriModel with ChangeNotifier {
           waitingSensoreStato.removeAt(findIndex);
         }
         notifyListeners();
-      } else {
-        int findIndex = waitingSensoreStato
-            .indexWhere((element) => element['id'] == jsonData['id']);
-        if (findIndex >= 0) {
-          waitingSensoreStato[findIndex]['stato'] = jsonData['stato'];
-        } else {
-          waitingSensoreStato.add(jsonData);
-        }
       }
     }
     // if (jsonData.containsKey('set')) {
