@@ -15,6 +15,7 @@ class SensoreSirena extends SensoreModel {
   SensoreSirena.fromJson(Map<String, dynamic> json, {int numeroRele = 1})
       : _id = json['id'],
         _nome = json['nome'],
+        azionamenti = json['azion'] ?? 0,
         super.fromJson(json) {
     icona = Icons.notifications_on_rounded;
   }
@@ -22,6 +23,7 @@ class SensoreSirena extends SensoreModel {
   // variabili
   int _id;
   String _nome;
+  int azionamenti = 0;
   // @override
   // Color colore = Colors.black;
   // @override
@@ -33,6 +35,12 @@ class SensoreSirena extends SensoreModel {
     valoreInt = valore;
     setColore();
   }
+
+  @override
+  get visualSize => size * (1 + (valore & 1));
+
+  @override
+  String get text => azionamenti.toString();
 
   void setColore() {
     if (valoreInt == 0) {

@@ -39,6 +39,10 @@ class SensoreModel {
 
   int get valore => valoreInt;
 
+  int get visualSize => size * (1 + valore);
+
+  String get text => '';
+
   // conversione Json
   SensoreModel.fromJson(Map<String, dynamic> json)
       : id = json['id'],

@@ -25,8 +25,8 @@ class Sensore extends StatelessWidget {
             // width: sensore.size.toDouble(),
             child: ElevatedButton.icon(
           icon: Icon(sensore.icona,
-              color: sensore.colore, size: sensore.size.toDouble()),
-          label: Text(''),
+              color: sensore.colore, size: sensore.visualSize.toDouble()),
+          label: Text(sensore.text),
           onPressed: () {
             sensore.cambiaStato(1);
           },

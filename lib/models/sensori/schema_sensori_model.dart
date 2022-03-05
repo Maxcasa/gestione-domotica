@@ -163,9 +163,9 @@ class SchemaSensoriModel with ChangeNotifier {
       if (jsonData['id'] == "*") {
         localSensori.addAll(sensori);
       } else if (int.tryParse(jsonData['id']) != null) {
-        // se paso un id intero
+        // se passo un id intero
         if (getSensore(int.parse(jsonData['id'])) != null) {
-          // se è l'id è auello di un sensore registrato
+          // se è l'id è quello di un sensore registrato
           localSensori.add(getSensore(int.parse(jsonData['id']))!);
         } else {
           // se l'id non è registrato metto il comando in attesa
@@ -180,6 +180,9 @@ class SchemaSensoriModel with ChangeNotifier {
       }
       for (SensoreModel localSensore in localSensori) {
         localSensore.valore = int.parse(jsonData['stato']);
+        if (localSensore is SensoreSirena && jsonData.containsKey('azion')) {
+          localSensore.azionamenti = int.parse(jsonData['azion']);
+        }
         int findIndex = waitingSensoreStato
             .indexWhere((element) => element['id'] == jsonData['id']);
         if (findIndex >= 0) {
