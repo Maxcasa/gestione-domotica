@@ -25,6 +25,11 @@ class SensoreInfisso extends SensoreModel {
   set valore(int valore) {
     valoreInt = valore;
     if (valoreInt > 0) {
+      zIndex = 1;
+    } else {
+      zIndex = 0;
+    }
+    if (valoreInt > 0) {
       colore = Colors.red;
     } else {
       colore = Colors.black;

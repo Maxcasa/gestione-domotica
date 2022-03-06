@@ -35,6 +35,11 @@ class SensoreLuce extends SensoreModel {
   @override
   set valore(int valore) {
     valoreInt = valore;
+    if (valoreInt > 0) {
+      zIndex = 1;
+    } else {
+      zIndex = 0;
+    }
     setColore();
   }
 

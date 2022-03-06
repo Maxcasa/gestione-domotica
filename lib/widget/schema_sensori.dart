@@ -9,13 +9,15 @@ class SchemaSensori extends StatelessWidget {
 
   // variabili
   SchemaSensoriModel schemaSensoriModel;
+  List<Sensore> sensoreList = [];
 
   @override
   Widget build(BuildContext context) {
-    List<Sensore> sensoreList = [];
+    sensoreList = [];
     for (var item in schemaSensoriModel.sensori) {
       sensoreList.add(Sensore(sensore: item));
     }
+    reorderListaSensori();
     return GestureDetector(
         onTap: () {
           // When the icon is pressed the OverlayEntry
@@ -60,5 +62,16 @@ class SchemaSensori extends StatelessWidget {
             // ])
           ],
         ));
+  }
+
+  void reorderListaSensori() {
+    if (sensoreList.isNotEmpty) {
+      // ignore: unnecessary_null_comparison
+      return sensoreList.sort((a, b) => a == null
+          ? 1
+          : b == null
+              ? -1
+              : a.sensore.zIndex.compareTo(b.sensore.zIndex));
+    }
   }
 }

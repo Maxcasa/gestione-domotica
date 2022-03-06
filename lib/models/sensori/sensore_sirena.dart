@@ -33,6 +33,11 @@ class SensoreSirena extends SensoreModel {
   @override
   set valore(int valore) {
     valoreInt = valore;
+    if (valoreInt > 0) {
+      zIndex = 2;
+    } else {
+      zIndex = 0;
+    }
     setColore();
   }
 

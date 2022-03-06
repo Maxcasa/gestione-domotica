@@ -31,6 +31,8 @@ class SensoreModel {
   bool abilitato = true;
   void Function(int, AzioneSensore, String)? azioneSensoreCallBack;
 
+  int zIndex = 0;
+
   // getter & setter
   String get tipo => runtimeType.toString();
   set valore(int valore) {
