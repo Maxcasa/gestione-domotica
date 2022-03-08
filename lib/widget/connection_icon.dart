@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:gestione_domotica/repositories/keep_alive_provider.dart';
 import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
 import 'package:gestione_domotica/repositories/multi_message_provider.dart';
 
@@ -29,12 +30,14 @@ class _ConnectionIconState extends State<ConnectionIcon> {
   Icon _iconaView = Icon(Icons.home_rounded, color: Colors.black, size: 20);
   bool _isAlive = true;
   Timer? timer;
+  KeepAliveProvider? keepAliveProvider;
 
   @override
   void initState() {
     mqttClientWrapper = MQTTClientWrapper();
     _multiplex();
     mqttClientWrapper!.addListener(_multiplex);
+    keepAliveProvider = KeepAliveProvider();
 
     // mqttClientWrapper!.addListener(_connected, ['connectionState.connected']);
     // mqttClientWrapper!.addListener(_connecting, ['connectionState.connecting']);
@@ -235,6 +238,9 @@ class _ConnectionIconState extends State<ConnectionIcon> {
     if (!(jsonData.containsKey('keepalive')) &&
         (jsonData['keepalive'] != 'OK')) {
       _isAlive = true;
+    }
+    if (jsonData.containsKey('TeH')) {
+      keepAliveProvider!.impostaTeH(jsonData['TeH']);
     }
   }
 

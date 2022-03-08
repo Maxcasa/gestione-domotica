@@ -191,7 +191,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
         "$topicBase/${remoteConnection!.remoteDomain}/$topicSurName";
     print('MQTTClientWrapper::Subscribing to the ' + totalTopic + ' topic');
     if (!subscribedTopicList.contains(totalTopic)) {
-      client!.subscribe(totalTopic, MqttQos.atMostOnce);
+      client!.subscribe(totalTopic, MqttQos.exactlyOnce);
     }
     if (onDataReceivedArray.containsKey(totalTopic)) {
       onDataReceivedArray[totalTopic]!.add(onDataReceived);

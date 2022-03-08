@@ -8,6 +8,7 @@ import 'dart:convert';
 
 import 'package:gestione_domotica/models/sensori/sensori_layer.dart';
 import 'package:gestione_domotica/models/model_data.dart';
+import 'package:gestione_domotica/repositories/keep_alive_provider.dart';
 import 'package:gestione_domotica/repositories/schema_repository.dart';
 import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
 //import 'package:property_change_notifier/property_change_notifier.dart';
@@ -45,6 +46,8 @@ class SchemaSensoriModel with ChangeNotifier {
       _getDati();
     }
     _setupMqtt();
+    keepAliveProvider = KeepAliveProvider();
+    keepAliveProvider?.addListener(setTeH);
   }
 
   // SchemaSensoriModel.fromListSensori(
@@ -65,6 +68,7 @@ class SchemaSensoriModel with ChangeNotifier {
   SchemaRepository? schemaRepository;
   String _nome = '';
   List<Map<String, dynamic>> waitingSensoreStato = [];
+  KeepAliveProvider? keepAliveProvider;
 
   // getter e setter
   SensoreModel? getSensore(id) {
@@ -223,6 +227,8 @@ class SchemaSensoriModel with ChangeNotifier {
 
     return maxIdAzione;
   }
+
+  void setTeH() {}
 
   // operator ==(Plan other) {
   //   return false;
