@@ -36,6 +36,7 @@ class SensoreInfisso extends SensoreModel {
     }
   }
 
-  @override
-  void cambiaStato(int valore) {}
+  // @override
+  // void cambiaStato(int valore) {}
+  // uso la funzione padre per mandae il messaggio
 }
