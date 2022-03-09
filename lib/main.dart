@@ -58,8 +58,19 @@ class MyApp extends StatelessWidget {
         title: 'Gestione Domotica',
         scrollBehavior: AppScrollBehavior(),
         theme: ThemeData(
-          // This is the theme of your application.
-          primarySwatch: Colors.blue,
+          // Define the default brightness and colors.
+          brightness: Brightness.light,
+          primaryColor: Colors.brown[50],
+          textTheme: const TextTheme(bodyText2: TextStyle(color: Colors.black)),
+          //   appBarTheme: AppBarTheme(
+          //       backgroundColor: Colors.cyan[100],
+          //       // This will be applied to the "back" icon
+          //       // iconTheme: IconThemeData(color: Colors.red),
+          //       // This will be applied to the action icon buttons that locates on the right side
+          //       actionsIconTheme: IconThemeData(color: Colors.amber),
+          //       centerTitle: false,
+          //       //elevation: 15,
+          //       titleTextStyle: TextStyle(color: Colors.lightBlueAccent)),
         ),
         home: HomePage());
     //connectionState() ? HomePage() : null

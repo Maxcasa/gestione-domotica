@@ -22,6 +22,7 @@ final factories = <String, Object Function(int id)>{
   'Sensore': (id) => SensoreModel(id: id),
   'SensoreLuce': (id) => SensoreLuce(id: id),
   'SensoreInfisso': (id) => SensoreInfisso(id: id),
+  'SensoreTeH': (id) => SensoreTeH(id: id),
   'Sirena_1': (id) => SensoreSirena(id: id, numeroRele: 1),
   'Sirena_2': (id) => SensoreSirena(id: id, numeroRele: 2)
 };
@@ -47,7 +48,7 @@ class SchemaSensoriModel with ChangeNotifier {
     }
     _setupMqtt();
     keepAliveProvider = KeepAliveProvider();
-    keepAliveProvider?.addListener(setTeH);
+    keepAliveProvider?.addListener(setTeH, ['TeH']);
   }
 
   // SchemaSensoriModel.fromListSensori(
@@ -118,6 +119,8 @@ class SchemaSensoriModel with ChangeNotifier {
               sensori.add(SensoreLuce.fromJson(element));
             } else if (tipo == 'SensoreInfisso') {
               sensori.add(SensoreInfisso.fromJson(element));
+            } else if (tipo == 'SensoreTeH') {
+              sensori.add(SensoreTeH.fromJson(element));
             } else if (tipo == 'Sirena' || tipo == 'Sirena_1') {
               sensori.add(SensoreSirena.fromJson(element, numeroRele: 1));
             } else if (tipo == 'Sirena_2') {
@@ -228,7 +231,24 @@ class SchemaSensoriModel with ChangeNotifier {
     return maxIdAzione;
   }
 
-  void setTeH() {}
+  void setTeH() {
+    if (keepAliveProvider != null &&
+        keepAliveProvider!.mappaValori.containsKey('TeH') &&
+        keepAliveProvider!.mappaValori['TeH'] != null &&
+        keepAliveProvider!.mappaValori['TeH']!.isNotEmpty) {
+      for (Map<String, dynamic> sensoreDaAggiornare
+          in keepAliveProvider!.mappaValori['TeH']!) {
+        if (getSensore(int.parse(sensoreDaAggiornare['id'])) != null &&
+            getSensore(int.parse(sensoreDaAggiornare['id']))!.tipo ==
+                'SensoreTeH') {
+          SensoreTeH sensore =
+              getSensore(int.parse(sensoreDaAggiornare['id']))! as SensoreTeH;
+          sensore.valoreList = sensoreDaAggiornare['valori'];
+        }
+      }
+      notifyListeners();
+    }
+  }
 
   // operator ==(Plan other) {
   //   return false;
