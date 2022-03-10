@@ -14,20 +14,30 @@ import 'package:provider/provider.dart';
 
 import 'main_drawer.dart';
 
-class ConfPage extends StatelessWidget {
+class ConfPage extends StatelessWidget with WidgetsBindingObserver {
   ConfPage({Key? key}) : super(key: key) {
     mqttClientWrapper = MQTTClientWrapper();
     if (mqttClientWrapper!.connectionState == MqttCurrentConnectionState.IDLE) {
       _connect();
     }
     mqttClientWrapper!.addListener(_connect, ['connectionState.disconnected']);
+    WidgetsBinding.instance!.addObserver(this);
   }
 
   // variabili
   MQTTClientWrapper? mqttClientWrapper;
+  bool active = true;
 
   void _connect() {
-    mqttClientWrapper!.connectMqttClient();
+    if (active) {
+      mqttClientWrapper!.active = true;
+      mqttClientWrapper!.connectMqttClient();
+    }
+  }
+
+  void _disconnect() {
+    mqttClientWrapper!.active = false;
+    mqttClientWrapper!.disconnect();
   }
 
   PageController _controller = PageController(
@@ -49,6 +59,33 @@ class ConfPage extends StatelessWidget {
   //   _controller.dispose();
   //   super.dispose();
   // }
+
+  // AppLifecycleState _notification;
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        print("app in resumed");
+        active = true;
+        _connect();
+        break;
+      case AppLifecycleState.inactive:
+        print("app in inactive");
+        active = false;
+        _disconnect();
+        break;
+      case AppLifecycleState.paused:
+        print("app in paused");
+        active = false;
+        _disconnect();
+        break;
+      case AppLifecycleState.detached:
+        print("app in detached");
+        active = false;
+        _disconnect();
+        break;
+    }
+  }
 
   // This widget is the root of your application.
   @override

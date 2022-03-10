@@ -15,17 +15,19 @@ import './mqtt_client_web.dart'
 
 // final String serverUri = "test.mosquitto.org";
 //const String serverUri = "192.168.1.3";
+// RICONNECTING,
+// RICONNECTED,
+//  TOGGLE_DISCONNECTED,
 
 enum MqttCurrentConnectionState {
   IDLE,
   CONNECTING,
   CONNECTED,
-  RICONNECTING,
-  RICONNECTED,
   DISCONNECTED,
-  TOGGLE_DISCONNECTED,
   ERROR_WHEN_CONNECTING
 }
+
+enum MqttWrapperState { ACTIVE, INACTIVE, ERROR }
 
 enum MqttSubscriptionState { IDLE, SUBSCRIBED }
 
@@ -50,16 +52,19 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   MqttDomoClient? client;
   MqttCurrentConnectionState connectionState = MqttCurrentConnectionState.IDLE;
   MqttSubscriptionState subscriptionState = MqttSubscriptionState.IDLE;
+  MqttWrapperState wrapperState = MqttWrapperState.INACTIVE;
   Map<String, List<Function(String)>> onDataReceivedArray = {};
   Map<String, List<Function(String, bool)>> onSubscriptionArray = {};
   List<String> subscribedTopicList = [];
   List<String> subscribedSubTopicList = [];
 
   RemoteConnection? remoteConnection;
-  bool reconnect = false;
-  bool _errorDetect = true;
+  // bool reconnect = false;
+  // bool _errorDetect = true;
   bool remote = false;
   // bool _statusRequest = false;
+
+  bool active = false;
 
   String? remoteServer;
   String mqttUser = "";
@@ -69,12 +74,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
 
   Future<void> connectMqttClient() async {
     print('MQTTClientWrapper::ConnectionState $connectionState');
-    if (!(connectionStateCheck()) &&
-        !(errorDetectedOrForced()) &&
-        connectionState != MqttCurrentConnectionState.TOGGLE_DISCONNECTED &&
-        remoteConnection != null &&
-        !(remoteConnection!.connectionDataNull) &&
-        remoteConnection!.connectionPresent) {
+    if (connectionAllowed) {
       // Posso collegarmi devo decidere se local o remote
       connectionState = MqttCurrentConnectionState.CONNECTING;
       if (await remoteConnection!.checkLocal()) {
@@ -105,11 +105,22 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     }
   }
 
+  bool get connectionAllowed {
+    if (!connectionStateCheck() &&
+        wrapperState == MqttWrapperState.ACTIVE &&
+        remoteConnection != null &&
+        !(remoteConnection!.connectionDataNull) &&
+        remoteConnection!.connectionPresent) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
   void _remoteNull() {
     remoteServer = null;
     connectionState = MqttCurrentConnectionState.IDLE;
     remote = false;
-    reconnect = false;
   }
 
   void _setupMqttClient() {
@@ -298,17 +309,15 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   }
 
   void _onDisconnected() {
+    connectionState = MqttCurrentConnectionState.DISCONNECTED;
     print(
         'MQTTClientWrapper::OnDisconnected client callback - Client disconnection');
     // if (client.connectionStatus.returnCode == MqttConnectReturnCode.solicited) {
     //   print('MQTTClientWrapper::OnDisconnected callback is solicited, this is correct');
     // }
-    if (connectionState != MqttCurrentConnectionState.TOGGLE_DISCONNECTED) {
-      connectionState = MqttCurrentConnectionState.DISCONNECTED;
-    }
     subscribedTopicList = [];
     subscribedSubTopicList = [];
-    if (reconnect && remoteConnection!.connectionPresent) {
+    if (connectionAllowed) {
       connectMqttClient();
     } else {
       notifyListeners('connectionState.disconnected');
@@ -321,7 +330,6 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
 
   void _onConnected() {
     connectionState = MqttCurrentConnectionState.CONNECTED;
-    reconnect = false;
     // if (_statusRequest) {
     //   _getstatus();
     // }
@@ -331,41 +339,37 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   }
 
   void _onAutoReconnect() async {
-    if (remoteConnection != null &&
-        !remoteConnection!.connectionDataNull &&
-        remote == (await remoteConnection!.checkLocal()) &&
-        !reconnect) {
+    if (!connectionAllowed) {
       print(
           'MQTTClientWrapper::OnRiconnect ${remoteConnection!.connectionPresent}');
-      reconnect = true;
       client!.autoReconnect = false;
       client!.disconnect();
       //  connect('mqtt_user', 'mqtt_user');
+    } else {
+      connectionState = MqttCurrentConnectionState.CONNECTING;
+      print(
+          'MQTTClientWrapper::OnRiconnect client callback - Client riconnection was in progress');
+      notifyListeners('connectionState.reconnecting');
     }
-    connectionState = MqttCurrentConnectionState.RICONNECTING;
-    print(
-        'MQTTClientWrapper::OnRiconnect client callback - Client riconnection was in progress');
-    notifyListeners('connectionState.riconnect');
   }
 
   void _onAutoReconnected() {
-    connectionState = MqttCurrentConnectionState.RICONNECTED;
+    connectionState = MqttCurrentConnectionState.CONNECTED;
     print(
         'MQTTClientWrapper::OnRiconnected client callback - Client riconnection was sucessful');
-    notifyListeners('connectionState.riconnected');
+    notifyListeners('connectionState.reconnected');
   }
 
   void toggleState() {
     if (connectionStateCheck()) {
-      connectionState = MqttCurrentConnectionState.TOGGLE_DISCONNECTED;
-      reconnect = false;
+      // connectionState = MqttCurrentConnectionState.TOGGLE_DISCONNECTED;
+      // reconnect = false;
       client!.autoReconnect = false;
+      wrapperState = MqttWrapperState.INACTIVE;
       client!.disconnect();
       //  connect('mqtt_user', 'mqtt_user');
-    } else if (connectionState == MqttCurrentConnectionState.DISCONNECTED ||
-        connectionState == MqttCurrentConnectionState.IDLE ||
-        connectionState == MqttCurrentConnectionState.ERROR_WHEN_CONNECTING ||
-        connectionState == MqttCurrentConnectionState.TOGGLE_DISCONNECTED) {
+    } else {
+      wrapperState = MqttWrapperState.ACTIVE;
       connectionState = MqttCurrentConnectionState.IDLE;
       connectMqttClient();
     }
@@ -381,9 +385,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     if (connectionStateCheck() &&
         remoteConnection != null &&
         !remoteConnection!.connectionDataNull &&
-        remote == (await remoteConnection!.checkLocal()) &&
-        !reconnect) {
-      reconnect = true;
+        remote == (await remoteConnection!.checkLocal())) {
       client!.autoReconnect = false;
       client!.disconnect();
       //  connect('mqtt_user', 'mqtt_user');
@@ -394,20 +396,16 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
 
   bool connectionStateCheck() {
     if (connectionState == MqttCurrentConnectionState.CONNECTING ||
-        connectionState == MqttCurrentConnectionState.CONNECTED ||
-        connectionState == MqttCurrentConnectionState.RICONNECTING ||
-        connectionState == MqttCurrentConnectionState.RICONNECTED) {
+        connectionState == MqttCurrentConnectionState.CONNECTED) {
       return true;
     }
     return false;
   }
 
   bool errorDetectedOrForced() {
-    if (connectionState == MqttCurrentConnectionState.ERROR_WHEN_CONNECTING &&
-        _errorDetect) {
+    if (connectionState == MqttCurrentConnectionState.ERROR_WHEN_CONNECTING) {
       return true;
     }
-    _errorDetect = true;
     return false;
   }
 

@@ -15,20 +15,27 @@ class HomePage extends StatefulWidget {
     // if (mqttClientWrapper!.connectionState == MqttCurrentConnectionState.IDLE) {
     //   _connect();
     // }
+    mqttClientWrapper!.wrapperState = MqttWrapperState.ACTIVE;
+    _connect();
     mqttClientWrapper!.addListener(_connect, ['connectionState.disconnected']);
   }
 
   MQTTClientWrapper? mqttClientWrapper;
+  bool active = true;
 
   void _connect() {
     mqttClientWrapper!.connectMqttClient();
+  }
+
+  void _disconnect() {
+    mqttClientWrapper!.disconnect();
   }
 
   @override
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   // : super(key: key);
   final PageController _controller = PageController(
     initialPage: 0,
@@ -43,18 +50,50 @@ class _HomePageState extends State<HomePage> {
 
   static const _kCurve = Curves.ease;
 
+  // AppLifecycleState _notification;
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        print("app in resumed");
+        widget.mqttClientWrapper!.wrapperState = MqttWrapperState.ACTIVE;
+        widget._connect();
+        break;
+      case AppLifecycleState.inactive:
+        print("app in inactive");
+        widget.mqttClientWrapper!.wrapperState = MqttWrapperState.INACTIVE;
+        widget._disconnect();
+        break;
+      case AppLifecycleState.paused:
+        print("app in paused");
+        widget.mqttClientWrapper!.wrapperState = MqttWrapperState.INACTIVE;
+        widget._disconnect();
+        break;
+      case AppLifecycleState.detached:
+        print("app in detached");
+        widget.mqttClientWrapper!.wrapperState = MqttWrapperState.INACTIVE;
+        widget._disconnect();
+        break;
+    }
+    // setState(() {
+    //   _notification = state;
+    // });
+  }
+
   @override
   void initState() {
     // multiMessageProvider.addMessage(
     //     'request/set', "{\"status\": \"sensori\"}", ['sensori/get']);
     // multiMessageProvider
     //     .addMessage('request/set', "{\"status\": \"stati\"}", ['stati/get']);
+    WidgetsBinding.instance!.addObserver(this);
     super.initState();
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    WidgetsBinding.instance!.removeObserver(this);
     super.dispose();
   }
 
@@ -65,7 +104,10 @@ class _HomePageState extends State<HomePage> {
         appBar: AppBar(
           leadingWidth: 100,
           leading: ConnectionIcon(),
-          title: Text('Gestione Domotica'),
+          title: Text(
+            'Gestione Domotica',
+            style: Theme.of(context).appBarTheme.titleTextStyle,
+          ),
         ),
         endDrawer: const MainDrawer(),
         body: Stack(children: [
