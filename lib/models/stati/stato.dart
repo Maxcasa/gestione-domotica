@@ -1,10 +1,15 @@
 import 'package:gestione_domotica/models/logging.dart';
+import 'package:gestione_domotica/models/timer.dart';
 import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
 import 'package:flutter/material.dart';
-import 'package:gestione_domotica/repositories/multi_message_provider.dart';
+//import 'package:gestione_domotica/repositories/multi_message_provider.dart';
 import 'package:gestione_domotica/repositories/schema_repository.dart';
 import 'package:gestione_domotica/models/hex_color.dart';
+import 'package:gestione_domotica/repositories/timer_repository.dart';
+//import 'package:time_range_picker/time_range_picker.dart';
 import 'dart:convert';
+
+import 'package:universal_html/html.dart';
 
 // import 'package:logger/logger.dart';
 
@@ -22,6 +27,11 @@ class Stato with ChangeNotifier {
       _getDati();
     }
     getStatus();
+    timerRepository = TimerRepository();
+    timerRepository!.addListener(_getTimer);
+    if (timerRepository != null) {
+      _getTimer();
+    }
   }
 
   // variabili
@@ -32,12 +42,19 @@ class Stato with ChangeNotifier {
   Color colore = Colors.black;
   SchemaRepository? schemaRepository;
   MQTTClientWrapper? mqttClientWrapper;
+  Map<int, TimeRanges> timeRangesMap = {};
+  TimerRepository? timerRepository;
+  Timer? timer;
 
   final log = logger(Stato);
 
   //metodi
   Future<void> _getDati() async {
     _getSchemaAllarme();
+  }
+
+  void _getTimer() {
+    timer = timerRepository!.getTimer('stati');
   }
 
   void getStatus() {
@@ -118,4 +135,8 @@ class Stato with ChangeNotifier {
     mqttClientWrapper!.publishMessage(
         topicSurName: '${topicSurName}/set', messageData: message);
   }
+
+  // void addTimeRange(TimeRange timeRange) {
+  //   timeRangesMap[valore] = timeRange as TimeRanges;
+  // }
 }

@@ -2,6 +2,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/remote_conf/remote_connection.dart';
+import 'package:gestione_domotica/repositories/timer_repository.dart';
 import 'package:gestione_domotica/views/home_page.dart';
 import 'package:gestione_domotica/views/main_drawer.dart';
 import 'package:provider/provider.dart';
@@ -27,7 +28,11 @@ void main() {
         create: (context) => SchemaSensoriModel()),
     ChangeNotifierProvider<RemoteConnection>(
       create: (context) => RemoteConnection(),
-    )
+    ),
+    // ChangeNotifierProvider<TimerRepository>(
+    //   create: (context) => TimerRepository(),
+    // ),
+
     // nome: 'test sensori',
     // sensori: [
     //   SensoreInfisso(id: 1, nome: 'Sensore 1'),
@@ -58,20 +63,20 @@ class MyApp extends StatelessWidget {
         title: 'Gestione Domotica',
         scrollBehavior: AppScrollBehavior(),
         theme: ThemeData(
-          // Define the default brightness and colors.
-          brightness: Brightness.light,
-          primaryColor: Colors.brown[50],
-          textTheme: const TextTheme(bodyText2: TextStyle(color: Colors.black)),
-          //   appBarTheme: AppBarTheme(
-          //       backgroundColor: Colors.cyan[100],
-          //       // This will be applied to the "back" icon
-          //       // iconTheme: IconThemeData(color: Colors.red),
-          //       // This will be applied to the action icon buttons that locates on the right side
-          //       actionsIconTheme: IconThemeData(color: Colors.amber),
-          //       centerTitle: false,
-          //       //elevation: 15,
-          //       titleTextStyle: TextStyle(color: Colors.lightBlueAccent)),
-        ),
+            // Define the default brightness and colors.
+            brightness: Brightness.light,
+            primaryColor: Colors.brown[200],
+            // textTheme: const TextTheme(bodyText2: TextStyle(color: Colors.black)),
+            appBarTheme: AppBarTheme(
+              backgroundColor: Colors.brown[100],
+              //       // This will be applied to the "back" icon
+              //       // iconTheme: IconThemeData(color: Colors.red),
+              //       // This will be applied to the action icon buttons that locates on the right side
+              actionsIconTheme: IconThemeData(color: Colors.white),
+              //       centerTitle: false,
+              //       //elevation: 15,
+              //       titleTextStyle: TextStyle(color: Colors.lightBlueAccent)),
+            )),
         home: HomePage());
     //connectionState() ? HomePage() : null
   }

@@ -1,0 +1,24 @@
+import 'package:flutter/cupertino.dart';
+
+class Utils {
+  static List<Widget> modelBuilder<M>(
+          List<M> models, Widget Function(int index, M model) builder) =>
+      models
+          .asMap()
+          .map<int, Widget>(
+              (index, model) => MapEntry(index, builder(index, model)))
+          .values
+          .toList();
+}
+
+class HexColor extends Color {
+  static int _getColorFromHex(String hexColor) {
+    hexColor = hexColor.toUpperCase().replaceAll('#', '');
+    if (hexColor.length == 6) {
+      hexColor = 'FF' + hexColor;
+    }
+    return int.parse(hexColor, radix: 16);
+  }
+
+  HexColor(final String hexColor) : super(_getColorFromHex(hexColor));
+}

@@ -126,7 +126,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               left: 0.0,
               right: 0.0,
               child: Container(
-                  color: Colors.grey[800]!.withOpacity(0.5),
+                  color: Theme.of(context).primaryColor,
                   padding: const EdgeInsets.all(20.0),
                   child: Center(
                     child: DotsIndicator(
@@ -161,10 +161,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   }
 }
 
-class AppScrollBehavior extends MaterialScrollBehavior {
-  @override
-  Set<PointerDeviceKind> get dragDevices => {
-        PointerDeviceKind.touch,
-        PointerDeviceKind.mouse,
-      };
-}
+// class AppScrollBehavior extends MaterialScrollBehavior {
+//   @override
+//   Set<PointerDeviceKind> get dragDevices => {
+//         PointerDeviceKind.touch,
+//         PointerDeviceKind.mouse,
+//       };
+// }

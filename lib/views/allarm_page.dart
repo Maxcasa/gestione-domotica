@@ -5,6 +5,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/stati/stato.dart';
 import 'package:gestione_domotica/repositories/multi_message_provider.dart';
+import 'package:gestione_domotica/widget/time_slider.dart';
 import 'package:provider/provider.dart';
 import 'main_drawer.dart';
 //import '../widget/AzioneForm.dart';
@@ -21,6 +22,7 @@ class AllarmPage extends StatelessWidget {
   // MultiMessageProvider multiMessageProvider = MultiMessageProvider();
   //final ScrollController scrollController = ScrollController();
   // final List<Map<String, dynamic>> drawerTree = [];
+  RangeValues _values = RangeValues(0.3, 0.7);
 
   @override
   Widget build(BuildContext context) {
@@ -33,24 +35,47 @@ class AllarmPage extends StatelessWidget {
   }
 
   Widget visalizzaAllarme(Stato allarme) {
-    return SizedBox(
-        height: 200.0,
-        width: 200.0,
-        child:
-            // IconButton(
-            //   icon:
-            //       Icon(Icons.add_circle_rounded, color: Colors.black, size: 200.0),
-            //   onPressed: () {
-            //     allarme.cambiaStatoAllarme();
-            //   },
-            // ),
-            IconButton(
-          icon: Icon(allarme.icona, color: allarme.colore, size: 200.0),
-          onPressed: () {
-            allarme.cambiaStatoAllarme();
-          },
-        )
-        // ]),
-        );
+    Widget tasto_allarme = SizedBox.fromSize(
+      size: const Size(150, 150),
+      child: ClipOval(
+        child: Material(
+          color: Colors.amber[50],
+          child: InkWell(
+            splashColor: Colors.green[50],
+            onTap: () {
+              allarme.cambiaStatoAllarme();
+            },
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                Icon(allarme.icona,
+                    color: allarme.colore, size: 150.0) // <-- Icon
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    return allarme.timer!.isActivated
+        ? TimeSlider(child: tasto_allarme)
+        : tasto_allarme;
+
+    // SizedBox(
+    //     height: 200.0,
+    //     width: 200.0,
+    //     child:
+    //         // IconButton(
+    //         //   icon:
+    //         //       Icon(Icons.add_circle_rounded, color: Colors.black, size: 200.0),
+    //         //   onPressed: () {
+    //         //     allarme.cambiaStatoAllarme();
+    //         //   },
+    //         // ),
+    //         ElevatedButton.icon(
+    //       icon: Icon(allarme.icona, color: allarme.colore, size: 200.0),
+    //       onPressed: () {
+    //         allarme.cambiaStatoAllarme();
+    //       },
+    //     )),
   }
 }
