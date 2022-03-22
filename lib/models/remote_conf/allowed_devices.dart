@@ -17,7 +17,8 @@ class AllowedDevices with ChangeNotifier {
   // costruttori
   AllowedDevices() : super() {
     remoteConnection = RemoteConnection();
-    remoteConnection!.addListener(getAllowedDevices);
+    remoteConnection!.addListener(getAllowedDevices,
+        ['activeIndex', 'connectivity', 'connectionInfo', 'connectionConf']);
     remoteConnection!.getConnectionInfo();
     if (!remoteConnection!.connectionDataNull) {
       getAllowedDevices();

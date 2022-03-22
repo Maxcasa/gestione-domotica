@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/remote_conf/connection_data.dart';
 import 'package:gestione_domotica/models/remote_conf/remote_layer.dart';
 import 'package:gestione_domotica/repositories/keep_alive_provider.dart';
-import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
+import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
 //import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
 import 'package:gestione_domotica/views/page_layer.dart';
 import 'package:gestione_domotica/widget/allowed_button.dart';
@@ -128,28 +128,40 @@ class ConfPage extends StatelessWidget with WidgetsBindingObserver {
   Widget selectConnection() {
     return Consumer<RemoteConnection>(builder: (BuildContext context,
         RemoteConnection remoteConnection, Widget? child) {
-      return Container(
-          margin: EdgeInsets.all(10),
-          padding: EdgeInsets.all(5),
-          width: 200,
-          child: DropdownButton(
-            hint: Text('Scegli uno'),
-            value: remoteConnection.activeIndex,
-            items: remoteConnection.connectionDataList
-                .map((ConnectionData element) {
-              return DropdownMenuItem(
-                  value: element.id, child: Text(element.connectionName));
-            }).toList(),
-            onChanged: (int? selectedId) {
-              remoteConnection.activeIndex = selectedId ?? 0;
-              // remoteConnection.activeIndex = Convert.ToInt32(selectedIndex)!;
-              // if (selectedName.isEmpty) {
-              //       return "can't empty";
-              //     } else {
-              //       return null;
-              //     }
-            },
-          ));
+      return Row(children: [
+        Container(
+            margin: EdgeInsets.all(10),
+            padding: EdgeInsets.all(5),
+            width: 200,
+            child: DropdownButton(
+              hint: Text('Scegli uno'),
+              value: remoteConnection.activeIndex,
+              items: remoteConnection.connectionDataList
+                  .map((ConnectionData element) {
+                return DropdownMenuItem(
+                    value: element.id, child: Text(element.connectionName));
+              }).toList(),
+              onChanged: (int? selectedId) {
+                remoteConnection.activeIndex = selectedId ?? 0;
+                // remoteConnection.activeIndex = Convert.ToInt32(selectedIndex)!;
+                // if (selectedName.isEmpty) {
+                //       return "can't empty";
+                //     } else {
+                //       return null;
+                //     }
+              },
+            )),
+        IconButton(
+            icon: Icon(Icons.add_circle_outline_rounded, size: 30.0),
+            onPressed: () {
+              //remoteConnection.addItem();
+            }),
+        IconButton(
+            icon: Icon(Icons.remove_circle_outline_rounded, size: 30.0),
+            onPressed: () {
+              remoteConnection.removeItem();
+            }),
+      ]);
     });
   }
 

@@ -43,7 +43,12 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
 
   MQTTClientWrapper._internal() {
     remoteConnection = RemoteConnection();
-    remoteConnection!.addListener(serverChange);
+    remoteConnection!.addListener(() {
+      removeToken = true;
+    }, ['activeIndex']);
+    remoteConnection!.addListener(serverChange,
+        ['activeIndex', 'connectivity', 'connectionInfo', 'connectionConf']);
+    remoteConnection!.addListener(sendToken, ['token']);
     remoteConnection!.getConnectionInfo();
     print('Istanzio l\'MQTT Client');
   }
@@ -57,6 +62,10 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   Map<String, List<Function(String, bool)>> onSubscriptionArray = {};
   List<String> subscribedTopicList = [];
   List<String> subscribedSubTopicList = [];
+
+  //controllo se devo mandare il token
+  bool isTokenToSend = false;
+  bool removeToken = false;
 
   RemoteConnection? remoteConnection;
   // bool reconnect = false;
@@ -335,6 +344,12 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     // }
     print(
         'MQTTClientWrapper::OnConnected client callback - Client connection was sucessful');
+    // se devo mando il token
+    if (isTokenToSend) {
+      String messageData = '{"token": "${remoteConnection!.token}"}';
+      publishMessage(topicSurName: 'request/set', messageData: messageData);
+      isTokenToSend = false;
+    }
     notifyListeners('connectionState.connected');
   }
 
@@ -386,12 +401,21 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
         remoteConnection != null &&
         !remoteConnection!.connectionDataNull &&
         remote == (await remoteConnection!.checkLocal())) {
+      if (removeToken) {
+        String messageData = '{"token": "remove"}';
+        publishMessage(topicSurName: 'request/set', messageData: messageData);
+        removeToken = false;
+      }
       client!.autoReconnect = false;
       client!.disconnect();
       //  connect('mqtt_user', 'mqtt_user');
     } else if (!connectionStateCheck() && remoteConnection!.connectionPresent) {
       connectMqttClient();
     }
+  }
+
+  void sendToken() {
+    isTokenToSend = true;
   }
 
   bool connectionStateCheck() {

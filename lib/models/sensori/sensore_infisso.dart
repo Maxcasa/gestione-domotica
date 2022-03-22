@@ -29,10 +29,16 @@ class SensoreInfisso extends SensoreModel {
     } else {
       zIndex = 0;
     }
-    if (valoreInt > 0) {
+    if ((valoreInt & 1) == 1) {
       colore = Colors.red;
     } else {
       colore = Colors.black;
+    }
+    if (valoreInt < -10 && valoreInt > -20) {
+      icona = Icons.battery_alert_outlined;
+      if (colore == Colors.black) {
+        colore = Colors.yellow;
+      }
     }
   }
 

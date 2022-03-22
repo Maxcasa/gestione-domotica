@@ -1,4 +1,4 @@
-import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
+import 'mqtt_client_wrapper.dart';
 // import 'package:logger/logger.dart';
 
 class MultiMessageProvider {

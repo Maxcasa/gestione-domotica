@@ -4,7 +4,7 @@ import 'dart:convert';
 //import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/sensori/sensori_layer.dart';
-import 'package:gestione_domotica/repositories/multi_message_provider.dart';
+import 'package:gestione_domotica/repositories/mqtt/multi_message_provider.dart';
 import 'package:gestione_domotica/widget/schema_sensori.dart';
 import 'package:provider/provider.dart';
 //import '../widget/AzioneForm.dart';

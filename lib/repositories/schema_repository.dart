@@ -8,6 +8,7 @@ import 'package:http/io_client.dart' as io_client;
 import 'package:path_provider/path_provider.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:flutter/services.dart' show rootBundle;
+import 'package:gestione_domotica/repositories/encrypt_data.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:synchronized/synchronized.dart';
 
@@ -30,7 +31,7 @@ class SchemaRepository extends ChangeNotifier {
     remoteConnection!.addListener(() async {
       reload = true;
       await lock.synchronized(_getInfo);
-    });
+    }, ['activeIndex', 'connectivity', 'connectionInfo', 'connectionConf']);
     remoteConnection!.getConnectionInfo();
     print('Istanzio il getter dello schema');
   }
@@ -114,7 +115,7 @@ class SchemaRepository extends ChangeNotifier {
     final File file =
         File('${directory.path}/domo_${remoteConnection!.connectionName}.json');
     if (await file.exists()) {
-      String fileString = await file.readAsString();
+      String fileString = decryptMyData(await file.readAsString()) ?? '';
       return json.decode(fileString);
     } else {
       return {};
@@ -184,7 +185,8 @@ class SchemaRepository extends ChangeNotifier {
       final directory = await getApplicationDocumentsDirectory();
       final File file = File(
           '${directory.path}/domo_${remoteConnection!.connectionName}.json');
-      await file.writeAsString(schemaData);
+      String stringToWrite = encryptMyData(schemaData);
+      await file.writeAsString(stringToWrite);
     }
   }
 

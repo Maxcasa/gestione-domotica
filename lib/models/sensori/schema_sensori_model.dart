@@ -10,7 +10,7 @@ import 'package:gestione_domotica/models/sensori/sensori_layer.dart';
 import 'package:gestione_domotica/models/model_data.dart';
 import 'package:gestione_domotica/repositories/keep_alive_provider.dart';
 import 'package:gestione_domotica/repositories/schema_repository.dart';
-import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
+import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
 //import 'package:property_change_notifier/property_change_notifier.dart';
 
 import 'package:flutter/material.dart';

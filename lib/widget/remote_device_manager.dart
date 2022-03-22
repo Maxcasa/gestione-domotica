@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
+import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
 
 /// Classe WIDGET che contiene la gestione per abilitare
 /// il join remoto dei dispositivi

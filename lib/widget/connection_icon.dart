@@ -4,8 +4,8 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/repositories/keep_alive_provider.dart';
-import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
-import 'package:gestione_domotica/repositories/multi_message_provider.dart';
+import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
+import 'package:gestione_domotica/repositories/mqtt/multi_message_provider.dart';
 
 /// Classe WIDGET che contiene la gestione dell'icona della connessione
 class ConnectionIcon extends StatefulWidget {
@@ -108,8 +108,10 @@ class _ConnectionIconState extends State<ConnectionIcon> {
           mqttClientWrapper!.subscribeToTopic(
               topicSurName: 'request/get',
               onDataReceived: (messageData) => _keepAlive(messageData));
-          timer =
-              Timer.periodic(Duration(minutes: 1), (Timer t) => _checkAlive());
+          // invio la richiesta di keep alive e attivo i timer per verificare la risposta
+          mqttClientWrapper!.publishMessage(
+              topicSurName: 'request/set', messageData: '{"keepalive": "OK"}');
+          setTimer();
           MultiMessageProvider multiMessageProvider = MultiMessageProvider();
           multiMessageProvider.addMessage(
               'request/set', "{\"status\": \"stati\"}", ['stati/get']);
@@ -235,24 +237,27 @@ class _ConnectionIconState extends State<ConnectionIcon> {
   void _keepAlive(String messageData) {
     Map<String, dynamic> jsonData = jsonDecode(messageData);
     // se risponde che OK è vivo altrimenti è morto e provo a riconnettere
-    if (!(jsonData.containsKey('keepalive')) &&
-        (jsonData['keepalive'] != 'OK')) {
+    if (jsonData.containsKey('keepalive') && jsonData['keepalive'] == 'OK') {
       _isAlive = true;
+      setTimer();
     }
     if (jsonData.containsKey('TeH')) {
       keepAliveProvider!.impostaTeH(jsonData['TeH']);
     }
   }
 
-  void _checkAlive() {
-    // se non è vivo disconnetto
-    if (!(_isAlive)) {
-      mqttClientWrapper!.disconnect();
-    } else {
-      _isAlive = false;
-      mqttClientWrapper!.publishMessage(
-          topicSurName: 'request/set', messageData: '{"keepalive": "OK"}');
-    }
+  void setTimer() {
+    timer?.cancel();
+    timer = Timer.periodic(Duration(minutes: 1), (Timer t) {
+      // se non è vivo disconnetto
+      if (_isAlive) {
+        _isAlive = false;
+        mqttClientWrapper!.publishMessage(
+            topicSurName: 'request/set', messageData: '{"keepalive": "OK"}');
+      } else {
+        mqttClientWrapper!.disconnect();
+      }
+    });
   }
 
   // bool connectionState() {

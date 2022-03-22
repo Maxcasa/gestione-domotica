@@ -1,20 +1,90 @@
 // import 'package:flutter/foundation.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/remote_conf/remote_connection.dart';
-import 'package:gestione_domotica/repositories/timer_repository.dart';
+import 'package:gestione_domotica/repositories/firebase/firebase_options.dart';
+import 'package:gestione_domotica/repositories/timers_repository.dart';
 import 'package:gestione_domotica/views/home_page.dart';
-import 'package:gestione_domotica/views/main_drawer.dart';
+// import 'package:gestione_domotica/views/main_drawer.dart';
 import 'package:provider/provider.dart';
 import 'package:gestione_domotica/models/sensori/sensori_layer.dart';
 import 'package:gestione_domotica/models/stati/stato.dart';
 import 'package:gestione_domotica/views/page_layer.dart';
-import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
+import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
 import 'models/drawer/main_drawer_provider.dart';
-import 'package:gestione_domotica/widget/connection_icon.dart';
+// import 'package:gestione_domotica/widget/connection_icon.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-void main() {
+/// Define a top-level named handler which background/terminated messages will
+/// call.
+///
+/// To verify things are working, check out the native platform logs.
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // If you're going to use other Firebase services in the background, such as Firestore,
+  // make sure you call `initializeApp` before using other Firebase services.
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  print('Handling a background message ${message.messageId}');
+}
+
+// /// Create a [AndroidNotificationChannel] for heads up notifications
+// late AndroidNotificationChannel channel;
+
+/// Initialize the [FlutterLocalNotificationsPlugin] package.
+late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  // Set the background messaging handler early on, as a named top-level function
+  FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+
+  if (!kIsWeb) {
+    // channel = const AndroidNotificationChannel(
+    //   'high_importance_channel', // id
+    //   'High Importance Notifications', // title
+    //   description:
+    //       'This channel is used for important notifications.', // description
+    //   importance: Importance.high,
+    // );
+
+    // flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+    // /// Create an Android Notification Channel.
+    // ///
+    // /// We use this channel in the `AndroidManifest.xml` file to override the
+    // /// default FCM channel to enable heads up notifications.
+    // await flutterLocalNotificationsPlugin
+    //     .resolvePlatformSpecificImplementation<
+    //         AndroidFlutterLocalNotificationsPlugin>()
+    //     ?.createNotificationChannel(channel);
+
+    // /// Requests & displays the current user permissions for this device.
+    // NotificationSettings settings =
+    //     await FirebaseMessaging.instance.requestPermission(
+    //   announcement: true,
+    //   carPlay: true,
+    //   criticalAlert: true,
+    // );
+    // if (kDebugMode) {
+    //   print('User granted permission: ${settings.authorizationStatus}');
+    // }
+
+    /// Update the iOS foreground notification presentation options to allow
+    /// heads up notifications.
+    await FirebaseMessaging.instance
+        .setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+  }
+
   //SchemaSensori(id: 0);
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider<Stato>(

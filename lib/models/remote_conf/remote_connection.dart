@@ -1,7 +1,8 @@
 import 'dart:convert';
 
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+// import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:gestione_domotica/models/remote_conf/connection_data.dart';
 import 'dart:io';
@@ -10,17 +11,18 @@ import 'package:network_info_plus/network_info_plus.dart';
 // import 'package:gestione_domotica/models/remote_conf/allowed_device.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:gestione_domotica/repositories/encrypt_data.dart';
-import 'package:gestione_domotica/models/remote_conf/connection_data.dart';
+//import 'package:gestione_domotica/models/remote_conf/connection_data.dart';
 // import 'package:wifi_iot/wifi_iot.dart';
 
 const String port = '8085';
 
 /// Classe che contiene la gestione dei dispositivi autorizzati
 // ignore: mixin_inherits_from_not_object
-class RemoteConnection extends ChangeNotifier {
+class RemoteConnection extends PropertyChangeNotifier<String> {
   // costruttori
   static final RemoteConnection _instance = RemoteConnection._internal();
 
@@ -38,6 +40,7 @@ class RemoteConnection extends ChangeNotifier {
   //String? remoteServerUri;
   List<ConnectionData> connectionDataList = [];
   int _activeIndex = -1;
+  String token = '';
   //String? connectionName;
   //String? localServerName;
   //String? remoteServerName;
@@ -52,6 +55,15 @@ class RemoteConnection extends ChangeNotifier {
   int get activeIndex => _activeIndex;
 
   set activeIndex(int activeIndex) {
+    bool changeFire = false;
+    if (activeIndex != _activeIndex) {
+      // if (connectionDataList.token == '') {
+      //   connectionDataList.last.token = (await FirebaseMessaging.instance.getToken())!;
+      //   FirebaseMessaging.instance.onTokenRefresh.listen(saveTokenToDatabase);
+      // }
+      //unSubscribeFirebase();
+      changeFire = true;
+    }
     if (connectionDataList.length <= activeIndex) {
       _activeIndex = connectionDataList.length;
     } else if (activeIndex < 0) {
@@ -59,7 +71,10 @@ class RemoteConnection extends ChangeNotifier {
     } else {
       _activeIndex = activeIndex;
     }
-    notifyListeners();
+    if (changeFire) {
+      subscribeFirebase();
+    }
+    notifyListeners('activeIndex');
   }
 
   String? get connectionName {
@@ -166,13 +181,34 @@ class RemoteConnection extends ChangeNotifier {
   // metodo per gestire il cambio di connettività
   void resultConnectivityHandler(ConnectivityResult result) {
     _connectivityResult = result;
-    notifyListeners();
+    subscribeFirebase();
+    notifyListeners('connectivity');
   }
+
+  // subscribe a FireBase
+  Future<void> subscribeFirebase() async {
+    if (connectivity != 0 && remoteDomain != null) {
+//      FirebaseMessaging.instance.subscribeToTopic('${remoteDomain}_sirena');
+      await FirebaseMessaging.instance
+          .subscribeToTopic('${remoteDomain}_allarme');
+      print('Firebase subscribe :: ${remoteDomain}_allarme');
+    }
+  }
+
+//   Future<void> unSubscribeFirebase() async {
+//     if (connectivity != 0 && remoteDomain != null) {
+// //      FirebaseMessaging.instance.subscribeToTopic('${remoteDomain}_sirena');
+//       await FirebaseMessaging.instance
+//           .subscribeToTopic('${remoteDomain}_allarme');
+//       print('Firebase unSubscribe :: ${remoteDomain}_allarme');
+//     }
+//   }
 
   // prendo le info di connessioni
   Future<void> getConnectionInfo() async {
     await lock.synchronized(_getConnectionInfo);
     await lock.synchronized(_getConnectionConf);
+    subscribeFirebase();
   }
 
   Future<void> _getConnectionInfo() async {
@@ -200,7 +236,7 @@ class RemoteConnection extends ChangeNotifier {
           await _getAssetsInfo();
         }
       }
-      notifyListeners();
+      notifyListeners('connectionInfo');
     }
     //}
   }
@@ -218,11 +254,23 @@ class RemoteConnection extends ChangeNotifier {
           String fileString = decryptMyData(await file.readAsString()) ?? '';
           Map<String, dynamic> jsonConfig = json.decode(fileString);
           _activeIndex = jsonConfig['activeIndex'];
+          token = jsonConfig['token'] ?? '';
+          String tmpToken = await FirebaseMessaging.instance.getToken() ?? '';
+          if (token == '' || token != tmpToken) {
+            token = tmpToken;
+            notifyListeners('token');
+            //saveConnectionInfo();
+          }
+          FirebaseMessaging.instance.onTokenRefresh.listen((String? token) {
+            this.token = token ?? '';
+            notifyListeners('token');
+          });
         } else {
           await _getAssetsConf();
         }
       }
-      notifyListeners();
+      //await subscribeFirebase();
+      notifyListeners('connectionConf');
     }
   }
 
@@ -320,6 +368,12 @@ class RemoteConnection extends ChangeNotifier {
     } else {
       return false;
     }
+  }
+
+  void removeItem() {
+    connectionDataList.removeAt(_activeIndex);
+    activeIndex = 0;
+    saveConnectionInfo();
   }
 
   Future<String?> getWifiName() async {
