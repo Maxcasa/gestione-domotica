@@ -6,12 +6,11 @@ class Timer {
   // costruttori
   Timer();
 
-  final List<int> _timer = [];
+  List<int> _timer = [0, 10];
   bool isActivated = false;
 
   void setTimer(int inizio, int fine) {
-    _timer.add(inizio);
-    _timer.add(fine);
+    _timer = [inizio, fine];
   }
 
   List<int> getTimer() {

@@ -11,9 +11,16 @@ import './timer.dart';
 
 class Timers with ChangeNotifier {
   // costruttori
-  Timers();
+  static final Timers _instance = Timers._internal();
 
-  List<Timer> timers = [];
+  factory Timers() {
+    return _instance;
+  }
+
+  // costruttori
+  Timers._internal() : super();
+
+  List<Timer> timers = [Timer(), Timer()];
   bool isActivated = false;
 
   // Future<Map<String, dynamic>> get timer async {
@@ -58,6 +65,6 @@ class Timers with ChangeNotifier {
     } else {
       return {};
     }
-    //notifyListeners();
+    notifyListeners();
   }
 }
