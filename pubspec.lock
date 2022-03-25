@@ -140,7 +140,7 @@ packages:
       name: dbus
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "0.7.1"
+    version: "0.7.2"
   encrypt:
     dependency: "direct main"
     description:
@@ -223,20 +223,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_circular_slider:
-    dependency: "direct main"
-    description:
-      path: "../flutter-circular-slider-master"
-      relative: true
-    source: path
-    version: "2.5.0"
-  flutter_circular_text:
-    dependency: transitive
-    description:
-      name: flutter_circular_text
-      url: "https://pub.dartlang.org"
-    source: hosted
-    version: "0.3.1"
   flutter_launcher_icons:
     dependency: "direct dev"
     description:
@@ -601,7 +587,7 @@ packages:
       name: synchronized
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.0.0"
+    version: "3.0.0+2"
   term_glyph:
     dependency: transitive
     description:
@@ -657,7 +643,7 @@ packages:
       name: win32
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.4.1"
+    version: "2.4.4"
   xdg_directories:
     dependency: transitive
     description:

@@ -60,6 +60,7 @@ class _AllarmPageState extends State<AllarmPage> {
               timers.isActivated
                   ? Switch(
                       value: timers.timers[0].isActivated,
+                      inactiveThumbColor: Colors.yellow[50],
                       activeColor: Colors.yellow,
                       onChanged: (value) {
                         setState(() {
@@ -70,6 +71,7 @@ class _AllarmPageState extends State<AllarmPage> {
               timers.isActivated
                   ? Switch(
                       value: timers.timers[1].isActivated,
+                      inactiveThumbColor: Colors.red[50],
                       activeColor: Colors.red,
                       onChanged: (value) {
                         setState(() {
@@ -84,39 +86,41 @@ class _AllarmPageState extends State<AllarmPage> {
   }
 
   Widget visalizzaAllarme(Timers timers, Stato stato) {
-    return timers.isActivated
-        ? TimeSlider(
-            timers: timers,
-            child: SizedBox.fromSize(
-              size: const Size(150, 150),
-              child: ClipOval(
-                child: Material(
-                  color: Colors.amber[50],
-                  child: InkWell(
-                    splashColor: Colors.green[50],
-                    onTap: () {
-                      stato.cambiaStatoAllarme();
-                    },
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: <Widget>[
-                        Icon(stato.icona,
-                            color: stato.colore, size: 150.0) // <-- Icon
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ))
-        : SizedBox(
-            height: 200.0,
-            width: 200.0,
-            child: IconButton(
-              icon: Icon(stato.icona, color: stato.colore, size: 200.0),
-              onPressed: () {
-                stato.cambiaStatoAllarme();
-              },
-            ),
-          );
+    return
+        // timers.isActivated
+        //     ? TimeSlider(
+        //         timers: timers,
+        //         child: SizedBox.fromSize(
+        //           size: const Size(150, 150),
+        //           child: ClipOval(
+        //             child: Material(
+        //               color: Colors.amber[50],
+        //               child: InkWell(
+        //                 splashColor: Colors.green[50],
+        //                 onTap: () {
+        //                   stato.cambiaStatoAllarme();
+        //                 },
+        //                 child: Column(
+        //                   mainAxisAlignment: MainAxisAlignment.center,
+        //                   children: <Widget>[
+        //                     Icon(stato.icona,
+        //                         color: stato.colore, size: 150.0) // <-- Icon
+        //                   ],
+        //                 ),
+        //               ),
+        //             ),
+        //           ),
+        //         ))
+        //     :
+        SizedBox(
+      height: 200.0,
+      width: 200.0,
+      child: IconButton(
+        icon: Icon(stato.icona, color: stato.colore, size: 200.0),
+        onPressed: () {
+          stato.cambiaStatoAllarme();
+        },
+      ),
+    );
   }
 }
