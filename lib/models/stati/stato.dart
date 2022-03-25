@@ -43,7 +43,7 @@ class Stato with ChangeNotifier {
   SchemaRepository? schemaRepository;
   MQTTClientWrapper? mqttClientWrapper;
   Map<int, TimeRanges> timeRangesMap = {};
-  Timers? timers;
+  //Timers? timers;
 
   final log = logger(Stato);
 

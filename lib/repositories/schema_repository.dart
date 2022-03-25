@@ -115,7 +115,7 @@ class SchemaRepository extends ChangeNotifier {
     final File file =
         File('${directory.path}/domo_${remoteConnection!.connectionName}.json');
     if (await file.exists()) {
-      String fileString = decryptMyData(await file.readAsString()) ?? '';
+      String fileString = await file.readAsString();
       return json.decode(fileString);
     } else {
       return {};
@@ -185,7 +185,7 @@ class SchemaRepository extends ChangeNotifier {
       final directory = await getApplicationDocumentsDirectory();
       final File file = File(
           '${directory.path}/domo_${remoteConnection!.connectionName}.json');
-      String stringToWrite = encryptMyData(schemaData);
+      String stringToWrite = schemaData;
       await file.writeAsString(stringToWrite);
     }
   }

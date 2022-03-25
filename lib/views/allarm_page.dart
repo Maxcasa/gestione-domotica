@@ -4,6 +4,7 @@ import 'dart:convert';
 //import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/stati/stato.dart';
+import 'package:gestione_domotica/models/timer/timers.dart';
 import 'package:gestione_domotica/repositories/mqtt/multi_message_provider.dart';
 import 'package:gestione_domotica/widget/time_slider.dart';
 import 'package:provider/provider.dart';
@@ -32,11 +33,11 @@ class _AllarmPageState extends State<AllarmPage> {
   @override
   Widget build(BuildContext context) {
     //_planProviderState.id = idPlan;
-    return Consumer<Stato>(
-        builder: (BuildContext context, Stato allarme, Widget? child) {
+    return Consumer2<Stato, Timers>(builder:
+        (BuildContext context, Stato stato, Timers timers, Widget? child) {
       return Stack(children: [
         Center(
-          child: visalizzaAllarme(allarme),
+          child: visalizzaAllarme(timers, stato),
         ),
         Positioned(
             bottom: 90.0,
@@ -49,49 +50,71 @@ class _AllarmPageState extends State<AllarmPage> {
                 color: Colors.red,
               ),
               Switch(
-                  value: allarme.timers!.isActivated,
+                  value: timers.isActivated,
+                  activeColor: Colors.black,
                   onChanged: (value) {
                     setState(() {
-                      allarme.timers!.isActivated = value;
+                      timers.isActivated = value;
                     });
-                  })
+                  }),
+              timers.isActivated
+                  ? Switch(
+                      value: timers.timers[0].isActivated,
+                      activeColor: Colors.yellow,
+                      onChanged: (value) {
+                        setState(() {
+                          timers.timers[0].isActivated = value;
+                        });
+                      })
+                  : const SizedBox.shrink(),
+              timers.isActivated
+                  ? Switch(
+                      value: timers.timers[1].isActivated,
+                      activeColor: Colors.red,
+                      onChanged: (value) {
+                        setState(() {
+                          timers.timers[1].isActivated = value;
+                        });
+                      })
+                  : const SizedBox.shrink()
             ])))
       ]);
     });
     //floatingActionButton: _buildAddTaskButton(),
   }
 
-  Widget visalizzaAllarme(Stato allarme) {
-    return allarme.timers!.isActivated
+  Widget visalizzaAllarme(Timers timers, Stato stato) {
+    return timers.isActivated
         ? TimeSlider(
+            timers: timers,
             child: SizedBox.fromSize(
-            size: const Size(150, 150),
-            child: ClipOval(
-              child: Material(
-                color: Colors.amber[50],
-                child: InkWell(
-                  splashColor: Colors.green[50],
-                  onTap: () {
-                    allarme.cambiaStatoAllarme();
-                  },
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      Icon(allarme.icona,
-                          color: allarme.colore, size: 150.0) // <-- Icon
-                    ],
+              size: const Size(150, 150),
+              child: ClipOval(
+                child: Material(
+                  color: Colors.amber[50],
+                  child: InkWell(
+                    splashColor: Colors.green[50],
+                    onTap: () {
+                      stato.cambiaStatoAllarme();
+                    },
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        Icon(stato.icona,
+                            color: stato.colore, size: 150.0) // <-- Icon
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ),
-          ))
+            ))
         : SizedBox(
             height: 200.0,
             width: 200.0,
             child: IconButton(
-              icon: Icon(allarme.icona, color: allarme.colore, size: 200.0),
+              icon: Icon(stato.icona, color: stato.colore, size: 200.0),
               onPressed: () {
-                allarme.cambiaStatoAllarme();
+                stato.cambiaStatoAllarme();
               },
             ),
           );

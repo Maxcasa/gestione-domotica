@@ -18,7 +18,9 @@ class Timers with ChangeNotifier {
   }
 
   // costruttori
-  Timers._internal() : super();
+  Timers._internal() : super() {
+    loadTimers();
+  }
 
   List<Timer> timers = [Timer(), Timer()];
   bool isActivated = false;
@@ -43,27 +45,28 @@ class Timers with ChangeNotifier {
     };
   }
 
-  void saveTimers(String schemaData) async {
+  void saveTimers() async {
     if (!kIsWeb) {
       final directory = await getApplicationDocumentsDirectory();
       final File file = File('${directory.path}/timers.json');
-      String stringToWrite = encryptMyData(schemaData);
+      String stringToWrite = encryptMyData(json.encode(toJson()));
       await file.writeAsString(stringToWrite);
     }
   }
 
-  Future<Map<String, dynamic>> loadTimers() async {
+  Future<void> loadTimers() async {
     if (!kIsWeb) {
       final directory = await getApplicationDocumentsDirectory();
       final File file = File('${directory.path}/timers.json');
       if (await file.exists()) {
         String fileString = decryptMyData(await file.readAsString()) ?? '';
-        return json.decode(fileString);
-      } else {
-        return {};
+        Map<String, dynamic> jsonTimers = json.decode(fileString);
+        isActivated = jsonTimers['act'] ?? false;
+        timers = [];
+        for (var i in jsonTimers['timer']) {
+          timers.add(Timer.fromJson(i));
+        }
       }
-    } else {
-      return {};
     }
     notifyListeners();
   }

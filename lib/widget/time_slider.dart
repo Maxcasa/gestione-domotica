@@ -3,15 +3,18 @@ import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_circular_slider/flutter_circular_slider.dart';
+import 'package:gestione_domotica/models/timer/timer.dart';
+import 'package:gestione_domotica/models/timer/timers.dart';
 
 class TimeSlider extends StatefulWidget {
-  TimeSlider({Key? key, this.child}) : super(key: key) {
+  TimeSlider({Key? key, required this.timers, this.child}) : super(key: key) {
     // MultiMessageProvider multiMessageProvider = MultiMessageProvider();
     // multiMessageProvider
     //     .addMessage('request/set', "{\"status\": \"stati\"}", ['stati/get']);
   }
 
   Widget? child;
+  Timers timers;
 
   @override
   _TimeSliderState createState() => _TimeSliderState();
@@ -30,25 +33,25 @@ class _TimeSliderState extends State<TimeSlider> {
   @override
   void initState() {
     super.initState();
-    _shuffle();
+    //_shuffle();
   }
 
-  void _shuffle() {
-    setState(() {
-      initTime = _generateRandomTime();
-      endTime = _generateRandomTime();
-      inBedTime = initTime;
-      outBedTime = endTime;
-    });
-  }
+  // void _shuffle() {
+  //   setState(() {
+  //     initTime = widget.timers.timers[0].getTimer()[0];
+  //     endTime = widget.timer.getTimer()[1];
+  //     inBedTime = initTime;
+  //     outBedTime = endTime;
+  //   });
+  // }
 
-  void _updateLabels(int init, int end, int laps) {
-    setState(() {
-      inBedTime = init;
-      outBedTime = end;
-      days = laps;
-    });
-  }
+  // void _updateLabels(int init, int end, int laps) {
+  //   setState(() {
+  //     inBedTime = init;
+  //     outBedTime = end;
+  //     days = laps;
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -58,8 +61,8 @@ class _TimeSliderState extends State<TimeSlider> {
     }
     Widget circularSlider_0 = DoubleCircularSlider(
       24 * 12,
-      initTime,
-      endTime,
+      widget.timers.timers[0].getTimer()[0],
+      widget.timers.timers[0].getTimer()[1],
       height: 250.0,
       width: 250.0,
       primarySectors: 24,
@@ -79,8 +82,8 @@ class _TimeSliderState extends State<TimeSlider> {
     );
     Widget circularSlider_1 = DoubleCircularSlider(
       24 * 12,
-      initTime,
-      endTime,
+      widget.timers.timers[1].getTimer()[0],
+      widget.timers.timers[1].getTimer()[1],
       height: 320.0,
       width: 320.0,
       primarySectors: 24,
@@ -107,7 +110,8 @@ class _TimeSliderState extends State<TimeSlider> {
   }
 
   void _onSelectionEnd(int a, int b, int mode) {
-    print('onSelectionEnd $a $b');
+    widget.timers.timers[mode].setTimer(a, b);
+    widget.timers.saveTimers();
   }
 
   // Widget _formatBedTime(String pre, int time) {
