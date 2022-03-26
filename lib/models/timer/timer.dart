@@ -20,6 +20,7 @@ class Timer {
   // conversione Json
   Timer.fromJson(Map<String, dynamic> json)
       : isActivated = json['act'] ?? false {
+    _timer = [];
     for (var i in json['time']) {
       _timer.add(i);
     }

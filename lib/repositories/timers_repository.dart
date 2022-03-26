@@ -35,8 +35,7 @@
 //   void saveTimers(String schemaData) async {
 //     if (!kIsWeb) {
 //       final directory = await getApplicationDocumentsDirectory();
-//       final File file = File(
-//           '${directory.path}/timers.json');
+//       final File file = File('${directory.path}/timers.json');
 //       String stringToWrite = encryptMyData(schemaData);
 //       await file.writeAsString(stringToWrite);
 //     }
