@@ -7,6 +7,8 @@ class Timer {
   Timer();
 
   List<int> _timer = [0, 10];
+  int? id;
+  int valore = 0;
   bool isActivated = false;
 
   void setTimer(int inizio, int fine) {
@@ -19,14 +21,30 @@ class Timer {
 
   // conversione Json
   Timer.fromJson(Map<String, dynamic> json)
-      : isActivated = json['act'] ?? false {
+      : isActivated = json['act'] ?? false,
+        id = json['id'],
+        valore = json['valore'] ?? 0 {
     _timer = [];
-    for (var i in json['time']) {
-      _timer.add(i);
+
+    if (json.containsKey('start')) {
+      _timer.add(json['start']);
+    } else {
+      _timer.add(0);
+    }
+    if (json.containsKey('end')) {
+      _timer.add(json['end']);
+    } else {
+      _timer.add(60 * 24 ~/ 5);
     }
   }
 
   Map<String, dynamic> toJson() {
-    return {'act': isActivated, 'time': _timer};
+    return {
+      'id': id,
+      'act': isActivated,
+      'valore': valore,
+      'start': _timer[0],
+      'end': _timer[1]
+    };
   }
 }

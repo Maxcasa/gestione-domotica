@@ -43,7 +43,7 @@ class Stato with ChangeNotifier {
   SchemaRepository? schemaRepository;
   MQTTClientWrapper? mqttClientWrapper;
   Map<int, TimeRanges> timeRangesMap = {};
-  //Timers? timers;
+  Timers? timers;
 
   final log = logger(Stato);
 
@@ -77,6 +77,9 @@ class Stato with ChangeNotifier {
           colore = element['colore'] != null
               ? HexColor.fromHex(element['colore'])
               : Colors.black;
+          if (element.containsKey('timers')) {
+            timers = Timers.fromJson(element);
+          }
         }
         notifyListeners();
       }

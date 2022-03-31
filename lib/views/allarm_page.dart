@@ -33,11 +33,11 @@ class _AllarmPageState extends State<AllarmPage> {
   @override
   Widget build(BuildContext context) {
     //_planProviderState.id = idPlan;
-    return Consumer2<Stato, Timers>(builder:
-        (BuildContext context, Stato stato, Timers timers, Widget? child) {
+    return Consumer<Stato>(
+        builder: (BuildContext context, Stato stato, Widget? child) {
       return Stack(children: [
         Center(
-          child: visalizzaAllarme(timers, stato),
+          child: visalizzaAllarme(stato),
         ),
         Positioned(
             bottom: 90.0,
@@ -50,21 +50,21 @@ class _AllarmPageState extends State<AllarmPage> {
                 color: Colors.red,
               ),
               Switch(
-                  value: timers.isActivated,
+                  value: stato.timers?.isActivated ?? false,
                   activeColor: Colors.black,
                   onChanged: (value) {
                     setState(() {
                       timers.isActivated = value;
                     });
                   }),
-              timers.isActivated
+              (stato.timers != null && stato.timers!.isActivated)
                   ? Switch(
-                      value: timers.timers[0].isActivated,
+                      value: stato.timers?.timers![0].isActivated ?? false,
                       inactiveThumbColor: Colors.yellow[50],
                       activeColor: Colors.yellow,
                       onChanged: (value) {
                         setState(() {
-                          timers.timers[0].isActivated = value;
+                          stato.timers?.timers[0].isActivated = value;
                         });
                       })
                   : const SizedBox.shrink(),

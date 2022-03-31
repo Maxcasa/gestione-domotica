@@ -91,9 +91,6 @@ Future<void> main() async {
     ChangeNotifierProvider<Stato>(
       create: (context) => Stato(id: 0),
     ),
-    ChangeNotifierProvider<Timers>(
-      create: (context) => Timers(),
-    ),
     ChangeNotifierProvider<MainDrawerProvider>(
       create: (context) => MainDrawerProvider('assets/json/drawer_list.json'),
     ),
