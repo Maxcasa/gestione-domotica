@@ -89,7 +89,7 @@ class _AllarmPageState extends State<AllarmPage> {
   }
 
   Widget visalizzaAllarme(Stato stato) {
-    return (stato.timers!.isActivated && stato.timers != null)
+    return (stato.timers != null && stato.timers!.isActivated)
         ? TimeSlider(
             timers: stato.timers!,
             child: SizedBox.fromSize(

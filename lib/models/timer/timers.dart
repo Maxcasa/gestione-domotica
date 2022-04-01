@@ -32,7 +32,8 @@ class Timers with ChangeNotifier {
   // conversione Json
   Timers.fromJson(Map<String, dynamic> json)
       : isActivated = json['act'] ?? false {
-    for (var i in json['timer']) {
+    timers = [];
+    for (var i in json['timers']) {
       timers.add(Timer.fromJson(i));
     }
   }
