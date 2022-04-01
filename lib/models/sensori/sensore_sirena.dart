@@ -61,13 +61,13 @@ class SensoreSirena extends SensoreModel {
   void cambiaStato(int valore) {
     // se valore
     int locValore = 0;
-    if (valore > 0) {
+    if (valore == -1) {
       if ((valoreInt & 1) == 1) {
         locValore &= ~1;
       } else {
         locValore |= 1;
       }
-    } else if (valore < 0 && numeroRele > 1) {
+    } else if (valore == -2 && numeroRele > 1) {
       if ((valoreInt & 2) == 1) {
         locValore &= ~2;
       } else {
@@ -77,6 +77,7 @@ class SensoreSirena extends SensoreModel {
     // this.valore = locValore;
     //Se c'è un callbck da chiamare lo chiamo
     super.cambiaStato(locValore);
+
     // String messaggio = json.encode({'id': id, 'stato': _valore});
     // if (azioneSensoreCallBack != null) {
     //   azioneSensoreCallBack!(id, AzioneSensore.imposta, messaggio);

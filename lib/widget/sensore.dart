@@ -71,16 +71,28 @@ class Sensore extends StatelessWidget {
                       },
                     ),
                     if (sensore is SensoreSirena)
-                      IconButton(
-                        icon: const Icon(Icons.handyman_rounded),
-                        onPressed: () {
-                          if (sensore.abilitato) {
-                            sensore.cambiaStato(-1);
-                          } else {
-                            sensore.cambiaStato(-1);
-                          }
-                        },
-                      ),
+                      Row(children: [
+                        IconButton(
+                          icon: const Icon(Icons.highlight_rounded),
+                          onPressed: () {
+                            if (sensore.abilitato) {
+                              sensore.cambiaStato(-1);
+                            } else {
+                              sensore.cambiaStato(-1);
+                            }
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.handyman_rounded),
+                          onPressed: () {
+                            if (sensore.abilitato) {
+                              sensore.cambiaStato(-2);
+                            } else {
+                              sensore.cambiaStato(-2);
+                            }
+                          },
+                        ),
+                      ])
                   ])),
             )));
   }
