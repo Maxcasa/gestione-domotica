@@ -35,6 +35,7 @@ class _AllarmPageState extends State<AllarmPage> {
     //_planProviderState.id = idPlan;
     return Consumer<Stato>(
         builder: (BuildContext context, Stato stato, Widget? child) {
+      int num_timers = stato.timers?.timers.length ?? 0;
       return Stack(children: [
         Center(
           child: visalizzaAllarme(stato),
@@ -49,33 +50,35 @@ class _AllarmPageState extends State<AllarmPage> {
                 Icons.access_time_rounded,
                 color: Colors.red,
               ),
-              Switch(
-                  value: stato.timers?.isActivated ?? false,
-                  activeColor: Colors.black,
-                  onChanged: (value) {
-                    setState(() {
-                      timers.isActivated = value;
-                    });
-                  }),
-              (stato.timers != null && stato.timers!.isActivated)
+              (num_timers > 0)
+                  ? Switch(
+                      value: stato.timers?.isActivated ?? false,
+                      activeColor: Colors.black,
+                      onChanged: (value) {
+                        setState(() {
+                          stato.timers!.isActivated = value;
+                        });
+                      })
+                  : const SizedBox.shrink(),
+              (num_timers > 0 && stato.timers!.isActivated)
                   ? Switch(
                       value: stato.timers?.timers![0].isActivated ?? false,
-                      inactiveThumbColor: Colors.yellow[50],
-                      activeColor: Colors.yellow,
+                      inactiveThumbColor: Colors.red[50],
+                      activeColor: Colors.red,
                       onChanged: (value) {
                         setState(() {
                           stato.timers?.timers[0].isActivated = value;
                         });
                       })
                   : const SizedBox.shrink(),
-              timers.isActivated
+              (num_timers > 1 && stato.timers!.isActivated)
                   ? Switch(
-                      value: timers.timers[1].isActivated,
-                      inactiveThumbColor: Colors.red[50],
-                      activeColor: Colors.red,
+                      value: stato.timers?.timers[1].isActivated ?? false,
+                      inactiveThumbColor: Colors.yellow[50],
+                      activeColor: Colors.yellow,
                       onChanged: (value) {
                         setState(() {
-                          timers.timers[1].isActivated = value;
+                          stato.timers?.timers[1].isActivated = value;
                         });
                       })
                   : const SizedBox.shrink()
@@ -85,10 +88,10 @@ class _AllarmPageState extends State<AllarmPage> {
     //floatingActionButton: _buildAddTaskButton(),
   }
 
-  Widget visalizzaAllarme(Timers timers, Stato stato) {
-    return timers.isActivated
+  Widget visalizzaAllarme(Stato stato) {
+    return (stato.timers!.isActivated && stato.timers != null)
         ? TimeSlider(
-            timers: timers,
+            timers: stato.timers!,
             child: SizedBox.fromSize(
               size: const Size(150, 150),
               child: ClipOval(
