@@ -30,9 +30,61 @@ class _TimeSliderState extends State<TimeSlider> {
   int outBedTime = 12;
   int days = 0;
 
+  Widget? doubleCircularSliderRosso;
+  Widget? doubleCircularSliderGiallo;
+
   @override
   void initState() {
     super.initState();
+    List<String> labels = [];
+    for (int i = 0; i < 8; i++) {
+      labels.add((i * 3).toString());
+    }
+    doubleCircularSliderRosso = DoubleCircularSlider(
+      24 * 12,
+      widget.timers.timers[0].getTimer()[0],
+      widget.timers.timers[0].getTimer()[1],
+      height: 250.0,
+      width: 250.0,
+      primarySectors: 24,
+      secondarySectors: 24 * 6,
+      baseColor: Colors.black12,
+      gridColor: Colors.black,
+      selectionColor: Colors.red[700],
+      handlerColor: Colors.black54,
+      handlerOutterRadius: 12.0,
+      //onSelectionChange: _updateLabels,
+      onSelectionEnd: (a, b, c) => _onSelectionEnd(a, b, 0),
+      sliderStrokeWidth: 12.0,
+      pointerLabel: (a) {
+        return _formatTime(a);
+      },
+      shouldCountLaps: false,
+    );
+
+    doubleCircularSliderGiallo = DoubleCircularSlider(
+      24 * 12,
+      widget.timers.timers[1].getTimer()[0],
+      widget.timers.timers[1].getTimer()[1],
+      height: 320.0,
+      width: 320.0,
+      primarySectors: 24,
+      secondarySectors: 24 * 6,
+      baseColor: Colors.black12,
+      gridColor: Colors.black,
+      selectionColor: Colors.yellow[700],
+      handlerColor: Colors.black54,
+      handlerOutterRadius: 12.0,
+      //onSelectionChange: _updateLabels,
+      onSelectionEnd: (a, b, c) => _onSelectionEnd(a, b, 1),
+      sliderStrokeWidth: 12.0,
+      labels: labels,
+      //child: widget.child,
+      pointerLabel: (a) {
+        return _formatTime(a);
+      },
+      shouldCountLaps: false,
+    );
     //_shuffle();
   }
 
@@ -56,58 +108,16 @@ class _TimeSliderState extends State<TimeSlider> {
   @override
   Widget build(BuildContext context) {
     int num_timers = widget.timers.timers.length;
-    List<String> labels = [];
-    for (int i = 0; i < 8; i++) {
-      labels.add((i * 3).toString());
-    }
     List<Widget> circularSlider = [];
-    if (num_timers > 0) {
-      circularSlider.add(DoubleCircularSlider(
-        24 * 12,
-        widget.timers.timers[0].getTimer()[0],
-        widget.timers.timers[0].getTimer()[1],
-        height: 250.0,
-        width: 250.0,
-        primarySectors: 24,
-        secondarySectors: 24 * 6,
-        baseColor: Colors.black12,
-        gridColor: Colors.black,
-        selectionColor: Colors.red[700],
-        handlerColor: Colors.black54,
-        handlerOutterRadius: 12.0,
-        //onSelectionChange: _updateLabels,
-        onSelectionEnd: (a, b, c) => _onSelectionEnd(a, b, 0),
-        sliderStrokeWidth: 12.0,
-        pointerLabel: (a) {
-          return _formatTime(a);
-        },
-        shouldCountLaps: false,
-      ));
+    if (num_timers > 0 &&
+        doubleCircularSliderRosso != null &&
+        widget.timers.timers[0].isActivated) {
+      circularSlider.add(doubleCircularSliderRosso!);
     }
-    if (num_timers > 1) {
-      circularSlider.add(DoubleCircularSlider(
-        24 * 12,
-        widget.timers.timers[1].getTimer()[0],
-        widget.timers.timers[1].getTimer()[1],
-        height: 320.0,
-        width: 320.0,
-        primarySectors: 24,
-        secondarySectors: 24 * 6,
-        baseColor: Colors.black12,
-        gridColor: Colors.black,
-        selectionColor: Colors.yellow[700],
-        handlerColor: Colors.black54,
-        handlerOutterRadius: 12.0,
-        //onSelectionChange: _updateLabels,
-        onSelectionEnd: (a, b, c) => _onSelectionEnd(a, b, 1),
-        sliderStrokeWidth: 12.0,
-        labels: labels,
-        //child: widget.child,
-        pointerLabel: (a) {
-          return _formatTime(a);
-        },
-        shouldCountLaps: false,
-      ));
+    if (num_timers > 1 &&
+        doubleCircularSliderGiallo != null &&
+        widget.timers.timers[1].isActivated) {
+      circularSlider.add(doubleCircularSliderGiallo!);
     }
     if (widget.child != null) {
       circularSlider.add(widget.child!);
