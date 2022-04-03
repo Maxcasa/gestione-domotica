@@ -63,7 +63,7 @@ class _AllarmPageState extends State<AllarmPage> {
               (num_timers > 0 && stato.timers!.isActivated)
                   ? Switch(
                       value: stato.timers?.timers![0].isActivated ?? false,
-                      inactiveThumbColor: Colors.red[50],
+                      inactiveThumbColor: Colors.red[100],
                       activeColor: Colors.red,
                       onChanged: (value) {
                         setState(() {
@@ -74,7 +74,7 @@ class _AllarmPageState extends State<AllarmPage> {
               (num_timers > 1 && stato.timers!.isActivated)
                   ? Switch(
                       value: stato.timers?.timers[1].isActivated ?? false,
-                      inactiveThumbColor: Colors.yellow[50],
+                      inactiveThumbColor: Colors.yellow[100],
                       activeColor: Colors.yellow,
                       onChanged: (value) {
                         setState(() {
