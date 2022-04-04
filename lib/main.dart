@@ -3,7 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/remote_conf/remote_connection.dart';
-import 'package:gestione_domotica/models/timer/timers.dart';
+import 'package:gestione_domotica/models/timer/timers_attivazione.dart';
 import 'package:gestione_domotica/repositories/firebase/firebase_options.dart';
 import 'package:gestione_domotica/repositories/timers_repository.dart';
 import 'package:gestione_domotica/views/home_page.dart';

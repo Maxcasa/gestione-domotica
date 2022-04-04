@@ -4,7 +4,7 @@ import 'dart:convert';
 //import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/stati/stato.dart';
-import 'package:gestione_domotica/models/timer/timers.dart';
+import 'package:gestione_domotica/models/timer/timers_attivazione.dart';
 import 'package:gestione_domotica/repositories/mqtt/multi_message_provider.dart';
 import 'package:gestione_domotica/widget/time_slider.dart';
 import 'package:provider/provider.dart';
@@ -91,7 +91,7 @@ class _AllarmPageState extends State<AllarmPage> {
   Widget visalizzaAllarme(Stato stato) {
     return (stato.timers != null && stato.timers!.isActivated)
         ? TimeSlider(
-            timers: stato.timers!,
+            timerAttivazioni: stato.timers!,
             child: SizedBox.fromSize(
               size: const Size(150, 150),
               child: ClipOval(

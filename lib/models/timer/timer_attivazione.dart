@@ -2,9 +2,9 @@
 
 /// Classe che contiene lo schema del sistema
 
-class Timer {
+class TimerAttivazione {
   // costruttori
-  Timer();
+  TimerAttivazione();
 
   List<int> _timer = [0, 10];
   int? id;
@@ -20,7 +20,7 @@ class Timer {
   }
 
   // conversione Json
-  Timer.fromJson(Map<String, dynamic> json)
+  TimerAttivazione.fromJson(Map<String, dynamic> json)
       : isActivated = json['act'] ?? false,
         id = json['id'],
         valore = json['valore'] ?? 0 {

@@ -1,11 +1,11 @@
 import 'package:gestione_domotica/models/logging.dart';
-import 'package:gestione_domotica/models/timer/timers.dart';
+import 'package:gestione_domotica/models/timer/timers_attivazione.dart';
 import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
 import 'package:flutter/material.dart';
 //import 'package:gestione_domotica/repositories/multi_message_provider.dart';
 import 'package:gestione_domotica/repositories/schema_repository.dart';
 import 'package:gestione_domotica/models/hex_color.dart';
-import 'package:gestione_domotica/models/timer/timers.dart';
+import 'package:gestione_domotica/models/timer/timers_attivazione.dart';
 //import 'package:time_range_picker/time_range_picker.dart';
 import 'dart:convert';
 
@@ -43,7 +43,7 @@ class Stato with ChangeNotifier {
   SchemaRepository? schemaRepository;
   MQTTClientWrapper? mqttClientWrapper;
   Map<int, TimeRanges> timeRangesMap = {};
-  Timers? timers;
+  TimerAttivazioni? timers;
 
   final log = logger(Stato);
 
@@ -78,7 +78,7 @@ class Stato with ChangeNotifier {
               ? HexColor.fromHex(element['colore'])
               : Colors.black;
           if (element.containsKey('timers')) {
-            timers = Timers.fromJson(element);
+            timers = TimerAttivazioni.fromJson(element);
           }
         }
         notifyListeners();
