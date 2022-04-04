@@ -92,6 +92,7 @@ class _AllarmPageState extends State<AllarmPage> {
     return (stato.timers != null && stato.timers!.isActivated)
         ? TimeSlider(
             timerAttivazioni: stato.timers!,
+            subDividerColor: stato.colore,
             child: SizedBox.fromSize(
               size: const Size(150, 150),
               child: ClipOval(
