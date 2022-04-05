@@ -1,5 +1,6 @@
 import 'package:gestione_domotica/models/logging.dart';
 import 'package:gestione_domotica/models/timer/timers_attivazione.dart';
+import 'package:gestione_domotica/repositories/keep_alive_provider.dart';
 import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
 import 'package:flutter/material.dart';
 //import 'package:gestione_domotica/repositories/multi_message_provider.dart';
@@ -23,6 +24,7 @@ class Stato with ChangeNotifier {
     _setupMqtt();
     schemaRepository = SchemaRepository();
     schemaRepository!.addListener(_getDati);
+    keepAliveProvider = KeepAliveProvider();
     if (schemaRepository != null) {
       _getDati();
     }
@@ -43,6 +45,7 @@ class Stato with ChangeNotifier {
   SchemaRepository? schemaRepository;
   MQTTClientWrapper? mqttClientWrapper;
   Map<int, TimeRanges> timeRangesMap = {};
+  KeepAliveProvider? keepAliveProvider;
   TimerAttivazioni? timers;
 
   final log = logger(Stato);
@@ -69,6 +72,7 @@ class Stato with ChangeNotifier {
       List listStati = tmpSchema[topicSurName];
       if (listStati.isNotEmpty) {
         for (var element in listStati) {
+          id = element['id'];
           nome = element['nome'];
           icona = element['icona'] != null
               ? IconData(element['icona']['codePoint'],
@@ -79,11 +83,26 @@ class Stato with ChangeNotifier {
               : Colors.black;
           if (element.containsKey('timers')) {
             timers = TimerAttivazioni.fromJson(element);
+            keepAliveProvider = KeepAliveProvider();
+            keepAliveProvider?.addListener(setTeH, ['TeH']);
           }
         }
         notifyListeners();
       }
     }
+  }
+
+  void setTeH() {
+    if (keepAliveProvider!.mappaValori.containsKey('TeH') && int.parse(keepAliveProvider?.mappaValori['TeH']![0]['id']!) == id && timers?.timers != null) {
+      if (timers.hashCode != keepAliveProvider?.mappaValori['TeH']![0])
+      for (timer in timers!.timers){
+
+      }
+      timers.timers
+
+
+    }
+
   }
 
   void _setupMqtt() {

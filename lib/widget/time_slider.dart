@@ -43,9 +43,8 @@ class _TimeSliderState extends State<TimeSlider> {
 
   final doubleCircularSliderRossoKey = GlobalKey<DoubleCircularSliderState>();
   final doubleCircularSliderGialloKey = GlobalKey<DoubleCircularSliderState>();
-  Color? subColorSliderRosso = Colors.red[700];
-  Color? subColorSliderGiallo = Colors.yellow[700];
-  bool dividerGiallo = false;
+  // Color? subColorSliderRosso = Colors.red[700];
+  // Color? subColorSliderGiallo = Colors.yellow[700];
 
   @override
   void initState() {
@@ -91,6 +90,7 @@ class _TimeSliderState extends State<TimeSlider> {
     List<Widget> circularSlider = [];
     int dividers = 24 * 12;
     List<String> labels = [];
+    bool dividerGiallo = false;
     for (int i = 0; i < 8; i++) {
       labels.add((i * 3).toString());
     }
@@ -100,10 +100,7 @@ class _TimeSliderState extends State<TimeSlider> {
               widget.timerAttivazioni.timers[1].getTimer()[0] &&
           currentDividerTime(dateTime, dividers) <
               widget.timerAttivazioni.timers[1].getTimer()[1]) {
-        subColorSliderGiallo = widget.subDividerColor;
         dividerGiallo = true;
-      } else {
-        subColorSliderGiallo = Colors.yellow[700];
       }
 
       circularSlider.add(DoubleCircularSlider(
@@ -126,7 +123,7 @@ class _TimeSliderState extends State<TimeSlider> {
         labels: labels,
         //child: widget.child,
         subDivider: currentDividerTime(dateTime, dividers),
-        subDividerColor: subColorSliderGiallo,
+        subDividerColor: widget.subDividerColor,
         pointerLabel: (a) {
           return _formatTime(a);
         },
@@ -134,15 +131,8 @@ class _TimeSliderState extends State<TimeSlider> {
       ));
     }
     if (numTimers > 0 && widget.timerAttivazioni.timers[0].isActivated) {
-      if (currentDividerTime(dateTime, dividers) >
-              widget.timerAttivazioni.timers[0].getTimer()[0] &&
-          currentDividerTime(dateTime, dividers) <
-              widget.timerAttivazioni.timers[0].getTimer()[1] &&
-          !dividerGiallo) {
-        subColorSliderRosso = widget.subDividerColor;
-      } else {
-        subColorSliderRosso = Colors.red[700];
-      }
+      Color? subColorSliderRosso =
+          dividerGiallo ? Colors.red[700] : widget.subDividerColor;
       circularSlider.add(DoubleCircularSlider(
         dividers,
         widget.timerAttivazioni.timers[0].getTimer()[0],
