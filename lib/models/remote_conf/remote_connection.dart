@@ -221,11 +221,16 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
         final directory = await getApplicationDocumentsDirectory();
         final File file = File('${directory.path}/connection_info.json');
         if (await file.exists()) {
-          String fileString = decryptMyData(await file.readAsString()) ?? '';
-          List<dynamic> jsonData = json.decode(fileString);
-          // remoteServerUri = jsonData['remoteServerUri'];
-          for (var element in jsonData) {
-            connectionDataList.add(ConnectionData.fromJson(element));
+          try {
+            String fileString = decryptMyData(await file.readAsString()) ?? '';
+            List<dynamic> jsonData = json.decode(fileString);
+            // remoteServerUri = jsonData['remoteServerUri'];
+            for (var element in jsonData) {
+              connectionDataList.add(ConnectionData.fromJson(element));
+            }
+          } on Exception catch (e) {
+            print('ConnectionInfo::client exception - $e');
+            await _getAssetsInfo();
           }
           // localServerName = jsonData['localServerName'];
           // remoteServerName = jsonData['remoteServerName'];
@@ -251,20 +256,25 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
         final directory = await getApplicationDocumentsDirectory();
         final File file = File('${directory.path}/config.json');
         if (await file.exists()) {
-          String fileString = decryptMyData(await file.readAsString()) ?? '';
-          Map<String, dynamic> jsonConfig = json.decode(fileString);
-          _activeIndex = jsonConfig['activeIndex'];
-          token = jsonConfig['token'] ?? '';
-          String tmpToken = await FirebaseMessaging.instance.getToken() ?? '';
-          if (token == '' || token != tmpToken) {
-            token = tmpToken;
-            notifyListeners('token');
-            //saveConnectionInfo();
+          try {
+            String fileString = decryptMyData(await file.readAsString()) ?? '';
+            Map<String, dynamic> jsonConfig = json.decode(fileString);
+            _activeIndex = jsonConfig['activeIndex'];
+            token = jsonConfig['token'] ?? '';
+            String tmpToken = await FirebaseMessaging.instance.getToken() ?? '';
+            if (token == '' || token != tmpToken) {
+              token = tmpToken;
+              notifyListeners('token');
+              //saveConnectionInfo();
+            }
+            FirebaseMessaging.instance.onTokenRefresh.listen((String? token) {
+              this.token = token ?? '';
+              notifyListeners('token');
+            });
+          } on Exception catch (e) {
+            print('ConnectionConf::client exception - $e');
+            await _getAssetsConf();
           }
-          FirebaseMessaging.instance.onTokenRefresh.listen((String? token) {
-            this.token = token ?? '';
-            notifyListeners('token');
-          });
         } else {
           await _getAssetsConf();
         }

@@ -14,7 +14,7 @@ String encryptMyData(String text) {
 
 //dycrypt
 String? decryptMyData(String? text) {
-  if (text != null) {
+  if (text != null && text != "") {
     final e = Encrypter(AES(key, mode: AESMode.cbc));
     final decrypted_data = e.decrypt(Encrypted.fromBase64(text), iv: iv);
     return decrypted_data;

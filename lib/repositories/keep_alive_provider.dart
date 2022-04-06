@@ -25,7 +25,7 @@ class KeepAliveProvider extends PropertyChangeNotifier<String> {
         .addListener(_mqttClientListener, ['connectionState.connected']);
   }
 
-  Map<String, List<Map<String, dynamic>>> mappaValori = {};
+  Map<String, List<dynamic>> mappaValori = {};
   MQTTClientWrapper? mqttClientWrapper;
   bool _isAlive = true;
   Timer? timer;
@@ -52,18 +52,21 @@ class KeepAliveProvider extends PropertyChangeNotifier<String> {
   void _keepAlive(String messageData) {
     Map<String, dynamic> jsonData = jsonDecode(messageData);
     // se risponde che OK è vivo altrimenti è morto e provo a riconnettere
-    if (jsonData.containsKey('keepalive') && jsonData['keepalive'] == 'OK') {
+    if (jsonData.containsKey('keepalive')) {
       _isAlive = true;
+      if (jsonData['keepalive'] != 'OK') {
+        impostaMappaValori('Timers', jsonData['keepalive']);
+      }
       setTimer();
     }
     if (jsonData.containsKey('TeH')) {
-      impostaTeH(jsonData['TeH']);
+      impostaMappaValori('TeH', jsonData['TeH']);
     }
   }
 
-  void impostaTeH(List<Map<String, dynamic>> valori) {
-    mappaValori['TeH'] = valori;
-    notifyListeners('TeH');
+  void impostaMappaValori(String key, List<dynamic> valori) {
+    mappaValori[key] = valori;
+    notifyListeners(key);
   }
 
   void setTimer() {

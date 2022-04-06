@@ -46,10 +46,12 @@ class _AllarmPageState extends State<AllarmPage> {
             child: Container(
                 // padding: const EdgeInsets.all(20.0),
                 child: Row(children: [
-              Icon(
-                Icons.access_time_rounded,
-                color: Colors.red,
-              ),
+              (num_timers > 0)
+                  ? Icon(
+                      Icons.access_time_rounded,
+                      color: Colors.red,
+                    )
+                  : const SizedBox.shrink(),
               (num_timers > 0)
                   ? Switch(
                       value: stato.timers?.isActivated ?? false,
@@ -91,8 +93,7 @@ class _AllarmPageState extends State<AllarmPage> {
   Widget visalizzaAllarme(Stato stato) {
     return (stato.timers != null && stato.timers!.isActivated)
         ? TimeSlider(
-            timerAttivazioni: stato.timers!,
-            subDividerColor: stato.colore,
+            stato: stato,
             child: SizedBox.fromSize(
               size: const Size(150, 150),
               child: ClipOval(

@@ -4,24 +4,19 @@ import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_circular_slider/flutter_circular_slider.dart';
+import 'package:gestione_domotica/models/stati/stato.dart';
 import 'package:gestione_domotica/models/timer/timer_attivazione.dart';
 import 'package:gestione_domotica/models/timer/timers_attivazione.dart';
 
 class TimeSlider extends StatefulWidget {
-  TimeSlider(
-      {Key? key,
-      required this.timerAttivazioni,
-      this.subDividerColor,
-      this.child})
-      : super(key: key) {
+  TimeSlider({Key? key, required this.stato, this.child}) : super(key: key) {
     // MultiMessageProvider multiMessageProvider = MultiMessageProvider();
     // multiMessageProvider
     //     .addMessage('request/set', "{\"status\": \"stati\"}", ['stati/get']);
   }
 
   Widget? child;
-  TimerAttivazioni timerAttivazioni;
-  Color? subDividerColor;
+  Stato stato;
 
   @override
   _TimeSliderState createState() => _TimeSliderState();
@@ -86,7 +81,7 @@ class _TimeSliderState extends State<TimeSlider> {
 
   @override
   Widget build(BuildContext context) {
-    numTimers = widget.timerAttivazioni.timers.length;
+    numTimers = widget.stato.timers!.timers.length;
     List<Widget> circularSlider = [];
     int dividers = 24 * 12;
     List<String> labels = [];
@@ -95,18 +90,18 @@ class _TimeSliderState extends State<TimeSlider> {
       labels.add((i * 3).toString());
     }
 
-    if (numTimers > 1 && widget.timerAttivazioni.timers[1].isActivated) {
+    if (numTimers > 1 && widget.stato.timers!.timers[1].isActivated) {
       if (currentDividerTime(dateTime, dividers) >
-              widget.timerAttivazioni.timers[1].getTimer()[0] &&
+              widget.stato.timers!.timers[1].getTimer()[0] &&
           currentDividerTime(dateTime, dividers) <
-              widget.timerAttivazioni.timers[1].getTimer()[1]) {
+              widget.stato.timers!.timers[1].getTimer()[1]) {
         dividerGiallo = true;
       }
 
       circularSlider.add(DoubleCircularSlider(
         dividers,
-        widget.timerAttivazioni.timers[1].getTimer()[0],
-        widget.timerAttivazioni.timers[1].getTimer()[1],
+        widget.stato.timers!.timers[1].getTimer()[0],
+        widget.stato.timers!.timers[1].getTimer()[1],
         key: doubleCircularSliderGialloKey,
         height: 320.0,
         width: 320.0,
@@ -123,20 +118,20 @@ class _TimeSliderState extends State<TimeSlider> {
         labels: labels,
         //child: widget.child,
         subDivider: currentDividerTime(dateTime, dividers),
-        subDividerColor: widget.subDividerColor,
+        subDividerColor: widget.stato.colore,
         pointerLabel: (a) {
           return _formatTime(a);
         },
         shouldCountLaps: false,
       ));
     }
-    if (numTimers > 0 && widget.timerAttivazioni.timers[0].isActivated) {
+    if (numTimers > 0 && widget.stato.timers!.timers[0].isActivated) {
       Color? subColorSliderRosso =
-          dividerGiallo ? Colors.red[700] : widget.subDividerColor;
+          dividerGiallo ? Colors.red[700] : widget.stato.colore;
       circularSlider.add(DoubleCircularSlider(
         dividers,
-        widget.timerAttivazioni.timers[0].getTimer()[0],
-        widget.timerAttivazioni.timers[0].getTimer()[1],
+        widget.stato.timers!.timers[0].getTimer()[0],
+        widget.stato.timers!.timers[0].getTimer()[1],
         key: doubleCircularSliderRossoKey,
         height: 250.0,
         width: 250.0,
@@ -168,7 +163,8 @@ class _TimeSliderState extends State<TimeSlider> {
   }
 
   void _onSelectionEnd(int a, int b, int mode) {
-    widget.timerAttivazioni.timers[mode].setTimer(a, b);
+    widget.stato.setTimer(mode, a, b);
+
     //widget.timers.saveTimers();
   }
 

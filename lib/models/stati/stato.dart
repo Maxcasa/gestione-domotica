@@ -84,7 +84,8 @@ class Stato with ChangeNotifier {
           if (element.containsKey('timers')) {
             timers = TimerAttivazioni.fromJson(element);
             keepAliveProvider = KeepAliveProvider();
-            keepAliveProvider?.addListener(setTeH, ['TeH']);
+            getTimerFromRemote();
+            keepAliveProvider?.addListener(getTimerFromRemote, ['Timers']);
           }
         }
         notifyListeners();
@@ -92,17 +93,31 @@ class Stato with ChangeNotifier {
     }
   }
 
-  void setTeH() {
-    if (keepAliveProvider!.mappaValori.containsKey('TeH') && int.parse(keepAliveProvider?.mappaValori['TeH']![0]['id']!) == id && timers?.timers != null) {
-      if (timers.hashCode != keepAliveProvider?.mappaValori['TeH']![0])
-      for (timer in timers!.timers){
-
+  void getTimerFromRemote() {
+    if (keepAliveProvider!.mappaValori.containsKey('Timers') &&
+        keepAliveProvider?.mappaValori['Timers']![0]['id']! == id &&
+        timers?.timers != null) {
+      if (timers.hashCode !=
+          keepAliveProvider?.mappaValori['Timers']![0]['hash']) {
+        // richiedi il set del timer
+        String message = "{\"id\": 0, \"timers\": \"get\"}";
+        mqttClientWrapper!.publishMessage(
+            topicSurName: '${topicSurName}/set', messageData: message);
       }
-      timers.timers
-
-
     }
+  }
 
+  void setTimer(int indexTimer, int inizio, int fine) {
+    if (timers != null &&
+        indexTimer >= 0 &&
+        indexTimer < timers!.timers.length) {
+      timers!.setTimer(indexTimer, inizio, fine);
+      // invio il set del timer
+      String message =
+          "{\"id\": 0, \"timers\": ${json.encode(timers!.toJson())}}";
+      mqttClientWrapper!.publishMessage(
+          topicSurName: '${topicSurName}/set', messageData: message);
+    }
   }
 
   void _setupMqtt() {
@@ -146,6 +161,9 @@ class Stato with ChangeNotifier {
           notifyListeners();
           break;
       }
+    }
+    if (jsonData.containsKey('timers')) {
+      print("Stato::GOT A NEW Timers $messageData");
     }
   }
 

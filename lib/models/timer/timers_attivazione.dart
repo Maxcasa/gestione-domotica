@@ -38,6 +38,12 @@ class TimerAttivazioni with ChangeNotifier {
     }
   }
 
+  void setTimer(int indexTimer, int inizio, int fine) {
+    if (indexTimer >= 0 && indexTimer < timers.length) {
+      timers[indexTimer].setTimer(inizio, fine);
+    }
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'act': isActivated,
