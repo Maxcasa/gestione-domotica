@@ -4,7 +4,7 @@ import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_circular_slider/flutter_circular_slider.dart';
-import 'package:gestione_domotica/models/stati/stato.dart';
+import 'package:gestione_domotica/models/stati/schema_stati_model.dart';
 import 'package:gestione_domotica/models/timer/timer_attivazione.dart';
 import 'package:gestione_domotica/models/timer/timers_attivazione.dart';
 
@@ -16,7 +16,7 @@ class TimeSlider extends StatefulWidget {
   }
 
   Widget? child;
-  Stato stato;
+  SchemaStatiModel stato;
 
   @override
   _TimeSliderState createState() => _TimeSliderState();

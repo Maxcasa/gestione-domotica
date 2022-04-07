@@ -35,6 +35,7 @@ class SensoreModel {
 
   // getter & setter
   String get tipo => runtimeType.toString();
+
   set valore(int valore) {
     valoreInt = valore;
   }

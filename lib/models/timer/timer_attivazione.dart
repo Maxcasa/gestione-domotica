@@ -19,6 +19,8 @@ class TimerAttivazione {
     return _timer.sublist(0, 2);
   }
 
+  int getSum() => (_timer[0] + _timer[1]);
+
   // conversione Json
   TimerAttivazione.fromJson(Map<String, dynamic> json)
       : isActivated = json['act'] ?? false,

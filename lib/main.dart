@@ -10,7 +10,7 @@ import 'package:gestione_domotica/views/home_page.dart';
 // import 'package:gestione_domotica/views/main_drawer.dart';
 import 'package:provider/provider.dart';
 import 'package:gestione_domotica/models/sensori/sensori_layer.dart';
-import 'package:gestione_domotica/models/stati/stato.dart';
+import 'package:gestione_domotica/models/stati/schema_stati_model.dart';
 import 'package:gestione_domotica/views/page_layer.dart';
 import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
 import 'models/drawer/main_drawer_provider.dart';
@@ -88,8 +88,8 @@ Future<void> main() async {
 
   //SchemaSensori(id: 0);
   runApp(MultiProvider(providers: [
-    ChangeNotifierProvider<Stato>(
-      create: (context) => Stato(id: 0),
+    ChangeNotifierProvider<SchemaStatiModel>(
+      create: (context) => SchemaStatiModel(id: 0),
     ),
     ChangeNotifierProvider<MainDrawerProvider>(
       create: (context) => MainDrawerProvider('assets/json/drawer_list.json'),

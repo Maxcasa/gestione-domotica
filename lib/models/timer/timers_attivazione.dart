@@ -29,6 +29,24 @@ class TimerAttivazioni with ChangeNotifier {
   //   return timersMap;
   // }
 
+  @override
+  int get hashCode {
+    int tmpHash = 0;
+    for (TimerAttivazione timer in timers) {
+      tmpHash += (300 *
+              (timers.length - timer.id!) *
+              (timers.length - (timer.isActivated ? 2 : 1))) +
+          timer.getSum();
+    }
+    return tmpHash;
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is TimerAttivazioni &&
+      other.runtimeType == runtimeType &&
+      other.hashCode == hashCode;
+
   // conversione Json
   TimerAttivazioni.fromJson(Map<String, dynamic> json)
       : isActivated = json['act'] ?? false {

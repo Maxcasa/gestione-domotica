@@ -5,20 +5,25 @@ import 'sensore_model.dart';
 class SensoreInfisso extends SensoreModel {
   // costruttori
   SensoreInfisso({required int id, String? nome})
-      : _id = id,
-        _nome = nome ?? "Sensore Infisso generico",
-        super(id: id, nome: nome, icona: Icons.sensor_window_outlined);
+      :
+        // super.id = id,
+        //   nome = nome ?? "Sensore Infisso generico",
+        super(
+            id: id,
+            nome: nome ?? "Sensore Infisso generico",
+            icona: Icons.sensor_window_outlined);
 
   SensoreInfisso.fromJson(Map<String, dynamic> json)
-      : _id = json['id'],
-        _nome = json['nome'],
+      :
+        //_id = json['id'],
+        //  _nome = json['nome'],
         super.fromJson(json) {
     icona = Icons.sensor_window_outlined;
   }
 
   // variabili
-  int _id;
-  String _nome;
+  //int _id;
+  //String _nome;
 //  int valoreInt = 0;
 
   @override

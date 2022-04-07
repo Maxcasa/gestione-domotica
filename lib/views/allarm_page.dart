@@ -3,7 +3,7 @@ import 'dart:convert';
 
 //import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:gestione_domotica/models/stati/stato.dart';
+import 'package:gestione_domotica/models/stati/schema_stati_model.dart';
 import 'package:gestione_domotica/models/timer/timers_attivazione.dart';
 import 'package:gestione_domotica/repositories/mqtt/multi_message_provider.dart';
 import 'package:gestione_domotica/widget/time_slider.dart';
@@ -33,8 +33,8 @@ class _AllarmPageState extends State<AllarmPage> {
   @override
   Widget build(BuildContext context) {
     //_planProviderState.id = idPlan;
-    return Consumer<Stato>(
-        builder: (BuildContext context, Stato stato, Widget? child) {
+    return Consumer<SchemaStatiModel>(
+        builder: (BuildContext context, SchemaStatiModel stato, Widget? child) {
       int num_timers = stato.timers?.timers.length ?? 0;
       return Stack(children: [
         Center(
@@ -90,7 +90,7 @@ class _AllarmPageState extends State<AllarmPage> {
     //floatingActionButton: _buildAddTaskButton(),
   }
 
-  Widget visalizzaAllarme(Stato stato) {
+  Widget visalizzaAllarme(SchemaStatiModel stato) {
     return (stato.timers != null && stato.timers!.isActivated)
         ? TimeSlider(
             stato: stato,
