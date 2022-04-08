@@ -8,7 +8,7 @@ import 'package:gestione_domotica/repositories/mqtt/multi_message_provider.dart'
 import 'package:gestione_domotica/views/main_drawer.dart';
 import 'package:gestione_domotica/views/page_layer.dart';
 import 'package:gestione_domotica/widget/connection_icon.dart';
-import 'package:gestione_domotica/widget/dot_indicator.dart';
+import 'package:gestione_domotica/widget/icons_indicator.dart';
 
 // import 'package:logger_flutter/logger_flutter.dart';
 
@@ -232,9 +232,12 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
                   color: Theme.of(context).primaryColor,
                   padding: const EdgeInsets.all(20.0),
                   child: Center(
-                    child: DotsIndicator(
+                    child: IconsIndicator(
                       controller: _controller,
-                      itemCount: 2,
+                      iconsList: const [
+                        Icons.home_rounded,
+                        Icons.access_alarm_rounded
+                      ],
                       onPageSelected: (int page) {
                         _controller.animateToPage(
                           page,

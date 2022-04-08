@@ -60,7 +60,10 @@ class StatoAllarme extends StatoModel {
 
   //metodi
   set valore(int valore) {
-    valoreInt = valore;
+    if (valore > 0) {
+      valoreInt += valore;
+      valoreInt = valoreInt > 2 ? 0 : valoreInt;
+    }
     switch (valoreInt) {
       case 2:
         colore = Colors.yellow;

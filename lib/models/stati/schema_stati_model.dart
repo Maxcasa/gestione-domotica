@@ -1,4 +1,6 @@
-import 'package:gestione_domotica/models/logging.dart';
+// import 'package:gestione_domotica/models/logging.dart';
+import 'dart:core';
+
 import 'package:gestione_domotica/models/stati/stati_layer.dart';
 import 'package:gestione_domotica/models/timer/timers_attivazione.dart';
 import 'package:gestione_domotica/repositories/keep_alive_provider.dart';
@@ -85,6 +87,11 @@ class SchemaStatiModel with ChangeNotifier {
     } on Exception catch (e) {
       return null;
     }
+  }
+
+  List<StatoAllarme> getAllarmi() {
+    return stati.where((stato) => stato.tipo == 'StatoAllarme').toList()
+        as List<StatoAllarme>;
   }
 
   // void _getTimer() {

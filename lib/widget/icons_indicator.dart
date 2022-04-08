@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'dart:math';
 
 /// An indicator showing the currently selected page of a PageController
-class DotsIndicator extends AnimatedWidget {
-  DotsIndicator({
+class IconsIndicator extends AnimatedWidget {
+  IconsIndicator({
     required this.controller,
-    required this.itemCount,
+    required this.iconsList,
     required this.onPageSelected,
     this.color = Colors.white,
   }) : super(listenable: controller);
@@ -14,7 +14,7 @@ class DotsIndicator extends AnimatedWidget {
   final PageController controller;
 
   /// The number of items managed by the PageController
-  final int itemCount;
+  final List<IconData> iconsList;
 
   /// Called when a dot is tapped
   final ValueChanged<int> onPageSelected;
@@ -41,17 +41,33 @@ class DotsIndicator extends AnimatedWidget {
       ),
     );
     double zoom = 1.0 + (_kMaxZoom - 1.0) * selectedness;
-    return new Container(
+    return Container(
       width: _kDotSpacing,
-      child: new Center(
-        child: new Material(
-          color: color,
-          type: MaterialType.circle,
-          child: new Container(
+      child: Center(
+        // child: Material(
+        //   color: color,
+        //   //type: MaterialType.circle,
+        //   child: new Container(
+        //     width: _kDotSize * zoom,
+        //     height: _kDotSize * zoom,
+        //     child: new InkWell(
+        //       onTap: () => onPageSelected(index),
+        //     ),
+        //   ),
+        // ),
+
+        child: Material(
+          //elevation: 4,
+          child: Container(
             width: _kDotSize * zoom,
             height: _kDotSize * zoom,
-            child: new InkWell(
-              onTap: () => onPageSelected(index),
+            //alignment: Alignment.topCenter,
+            // padding: const EdgeInsets.only(
+            //     right: _kDotSize * zoom,
+            //     left: _kDotSize * zoom),
+            child: IconButton(
+              icon: Icon(iconsList[index], size: _kDotSize * zoom),
+              onPressed: () => onPageSelected(index),
             ),
           ),
         ),
@@ -60,9 +76,9 @@ class DotsIndicator extends AnimatedWidget {
   }
 
   Widget build(BuildContext context) {
-    return new Row(
+    return Row(
       mainAxisAlignment: MainAxisAlignment.center,
-      children: new List<Widget>.generate(itemCount, _buildDot),
+      children: List<Widget>.generate(iconsList.length, _buildDot),
     );
   }
 }

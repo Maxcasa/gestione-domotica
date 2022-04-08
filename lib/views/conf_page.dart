@@ -8,7 +8,7 @@ import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
 import 'package:gestione_domotica/views/page_layer.dart';
 import 'package:gestione_domotica/widget/allowed_button.dart';
 import 'package:gestione_domotica/widget/connection_icon.dart';
-import 'package:gestione_domotica/widget/dot_indicator.dart';
+import 'package:gestione_domotica/widget/icons_indicator.dart';
 import 'package:gestione_domotica/widget/remote_device_manager.dart';
 import 'package:provider/provider.dart';
 

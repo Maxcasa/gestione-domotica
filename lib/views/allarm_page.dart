@@ -3,7 +3,7 @@ import 'dart:convert';
 
 //import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:gestione_domotica/models/stati/schema_stati_model.dart';
+import 'package:gestione_domotica/models/stati/stati_layer.dart';
 import 'package:gestione_domotica/models/timer/timers_attivazione.dart';
 import 'package:gestione_domotica/repositories/mqtt/multi_message_provider.dart';
 import 'package:gestione_domotica/widget/time_slider.dart';
@@ -34,7 +34,8 @@ class _AllarmPageState extends State<AllarmPage> {
   Widget build(BuildContext context) {
     //_planProviderState.id = idPlan;
     return Consumer<SchemaStatiModel>(
-        builder: (BuildContext context, SchemaStatiModel stato, Widget? child) {
+        builder: (BuildContext context, SchemaStatiModel stati, Widget? child) {
+      StatoAllarme stato = stati.getAllarmi()[0];
       int num_timers = stato.timers?.timers.length ?? 0;
       return Stack(children: [
         Center(
@@ -90,7 +91,7 @@ class _AllarmPageState extends State<AllarmPage> {
     //floatingActionButton: _buildAddTaskButton(),
   }
 
-  Widget visalizzaAllarme(SchemaStatiModel stato) {
+  Widget visalizzaAllarme(StatoAllarme stato) {
     return (stato.timers != null && stato.timers!.isActivated)
         ? TimeSlider(
             stato: stato,
@@ -102,7 +103,7 @@ class _AllarmPageState extends State<AllarmPage> {
                   child: InkWell(
                     splashColor: Colors.green[50],
                     onTap: () {
-                      stato.cambiaStatoAllarme();
+                      stato.valore = 1;
                     },
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -121,7 +122,7 @@ class _AllarmPageState extends State<AllarmPage> {
             child: IconButton(
               icon: Icon(stato.icona, color: stato.colore, size: 200.0),
               onPressed: () {
-                stato.cambiaStatoAllarme();
+                stato.valore = 1;
               },
             ),
           );
