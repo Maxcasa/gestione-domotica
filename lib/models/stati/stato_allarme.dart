@@ -60,10 +60,7 @@ class StatoAllarme extends StatoModel {
 
   //metodi
   set valore(int valore) {
-    if (valore > 0) {
-      valoreInt += valore;
-      valoreInt = valoreInt > 2 ? 0 : valoreInt;
-    }
+    valoreInt = valore;
     switch (valoreInt) {
       case 2:
         colore = Colors.yellow;
@@ -87,6 +84,21 @@ class StatoAllarme extends StatoModel {
   }
 
   int get valore => valoreInt;
+
+  // funzione invocata dall'interfaccia quando si cambia il valore
+  @override
+  void cambiaStato(int valore) {
+    //Se c'è un callback da chiamare lo chiamo
+    int locValore = valoreInt;
+    if (valore > 0) {
+      locValore += valore;
+      locValore = locValore > 2 ? 0 : locValore;
+    }
+    String messaggio = json.encode({'id': id, 'stato': locValore});
+    if (azioneStatoCallBack != null) {
+      azioneStatoCallBack!(id, AzioneStato.imposta, messaggio);
+    }
+  }
 
   StatoAllarme.fromJson(Map<String, dynamic> json)
       :

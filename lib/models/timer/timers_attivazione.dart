@@ -62,6 +62,14 @@ class TimerAttivazioni with ChangeNotifier {
     }
   }
 
+  void attivaTimer(int indexTimer, bool attiva) {
+    if (indexTimer < 0) {
+      isActivated = attiva;
+    } else if (indexTimer < timers.length) {
+      timers[indexTimer].isActivated = attiva;
+    }
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'act': isActivated,

@@ -148,6 +148,16 @@ class StatoModel {
     }
   }
 
+  void attivaTimer(int indexTimer, bool attiva) {
+    timers!.attivaTimer(indexTimer, attiva);
+    // invio il set del timer
+    String messaggio =
+        "{\"id\": 0, \"timers\": ${json.encode(timers!.toJson())}}";
+    if (azioneStatoCallBack != null) {
+      azioneStatoCallBack!(id, AzioneStato.imposta, messaggio);
+    }
+  }
+
   // cambiaStato(String messageData) {
   //   Map<String, dynamic> jsonData = jsonDecode(messageData);
   //   if (jsonData.containsKey('stato')) {

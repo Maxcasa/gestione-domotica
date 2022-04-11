@@ -45,9 +45,15 @@ class _TimeSliderState extends State<TimeSlider> {
   void initState() {
     super.initState();
     dateTime = DateTime.now();
-    _timer = Timer.periodic(const Duration(seconds: 1), setTime);
+    _timer = Timer.periodic(const Duration(seconds: 10), setTime);
 
     //_shuffle();
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _timer.cancel();
   }
 
   void setTime(Timer timer) {

@@ -90,8 +90,13 @@ class SchemaStatiModel with ChangeNotifier {
   }
 
   List<StatoAllarme> getAllarmi() {
-    return stati.where((stato) => stato.tipo == 'StatoAllarme').toList()
-        as List<StatoAllarme>;
+    List<StatoAllarme> tmpStatiList = [];
+    for (dynamic stato in stati) {
+      if (stato is StatoAllarme) {
+        tmpStatiList.add(stato as StatoAllarme);
+      }
+    }
+    return tmpStatiList;
   }
 
   // void _getTimer() {
@@ -136,10 +141,10 @@ class SchemaStatiModel with ChangeNotifier {
     Map<String, dynamic> tmpSchema = await schemaRepository!.schema;
     stati = [];
     if (tmpSchema.containsKey(topicSurName)) {
-      List listSensori = tmpSchema[topicSurName];
-      if (listSensori.isNotEmpty) {
-        for (var element in listSensori) {
-          String tipo = element['tipo'] ?? 'Sensore';
+      List listStati = tmpSchema[topicSurName];
+      if (listStati.isNotEmpty) {
+        for (var element in listStati) {
+          String tipo = element['tipo'] ?? 'StatoAllarme';
           int id = element['id'];
           if (factories.containsKey(tipo)) {
             if (tipo == 'Stato') {

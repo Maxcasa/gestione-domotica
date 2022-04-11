@@ -35,58 +35,72 @@ class _AllarmPageState extends State<AllarmPage> {
     //_planProviderState.id = idPlan;
     return Consumer<SchemaStatiModel>(
         builder: (BuildContext context, SchemaStatiModel stati, Widget? child) {
-      StatoAllarme stato = stati.getAllarmi()[0];
-      int num_timers = stato.timers?.timers.length ?? 0;
-      return Stack(children: [
-        Center(
-          child: visalizzaAllarme(stato),
-        ),
-        Positioned(
-            bottom: 90.0,
-            left: 20.0,
-            child: Container(
-                // padding: const EdgeInsets.all(20.0),
-                child: Row(children: [
-              (num_timers > 0)
-                  ? Icon(
-                      Icons.access_time_rounded,
-                      color: Colors.red,
-                    )
-                  : const SizedBox.shrink(),
-              (num_timers > 0)
-                  ? Switch(
-                      value: stato.timers?.isActivated ?? false,
-                      activeColor: Colors.black,
-                      onChanged: (value) {
-                        setState(() {
-                          stato.timers!.isActivated = value;
-                        });
-                      })
-                  : const SizedBox.shrink(),
-              (num_timers > 0 && stato.timers!.isActivated)
-                  ? Switch(
-                      value: stato.timers?.timers![0].isActivated ?? false,
-                      inactiveThumbColor: Colors.red[100],
-                      activeColor: Colors.red,
-                      onChanged: (value) {
-                        setState(() {
-                          stato.timers?.timers[0].isActivated = value;
-                        });
-                      })
-                  : const SizedBox.shrink(),
-              (num_timers > 1 && stato.timers!.isActivated)
-                  ? Switch(
-                      value: stato.timers?.timers[1].isActivated ?? false,
-                      inactiveThumbColor: Colors.yellow[100],
-                      activeColor: Colors.yellow,
-                      onChanged: (value) {
-                        setState(() {
-                          stato.timers?.timers[1].isActivated = value;
-                        });
-                      })
-                  : const SizedBox.shrink()
-            ])))
-      ]);
+      List<StatoAllarme> statiAllarme = stati.getAllarmi();
+      if (statiAllarme.length > 0) {
+        StatoAllarme stato = statiAllarme[0];
+        int num_timers = stato.timers?.timers.length ?? 0;
+        return Stack(children: [
+          Center(
+            child: visalizzaAllarme(stato),
+          ),
+          Positioned(
+              bottom: 90.0,
+              left: 20.0,
+              child: Container(
+                  // padding: const EdgeInsets.all(20.0),
+                  child: Row(children: [
+                (num_timers > 0)
+                    ? Icon(
+                        Icons.access_time_rounded,
+                        color: Colors.red,
+                      )
+                    : const SizedBox.shrink(),
+                (num_timers > 0)
+                    ? Switch(
+                        value: stato.timers?.isActivated ?? false,
+                        activeColor: Colors.black,
+                        onChanged: (value) {
+                          setState(() {
+                            //stato.timers!.isActivated = value;
+                            stato.attivaTimer(-1, value);
+                          });
+                        })
+                    : const SizedBox.shrink(),
+                (num_timers > 0 && stato.timers!.isActivated)
+                    ? Switch(
+                        value: stato.timers?.timers![0].isActivated ?? false,
+                        inactiveThumbColor: Colors.red[100],
+                        activeColor: Colors.red,
+                        onChanged: (value) {
+                          setState(() {
+                            stato.attivaTimer(0, value);
+                            //stato.timers?.timers[0].isActivated = value;
+                          });
+                        })
+                    : const SizedBox.shrink(),
+                (num_timers > 1 && stato.timers!.isActivated)
+                    ? Switch(
+                        value: stato.timers?.timers[1].isActivated ?? false,
+                        inactiveThumbColor: Colors.yellow[100],
+                        activeColor: Colors.yellow,
+                        onChanged: (value) {
+                          setState(() {
+                            stato.attivaTimer(1, value);
+                            //stato.timers?.timers[1].isActivated = value;
+                          });
+                        })
+                    : const SizedBox.shrink()
+              ])))
+        ]);
+      } else {
+        return Center(
+          child: const Image(
+            image: AssetImage('assets/images/sfondo_vuoto.png'),
+            height: 150,
+            width: 150,
+          ),
+        );
+      }
     });
     //floatingActionButton: _buildAddTaskButton(),
   }
@@ -103,7 +117,7 @@ class _AllarmPageState extends State<AllarmPage> {
                   child: InkWell(
                     splashColor: Colors.green[50],
                     onTap: () {
-                      stato.valore = 1;
+                      stato.cambiaStato(1);
                     },
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -122,7 +136,7 @@ class _AllarmPageState extends State<AllarmPage> {
             child: IconButton(
               icon: Icon(stato.icona, color: stato.colore, size: 200.0),
               onPressed: () {
-                stato.valore = 1;
+                stato.cambiaStato(1);
               },
             ),
           );
