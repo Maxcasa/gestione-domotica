@@ -213,47 +213,57 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           ),
         ),
         endDrawer: const MainDrawer(),
-        body: Stack(children: [
-          PageView(
-            controller: _controller,
-            onPageChanged: (indice) {
-              print(indice);
-            },
-            children: [
-              SensorPage(),
-              AllarmPage(),
-            ],
-          ),
-          Positioned(
-              bottom: 0.0,
-              left: 0.0,
-              right: 0.0,
-              child: Container(
-                  color: Theme.of(context).primaryColor,
-                  padding: const EdgeInsets.all(20.0),
-                  child: Center(
-                    child: IconsIndicator(
-                      controller: _controller,
-                      iconsList: const [
-                        Icons.home_rounded,
-                        Icons.access_alarm_rounded
-                      ],
-                      onPageSelected: (int page) {
-                        _controller.animateToPage(
-                          page,
-                          duration: _kDuration,
-                          curve: _kCurve,
-                        );
-                      },
-                    ),
-                  ))),
-          // LogConsoleOnShake(
-          //   dark: true,
-          //   child: Center(
-          //     child: Text("Shake Phone to open Console."),
-          //   ),
-          // )
-        ]));
+        body: RefreshIndicator(
+            // reload page
+            onRefresh: () => _refresh(),
+            child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                scrollDirection: Axis.vertical,
+                child: Stack(children: [
+                  PageView(
+                    controller: _controller,
+                    onPageChanged: (indice) {
+                      print(indice);
+                    },
+                    children: [
+                      SensorPage(),
+                      AllarmPage(),
+                    ],
+                  ),
+                  Positioned(
+                      bottom: 0.0,
+                      left: 0.0,
+                      right: 0.0,
+                      child: Container(
+                          color: Theme.of(context).primaryColor,
+                          padding: const EdgeInsets.all(20.0),
+                          child: Center(
+                            child: IconsIndicator(
+                              controller: _controller,
+                              iconsList: const [
+                                Icons.home_rounded,
+                                Icons.access_alarm_rounded
+                              ],
+                              onPageSelected: (int page) {
+                                _controller.animateToPage(
+                                  page,
+                                  duration: _kDuration,
+                                  curve: _kCurve,
+                                );
+                              },
+                            ),
+                          ))),
+                  // LogConsoleOnShake(
+                  //   dark: true,
+                  //   child: Center(
+                  //     child: Text("Shake Phone to open Console."),
+                  //   ),
+                  // )
+                ]))));
+  }
+
+  Future<void> _refresh() async {
+    print("REFRESH");
   }
 
   bool connectionState() {
