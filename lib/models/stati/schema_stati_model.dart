@@ -2,14 +2,14 @@
 import 'dart:core';
 
 import 'package:gestione_domotica/models/stati/stati_layer.dart';
-import 'package:gestione_domotica/models/timer/timers_attivazione.dart';
+import 'package:gestione_domotica/models/timer/timer_attivazioni.dart';
 import 'package:gestione_domotica/repositories/keep_alive_provider.dart';
 import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
 import 'package:flutter/material.dart';
 //import 'package:gestione_domotica/repositories/multi_message_provider.dart';
 import 'package:gestione_domotica/repositories/schema_repository.dart';
 import 'package:gestione_domotica/models/hex_color.dart';
-import 'package:gestione_domotica/models/timer/timers_attivazione.dart';
+import 'package:gestione_domotica/models/timer/timer_attivazioni.dart';
 //import 'package:time_range_picker/time_range_picker.dart';
 import 'dart:convert';
 
@@ -21,7 +21,7 @@ const String topicSurName = "stati";
 
 final factories = <String, Object Function(int id)>{
   'Stato': (id) => StatoModel(id: id),
-  'StatoAllarme': (id) => StatoAllarme(id: id)
+  'StatoAllarme': (id) => StatoModel(id: id)
 };
 
 /// Classe che contiene la gestione degli allarmi
@@ -89,11 +89,11 @@ class SchemaStatiModel with ChangeNotifier {
     }
   }
 
-  List<StatoAllarme> getAllarmi() {
-    List<StatoAllarme> tmpStatiList = [];
+  List<StatoModel> getModel(String tipoStato) {
+    List<StatoModel> tmpStatiList = [];
     for (dynamic stato in stati) {
-      if (stato is StatoAllarme) {
-        tmpStatiList.add(stato as StatoAllarme);
+      if ((stato).toString() == tipoStato) {
+        tmpStatiList.add(stato);
       }
     }
     return tmpStatiList;
@@ -150,7 +150,7 @@ class SchemaStatiModel with ChangeNotifier {
             if (tipo == 'Stato') {
               stati.add(StatoModel.fromJson(element));
             } else if (tipo == 'StatoAllarme') {
-              stati.add(StatoAllarme.fromJson(element));
+              stati.add(StatoModel.fromJson(element));
             }
             stati.last.setAzioneStatoListener(callback: azioneStato);
           }

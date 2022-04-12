@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_circular_slider/flutter_circular_slider.dart';
 import 'package:gestione_domotica/models/stati/stati_layer.dart';
 import 'package:gestione_domotica/models/timer/timer_attivazione.dart';
-import 'package:gestione_domotica/models/timer/timers_attivazione.dart';
+import 'package:gestione_domotica/models/timer/timer_attivazioni.dart';
 
 class TimeSlider extends StatefulWidget {
   TimeSlider({Key? key, required this.stato, this.child}) : super(key: key) {
@@ -151,6 +151,7 @@ class _TimeSliderState extends State<TimeSlider> {
         //onSelectionChange: _updateLabels,
         onSelectionEnd: (a, b, c) => _onSelectionEnd(a, b, 0),
         sliderStrokeWidth: 12.0,
+        timerDivider: currentDividerTime(dateTime, dividers),
         subDivider: currentDividerTime(dateTime, dividers),
         subDividerColor: subColorSliderRosso,
         pointerLabel: (a) {

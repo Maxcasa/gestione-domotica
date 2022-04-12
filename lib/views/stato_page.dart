@@ -4,7 +4,7 @@ import 'dart:convert';
 //import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/stati/stati_layer.dart';
-import 'package:gestione_domotica/models/timer/timers_attivazione.dart';
+import 'package:gestione_domotica/models/timer/timer_attivazioni.dart';
 import 'package:gestione_domotica/repositories/mqtt/multi_message_provider.dart';
 import 'package:gestione_domotica/widget/time_slider.dart';
 import 'package:provider/provider.dart';
@@ -12,18 +12,22 @@ import 'main_drawer.dart';
 //import '../widget/AzioneForm.dart';
 
 /// Classe WIDGET che contiene la gestione degli allarmi
-class AllarmPage extends StatefulWidget {
-  AllarmPage({Key? key}) : super(key: key) {
+class StatoPage extends StatefulWidget {
+  StatoPage({Key? key, String? tipoStato})
+      : tipoStato = tipoStato ?? "Stato",
+        super(key: key) {
     // MultiMessageProvider multiMessageProvider = MultiMessageProvider();
     // multiMessageProvider
     //     .addMessage('request/set', "{\"status\": \"stati\"}", ['stati/get']);
   }
 
+  String tipoStato;
+
   @override
-  _AllarmPageState createState() => _AllarmPageState();
+  _StatoPageState createState() => _StatoPageState();
 }
 
-class _AllarmPageState extends State<AllarmPage> {
+class _StatoPageState extends State<StatoPage> {
   // varible for visualization control
   // MultiMessageProvider multiMessageProvider = MultiMessageProvider();
   //final ScrollController scrollController = ScrollController();
@@ -35,9 +39,9 @@ class _AllarmPageState extends State<AllarmPage> {
     //_planProviderState.id = idPlan;
     return Consumer<SchemaStatiModel>(
         builder: (BuildContext context, SchemaStatiModel stati, Widget? child) {
-      List<StatoAllarme> statiAllarme = stati.getAllarmi();
-      if (statiAllarme.length > 0) {
-        StatoAllarme stato = statiAllarme[0];
+      List<StatoModel> statiLista = stati.getModel(widget.tipoStato);
+      if (statiLista.length > 0) {
+        StatoModel stato = statiLista[0];
         int num_timers = stato.timers?.timers.length ?? 0;
         return Stack(children: [
           Center(
@@ -105,7 +109,7 @@ class _AllarmPageState extends State<AllarmPage> {
     //floatingActionButton: _buildAddTaskButton(),
   }
 
-  Widget visalizzaAllarme(StatoAllarme stato) {
+  Widget visalizzaAllarme(StatoModel stato) {
     return (stato.timers != null && stato.timers!.isActivated)
         ? TimeSlider(
             stato: stato,

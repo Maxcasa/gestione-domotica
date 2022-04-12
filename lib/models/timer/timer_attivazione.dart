@@ -6,37 +6,43 @@ class TimerAttivazione {
   // costruttori
   TimerAttivazione();
 
-  List<int> _timer = [0, 10];
+  List<int> _timerInizio = [0];
+  List<int> _timerFine = [10];
   int? id;
   int valore = 0;
+  int maxTimers = 1;
   bool isActivated = false;
 
-  void setTimer(int inizio, int fine) {
-    _timer = [inizio, fine];
+  void setTimer(List<int> inizio, List<int> fine) {
+    _timerInizio = inizio;
+    _timerFine = fine;
   }
 
-  List<int> getTimer() {
-    return _timer.sublist(0, 2);
+  List<int> getTimer({int indexTimer = 0}) {
+    indexTimer = indexTimer <= maxTimers ? indexTimer : maxTimers;
+    return [_timerInizio[indexTimer], _timerFine[indexTimer]];
   }
 
-  int getSum() => (_timer[0] + _timer[1]);
+  int getSum() => (_timerInizio.reduce((a, b) => a + b) +
+      _timerFine.reduce((a, b) => a + b));
 
   // conversione Json
   TimerAttivazione.fromJson(Map<String, dynamic> json)
       : isActivated = json['act'] ?? false,
         id = json['id'],
         valore = json['valore'] ?? 0 {
-    _timer = [];
-
     if (json.containsKey('start')) {
-      _timer.add(json['start']);
+      _timerInizio = json['start'];
     } else {
-      _timer.add(0);
+      _timerInizio = [0];
     }
     if (json.containsKey('end')) {
-      _timer.add(json['end']);
+      _timerFine = json['end'];
     } else {
-      _timer.add(60 * 24 ~/ 5);
+      _timerFine = [60 * 24 ~/ 5];
+    }
+    if (json.containsKey('max')) {
+      maxTimers = json['max'];
     }
   }
 
@@ -45,8 +51,9 @@ class TimerAttivazione {
       'id': id,
       'act': isActivated,
       'valore': valore,
-      'start': _timer[0],
-      'end': _timer[1]
+      'max': maxTimers,
+      'start': _timerInizio,
+      'end': _timerFine
     };
   }
 }

@@ -11,6 +11,7 @@ import './timer_attivazione.dart';
 
 class TimerAttivazioni with ChangeNotifier {
   // costruttori
+  TimerAttivazioni();
   // static final Timers _instance = Timers._internal();
 
   // factory Timers() {
@@ -22,7 +23,7 @@ class TimerAttivazioni with ChangeNotifier {
   //   loadTimers();
   // }
 
-  List<TimerAttivazione> timers = [TimerAttivazione(), TimerAttivazione()];
+  List<TimerAttivazione> timers = [];
   bool isActivated = false;
 
   // Future<Map<String, dynamic>> get timer async {
@@ -56,7 +57,7 @@ class TimerAttivazioni with ChangeNotifier {
     }
   }
 
-  void setTimer(int indexTimer, int inizio, int fine) {
+  void setTimer(int indexTimer, List<int> inizio, List<int> fine) {
     if (indexTimer >= 0 && indexTimer < timers.length) {
       timers[indexTimer].setTimer(inizio, fine);
     }
