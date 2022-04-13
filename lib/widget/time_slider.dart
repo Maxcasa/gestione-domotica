@@ -106,8 +106,8 @@ class _TimeSliderState extends State<TimeSlider> {
 
       circularSlider.add(DoubleCircularSlider(
         dividers,
-        widget.stato.timers!.timers[1].getTimer()[0],
-        widget.stato.timers!.timers[1].getTimer()[1],
+        [widget.stato.timers!.timers[1].getTimer()[0]],
+        [widget.stato.timers!.timers[1].getTimer()[1]],
         key: doubleCircularSliderGialloKey,
         height: 320.0,
         width: 320.0,
@@ -119,11 +119,11 @@ class _TimeSliderState extends State<TimeSlider> {
         handlerColor: Colors.black54,
         handlerOutterRadius: 12.0,
         //onSelectionChange: _updateLabels,
-        onSelectionEnd: (a, b, c) => _onSelectionEnd(a, b, 1),
+        onSelectionEnd: (a, b, c, d) => _onSelectionEnd(a, b, c, d),
         sliderStrokeWidth: 12.0,
         labels: labels,
         //child: widget.child,
-        subDivider: currentDividerTime(dateTime, dividers),
+        subDivider: [currentDividerTime(dateTime, dividers)],
         subDividerColor: widget.stato.colore,
         pointerLabel: (a) {
           return _formatTime(a);
@@ -136,8 +136,8 @@ class _TimeSliderState extends State<TimeSlider> {
           dividerGiallo ? Colors.red[700] : widget.stato.colore;
       circularSlider.add(DoubleCircularSlider(
         dividers,
-        widget.stato.timers!.timers[0].getTimer()[0],
-        widget.stato.timers!.timers[0].getTimer()[1],
+        [widget.stato.timers!.timers[0].getTimer()[0]],
+        [widget.stato.timers!.timers[0].getTimer()[1]],
         key: doubleCircularSliderRossoKey,
         height: 250.0,
         width: 250.0,
@@ -149,10 +149,10 @@ class _TimeSliderState extends State<TimeSlider> {
         handlerColor: Colors.black54,
         handlerOutterRadius: 12.0,
         //onSelectionChange: _updateLabels,
-        onSelectionEnd: (a, b, c) => _onSelectionEnd(a, b, 0),
+        onSelectionEnd: (a, b, c, d) => _onSelectionEnd(a, b, 0, d),
         sliderStrokeWidth: 12.0,
         timerDivider: currentDividerTime(dateTime, dividers),
-        subDivider: currentDividerTime(dateTime, dividers),
+        subDivider: [currentDividerTime(dateTime, dividers)],
         subDividerColor: subColorSliderRosso,
         pointerLabel: (a) {
           return _formatTime(a);
@@ -169,7 +169,7 @@ class _TimeSliderState extends State<TimeSlider> {
     );
   }
 
-  void _onSelectionEnd(int a, int b, int mode) {
+  void _onSelectionEnd(int a, int b, int mode, int index) {
     widget.stato.setTimer(mode, a, b);
 
     //widget.timers.saveTimers();
