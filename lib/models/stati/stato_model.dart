@@ -133,11 +133,11 @@ class StatoModel {
   //   }
   // }
 
-  void setTimer(int indexTimer, int inizio, int fine) {
+  void setTimer(List<int> indexTimer, List<int> multiInit) {
     if (timers != null &&
-        indexTimer >= 0 &&
-        indexTimer < timers!.timers.length) {
-      timers!.setTimer(indexTimer, [inizio], [fine]);
+        indexTimer[0] >= 0 &&
+        indexTimer[0] < timers!.timers.length) {
+      timers!.setTimer(indexTimer, multiInit);
       // invio il set del timer
       String messaggio =
           "{\"id\": 0, \"timers\": ${json.encode(timers!.toJson())}}";

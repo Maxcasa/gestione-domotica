@@ -6,43 +6,47 @@ class TimerAttivazione {
   // costruttori
   TimerAttivazione();
 
-  List<int> _timerInizio = [0];
-  List<int> _timerFine = [10];
+  List<dynamic> _timerInit = [
+    [0, 10]
+  ];
   int? id;
   int valore = 0;
   int maxTimers = 1;
   bool isActivated = false;
 
-  void setTimer(List<int> inizio, List<int> fine) {
-    _timerInizio = inizio;
-    _timerFine = fine;
+  set timer(List<dynamic> init) {
+    _timerInit = init;
   }
 
-  List<int> getTimer({int indexTimer = 0}) {
-    indexTimer = indexTimer <= maxTimers ? indexTimer : maxTimers;
-    return [_timerInizio[indexTimer], _timerFine[indexTimer]];
+  void setTimer(List<int> init, int index) {
+    if (index < _timerInit.length) {
+      _timerInit[index] = init;
+    } else {
+      throw Exception('Index must be inside timers');
+    }
   }
 
-  int getSum() => (_timerInizio.reduce((a, b) => a + b) +
-      _timerFine.reduce((a, b) => a + b));
+  List<int> getTimer({int index = 0}) {
+    if (index < _timerInit.length) {
+      //indexTimer = indexTimer <= maxTimers ? indexTimer : maxTimers;
+      return _timerInit[index];
+      //_timerInit[index] = init;
+    } else {
+      throw Exception('Index must be inside timers');
+    }
+  }
+
+  int getSum() => (_timerInit.reduce((a, b) => a + b));
 
   // conversione Json
   TimerAttivazione.fromJson(Map<String, dynamic> json)
       : isActivated = json['act'] ?? false,
         id = json['id'],
         valore = json['valore'] ?? 0 {
-    if (json.containsKey('start')) {
-      _timerInizio = json['start'];
+    if (json.containsKey('time')) {
+      _timerInit = json['time'];
     } else {
-      _timerInizio = [0];
-    }
-    if (json.containsKey('end')) {
-      _timerFine = json['end'];
-    } else {
-      _timerFine = [60 * 24 ~/ 5];
-    }
-    if (json.containsKey('max')) {
-      maxTimers = json['max'];
+      _timerInit = [];
     }
   }
 
@@ -52,8 +56,7 @@ class TimerAttivazione {
       'act': isActivated,
       'valore': valore,
       'max': maxTimers,
-      'start': _timerInizio,
-      'end': _timerFine
+      'time': _timerInit
     };
   }
 }

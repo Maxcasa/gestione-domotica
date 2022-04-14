@@ -70,7 +70,7 @@ packages:
       name: connectivity_plus
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.2.1"
+    version: "2.3.0"
   connectivity_plus_linux:
     dependency: transitive
     description:
@@ -84,7 +84,7 @@ packages:
       name: connectivity_plus_macos
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.2.1"
+    version: "1.2.2"
   connectivity_plus_platform_interface:
     dependency: transitive
     description:
@@ -182,7 +182,7 @@ packages:
       name: firebase_core
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.14.0"
+    version: "1.14.1"
   firebase_core_platform_interface:
     dependency: transitive
     description:
@@ -196,40 +196,33 @@ packages:
       name: firebase_core_web
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "1.6.1"
+    version: "1.6.2"
   firebase_messaging:
     dependency: "direct main"
     description:
       name: firebase_messaging
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "11.2.12"
+    version: "11.2.13"
   firebase_messaging_platform_interface:
     dependency: transitive
     description:
       name: firebase_messaging_platform_interface
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.2.2"
+    version: "3.2.3"
   firebase_messaging_web:
     dependency: transitive
     description:
       name: firebase_messaging_web
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "2.2.10"
+    version: "2.2.11"
   flutter:
     dependency: "direct main"
     description: flutter
     source: sdk
     version: "0.0.0"
-  flutter_circular_slider:
-    dependency: "direct main"
-    description:
-      path: "../flutter-circular-slider-master"
-      relative: true
-    source: path
-    version: "2.5.0"
   flutter_circular_text:
     dependency: transitive
     description:
@@ -366,6 +359,13 @@ packages:
       url: "https://pub.dartlang.org"
     source: hosted
     version: "9.6.6"
+  multi_flutter_circular_slider:
+    dependency: "direct main"
+    description:
+      path: "../multi_flutter_circular_slider"
+      relative: true
+    source: path
+    version: "1.0.0"
   nested:
     dependency: transitive
     description:

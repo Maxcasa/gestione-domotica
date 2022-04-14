@@ -57,9 +57,9 @@ class TimerAttivazioni with ChangeNotifier {
     }
   }
 
-  void setTimer(int indexTimer, List<int> inizio, List<int> fine) {
-    if (indexTimer >= 0 && indexTimer < timers.length) {
-      timers[indexTimer].setTimer(inizio, fine);
+  void setTimer(List<int> indexTimer, List<int> multiInit) {
+    if (indexTimer[0] >= 0 && indexTimer[0] < timers.length) {
+      timers[indexTimer[0]].setTimer(multiInit, indexTimer[1]);
     }
   }
 

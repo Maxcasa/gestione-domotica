@@ -3,7 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_circular_slider/flutter_circular_slider.dart';
+import 'package:multi_flutter_circular_slider/multi_flutter_circular_slider.dart';
 import 'package:gestione_domotica/models/stati/stati_layer.dart';
 import 'package:gestione_domotica/models/timer/timer_attivazione.dart';
 import 'package:gestione_domotica/models/timer/timer_attivazioni.dart';
@@ -36,8 +36,8 @@ class _TimeSliderState extends State<TimeSlider> {
   int outBedTime = 12;
   int days = 0;
 
-  final doubleCircularSliderRossoKey = GlobalKey<DoubleCircularSliderState>();
-  final doubleCircularSliderGialloKey = GlobalKey<DoubleCircularSliderState>();
+  // final doubleCircularSliderRossoKey = GlobalKey<DoubleCircularSliderState>();
+  // final doubleCircularSliderGialloKey = GlobalKey<DoubleCircularSliderState>();
   // Color? subColorSliderRosso = Colors.red[700];
   // Color? subColorSliderGiallo = Colors.yellow[700];
 
@@ -87,58 +87,11 @@ class _TimeSliderState extends State<TimeSlider> {
 
   @override
   Widget build(BuildContext context) {
-    numTimers = widget.stato.timers!.timers.length;
-    List<Widget> circularSlider = [];
     int dividers = 24 * 12;
-    List<String> labels = [];
-    bool dividerGiallo = false;
-    for (int i = 0; i < 8; i++) {
-      labels.add((i * 3).toString());
-    }
-
-    if (numTimers > 1 && widget.stato.timers!.timers[1].isActivated) {
-      if (currentDividerTime(dateTime, dividers) >
-              widget.stato.timers!.timers[1].getTimer()[0] &&
-          currentDividerTime(dateTime, dividers) <
-              widget.stato.timers!.timers[1].getTimer()[1]) {
-        dividerGiallo = true;
-      }
-
-      circularSlider.add(DoubleCircularSlider(
-        dividers,
-        [widget.stato.timers!.timers[1].getTimer()[0]],
-        [widget.stato.timers!.timers[1].getTimer()[1]],
-        key: doubleCircularSliderGialloKey,
-        height: 320.0,
-        width: 320.0,
-        primarySectors: 24,
-        secondarySectors: 24 * 6,
-        baseColor: Colors.black12,
-        gridColor: Colors.black,
-        selectionColor: Colors.yellow[700],
-        handlerColor: Colors.black54,
-        handlerOutterRadius: 12.0,
-        //onSelectionChange: _updateLabels,
-        onSelectionEnd: (a, b, c, d) => _onSelectionEnd(a, b, c, d),
-        sliderStrokeWidth: 12.0,
-        labels: labels,
-        //child: widget.child,
-        subDivider: [currentDividerTime(dateTime, dividers)],
-        subDividerColor: widget.stato.colore,
-        pointerLabel: (a) {
-          return _formatTime(a);
-        },
-        shouldCountLaps: false,
-      ));
-    }
-    if (numTimers > 0 && widget.stato.timers!.timers[0].isActivated) {
-      Color? subColorSliderRosso =
-          dividerGiallo ? Colors.red[700] : widget.stato.colore;
-      circularSlider.add(DoubleCircularSlider(
+    return MultiFlutterCircularSlider(
         dividers,
         [widget.stato.timers!.timers[0].getTimer()[0]],
         [widget.stato.timers!.timers[0].getTimer()[1]],
-        key: doubleCircularSliderRossoKey,
         height: 250.0,
         width: 250.0,
         primarySectors: 24,
@@ -153,20 +106,95 @@ class _TimeSliderState extends State<TimeSlider> {
         sliderStrokeWidth: 12.0,
         timerDivider: currentDividerTime(dateTime, dividers),
         subDivider: [currentDividerTime(dateTime, dividers)],
-        subDividerColor: subColorSliderRosso,
+        subDividerColor: Colors.black,
         pointerLabel: (a) {
           return _formatTime(a);
         },
         shouldCountLaps: false,
-      ));
-    }
-    if (widget.child != null) {
-      circularSlider.add(widget.child!);
-    }
-    return Stack(
-      children: circularSlider,
-      alignment: Alignment.center,
-    );
+      )
+
+
+
+    // numTimers = widget.stato.timers!.timers.length;
+    // List<Widget> circularSlider = [];
+    // int dividers = 24 * 12;
+    // List<String> labels = [];
+    // bool dividerGiallo = false;
+    // for (int i = 0; i < 8; i++) {
+    //   labels.add((i * 3).toString());
+    // }
+
+    // if (numTimers > 1 && widget.stato.timers!.timers[1].isActivated) {
+    //   if (currentDividerTime(dateTime, dividers) >
+    //           widget.stato.timers!.timers[1].getTimer()[0] &&
+    //       currentDividerTime(dateTime, dividers) <
+    //           widget.stato.timers!.timers[1].getTimer()[1]) {
+    //     dividerGiallo = true;
+    //   }
+
+    //   circularSlider.add(DoubleCircularSlider(
+    //     dividers,
+    //     [widget.stato.timers!.timers[1].getTimer()[0]],
+    //     [widget.stato.timers!.timers[1].getTimer()[1]],
+    //     key: doubleCircularSliderGialloKey,
+    //     height: 320.0,
+    //     width: 320.0,
+    //     primarySectors: 24,
+    //     secondarySectors: 24 * 6,
+    //     baseColor: Colors.black12,
+    //     gridColor: Colors.black,
+    //     selectionColor: Colors.yellow[700],
+    //     handlerColor: Colors.black54,
+    //     handlerOutterRadius: 12.0,
+    //     //onSelectionChange: _updateLabels,
+    //     onSelectionEnd: (a, b, c, d) => _onSelectionEnd(a, b, c, d),
+    //     sliderStrokeWidth: 12.0,
+    //     labels: labels,
+    //     //child: widget.child,
+    //     subDivider: [currentDividerTime(dateTime, dividers)],
+    //     subDividerColor: widget.stato.colore,
+    //     pointerLabel: (a) {
+    //       return _formatTime(a);
+    //     },
+    //     shouldCountLaps: false,
+    //   ));
+    // }
+    // if (numTimers > 0 && widget.stato.timers!.timers[0].isActivated) {
+    //   Color? subColorSliderRosso =
+    //       dividerGiallo ? Colors.red[700] : widget.stato.colore;
+    //   circularSlider.add(DoubleCircularSlider(
+    //     dividers,
+    //     [widget.stato.timers!.timers[0].getTimer()[0]],
+    //     [widget.stato.timers!.timers[0].getTimer()[1]],
+    //     key: doubleCircularSliderRossoKey,
+    //     height: 250.0,
+    //     width: 250.0,
+    //     primarySectors: 24,
+    //     secondarySectors: 24 * 6,
+    //     baseColor: Colors.black12,
+    //     gridColor: Colors.black,
+    //     selectionColor: Colors.red[700],
+    //     handlerColor: Colors.black54,
+    //     handlerOutterRadius: 12.0,
+    //     //onSelectionChange: _updateLabels,
+    //     onSelectionEnd: (a, b, c, d) => _onSelectionEnd(a, b, 0, d),
+    //     sliderStrokeWidth: 12.0,
+    //     timerDivider: currentDividerTime(dateTime, dividers),
+    //     subDivider: [currentDividerTime(dateTime, dividers)],
+    //     subDividerColor: subColorSliderRosso,
+    //     pointerLabel: (a) {
+    //       return _formatTime(a);
+    //     },
+    //     shouldCountLaps: false,
+    //   ));
+    // }
+    // if (widget.child != null) {
+    //   circularSlider.add(widget.child!);
+    // }
+    // return Stack(
+    //   children: circularSlider,
+    //   alignment: Alignment.center,
+    // );
   }
 
   void _onSelectionEnd(int a, int b, int mode, int index) {
