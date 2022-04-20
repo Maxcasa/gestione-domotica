@@ -89,31 +89,30 @@ class _TimeSliderState extends State<TimeSlider> {
   Widget build(BuildContext context) {
     int dividers = 24 * 12;
     return MultiFlutterCircularSlider(
-        dividers,
-        [widget.stato.timers!.timers[0].getTimer()[0]],
-        [widget.stato.timers!.timers[0].getTimer()[1]],
-        height: 250.0,
-        width: 250.0,
-        primarySectors: 24,
-        secondarySectors: 24 * 6,
-        baseColor: Colors.black12,
-        gridColor: Colors.black,
-        selectionColor: Colors.red[700],
-        handlerColor: Colors.black54,
-        handlerOutterRadius: 12.0,
-        //onSelectionChange: _updateLabels,
-        onSelectionEnd: (a, b, c, d) => _onSelectionEnd(a, b, 0, d),
-        sliderStrokeWidth: 12.0,
-        timerDivider: currentDividerTime(dateTime, dividers),
-        subDivider: [currentDividerTime(dateTime, dividers)],
-        subDividerColor: Colors.black,
-        pointerLabel: (a) {
-          return _formatTime(a);
-        },
-        shouldCountLaps: false,
-      )
-
-
+      dividers,
+      widget.stato.timers!.timersArray,
+      widget.stato.timers!.activationArray,
+      size: [Size(320.0, 320.0), Size(250.0, 250.0)],
+      primarySectors: 24,
+      secondarySectors: 24 * 6,
+      baseColor: Colors.black12,
+      gridColor: Colors.black,
+      selectionColor: [
+        Colors.yellow[700] ?? Colors.black54,
+        Colors.red[700] ?? Colors.black54
+      ],
+      handlerColor: Colors.black54,
+      handlerOutterRadius: 12.0,
+      //onSelectionChange: _updateLabels,
+      onSelectionEnd: (a, b, d) => _onSelectionEnd(a, b, d),
+      sliderStrokeWidth: 12.0,
+      timerDivider: currentDividerTime(dateTime, dividers),
+      subDividerColor: Colors.black,
+      pointerLabel: (a) {
+        return _formatTime(a);
+      },
+      shouldCountLaps: false,
+    );
 
     // numTimers = widget.stato.timers!.timers.length;
     // List<Widget> circularSlider = [];
@@ -197,8 +196,8 @@ class _TimeSliderState extends State<TimeSlider> {
     // );
   }
 
-  void _onSelectionEnd(int a, int b, int mode, int index) {
-    widget.stato.setTimer(mode, a, b);
+  void _onSelectionEnd(List<int> a, int b, List<int> index) {
+    widget.stato.setTimer(a, index);
 
     //widget.timers.saveTimers();
   }

@@ -30,6 +30,14 @@ class TimerAttivazioni with ChangeNotifier {
   //   return timersMap;
   // }
 
+  List<dynamic> get timersArray {
+    return timers.map((timer) => timer.timerInit).toList();
+  }
+
+  List<bool> get activationArray {
+    return timers.map((timers) => timers.isActivated).toList();
+  }
+
   @override
   int get hashCode {
     int tmpHash = 0;

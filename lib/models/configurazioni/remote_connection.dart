@@ -4,7 +4,8 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
 // import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:gestione_domotica/models/remote_conf/connection_data.dart';
+import 'package:gestione_domotica/models/configurazioni/connection_data.dart';
+import 'package:gestione_domotica/models/configurazioni/local_data.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:network_info_plus/network_info_plus.dart';
@@ -39,8 +40,7 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
   // variabili
   //String? remoteServerUri;
   List<ConnectionData> connectionDataList = [];
-  int _activeIndex = -1;
-  String token = '';
+  LocalData localData = LocalData();
   //String? connectionName;
   //String? localServerName;
   //String? remoteServerName;
@@ -52,11 +52,11 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
   var lock = Lock(reentrant: true);
 
   // getter & setter
-  int get activeIndex => _activeIndex;
+  int get activeIndex => localData.activeIndex;
 
   set activeIndex(int activeIndex) {
     bool changeFire = false;
-    if (activeIndex != _activeIndex) {
+    if (activeIndex != localData.activeIndex) {
       // if (connectionDataList.token == '') {
       //   connectionDataList.last.token = (await FirebaseMessaging.instance.getToken())!;
       //   FirebaseMessaging.instance.onTokenRefresh.listen(saveTokenToDatabase);
@@ -65,11 +65,11 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
       changeFire = true;
     }
     if (connectionDataList.length <= activeIndex) {
-      _activeIndex = connectionDataList.length;
+      localData.activeIndex = connectionDataList.length;
     } else if (activeIndex < 0) {
-      _activeIndex = 0;
+      localData.activeIndex = 0;
     } else {
-      _activeIndex = activeIndex;
+      localData.activeIndex = activeIndex;
     }
     if (changeFire) {
       subscribeFirebase();
@@ -78,8 +78,9 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
   }
 
   String? get connectionName {
-    if (connectionDataList.length > _activeIndex && _activeIndex >= 0) {
-      return connectionDataList[_activeIndex].connectionName;
+    if (connectionDataList.length > localData.activeIndex &&
+        localData.activeIndex >= 0) {
+      return connectionDataList[localData.activeIndex].connectionName;
     } else {
       return null;
     }
@@ -94,51 +95,57 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
   }
 
   String? get localServerName {
-    if (connectionDataList.length > _activeIndex && _activeIndex >= 0) {
-      return connectionDataList[_activeIndex].localServerName;
+    if (connectionDataList.length > localData.activeIndex &&
+        localData.activeIndex >= 0) {
+      return connectionDataList[localData.activeIndex].localServerName;
     } else {
       return null;
     }
   }
 
   set localServerName(String? localServerName) {
-    connectionDataList[_activeIndex].localServerName = localServerName ?? '';
+    connectionDataList[localData.activeIndex].localServerName =
+        localServerName ?? '';
   }
 
   String? get remoteServerName {
-    if (connectionDataList.length > _activeIndex && _activeIndex >= 0) {
-      return connectionDataList[_activeIndex].remoteServerName;
+    if (connectionDataList.length > localData.activeIndex &&
+        localData.activeIndex >= 0) {
+      return connectionDataList[localData.activeIndex].remoteServerName;
     } else {
       return null;
     }
   }
 
   String? get remoteUser {
-    if (connectionDataList.length > _activeIndex && _activeIndex >= 0) {
-      return connectionDataList[_activeIndex].remoteUser;
+    if (connectionDataList.length > localData.activeIndex &&
+        localData.activeIndex >= 0) {
+      return connectionDataList[localData.activeIndex].remoteUser;
     } else {
       return null;
     }
   }
 
   String? get remoteDomain {
-    if (connectionDataList.length > _activeIndex && _activeIndex >= 0) {
-      return connectionDataList[_activeIndex].remoteDomain;
+    if (connectionDataList.length > localData.activeIndex &&
+        localData.activeIndex >= 0) {
+      return connectionDataList[localData.activeIndex].remoteDomain;
     } else {
       return null;
     }
   }
 
   String? get localWiFiConnectionName {
-    if (connectionDataList.length > _activeIndex && _activeIndex >= 0) {
-      return connectionDataList[_activeIndex].localWiFiConnectionName;
+    if (connectionDataList.length > localData.activeIndex &&
+        localData.activeIndex >= 0) {
+      return connectionDataList[localData.activeIndex].localWiFiConnectionName;
     } else {
       return null;
     }
   }
 
   set localWiFiConnectionName(String? localWiFiConnectionName) {
-    connectionDataList[_activeIndex].localWiFiConnectionName =
+    connectionDataList[localData.activeIndex].localWiFiConnectionName =
         localWiFiConnectionName ?? '';
   }
 
@@ -175,6 +182,13 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
         return 0;
     }
   }
+
+  bool get sensoriVisibili => localData.sensoriVisibili;
+
+  set sensoriVisibili(bool sensoriVisibili) =>
+      localData.sensoriVisibili = sensoriVisibili;
+
+  String get token => localData.token;
 
   //metodi
 
@@ -249,7 +263,7 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
   Future<void> _getConnectionConf() async {
     //if (localWiFiConnectionName == null && remoteServerUri == null) {
     // ricarico solo se necessario o forzato.
-    if (_activeIndex < 0) {
+    if (localData.activeIndex < 0) {
       if (kIsWeb) {
         await _getAssetsConf();
       } else {
@@ -259,16 +273,15 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
           try {
             String fileString = decryptMyData(await file.readAsString()) ?? '';
             Map<String, dynamic> jsonConfig = json.decode(fileString);
-            _activeIndex = jsonConfig['activeIndex'];
-            token = jsonConfig['token'] ?? '';
+            localData = LocalData.fromJson(jsonConfig);
             String tmpToken = await FirebaseMessaging.instance.getToken() ?? '';
-            if (token == '' || token != tmpToken) {
-              token = tmpToken;
+            if (localData.token == '' || localData.token != tmpToken) {
+              localData.token = tmpToken;
               notifyListeners('token');
               //saveConnectionInfo();
             }
             FirebaseMessaging.instance.onTokenRefresh.listen((String? token) {
-              this.token = token ?? '';
+              localData.token = token ?? '';
               notifyListeners('token');
             });
           } on Exception catch (e) {
@@ -300,7 +313,7 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
   }
 
   Future<void> _getAssetsConf() async {
-    _activeIndex = 0;
+    localData.activeIndex = 0;
     print('RemoteConnection :: $localServerName, $localWiFiConnectionName');
   }
 
@@ -318,7 +331,8 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
       String stringToWrite = encryptMyData(jsonEncode(connectionDataList));
       await file.writeAsString(stringToWrite);
       final File configFile = File('${directory.path}/config.json');
-      stringToWrite = encryptMyData(jsonEncode({"activeIndex": _activeIndex}));
+      stringToWrite =
+          encryptMyData(jsonEncode({"activeIndex": localData.activeIndex}));
       await configFile.writeAsString(stringToWrite);
     }
     // forzo il ricaricare i valori
@@ -331,12 +345,11 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
     if (!kIsWeb) {
       final directory = await getApplicationDocumentsDirectory();
       final File file = File('${directory.path}/config.json');
-      String stringToWrite =
-          encryptMyData(jsonEncode({"activeIndex": _activeIndex}));
+      String stringToWrite = encryptMyData(jsonEncode(localData.toJson()));
       await file.writeAsString(stringToWrite);
     }
     // forzo il ricaricare i valori
-    _activeIndex = -1;
+    localData.activeIndex = -1;
     getConnectionInfo();
     return true;
   }
@@ -381,7 +394,7 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
   }
 
   void removeItem() {
-    connectionDataList.removeAt(_activeIndex);
+    connectionDataList.removeAt(localData.activeIndex);
     activeIndex = 0;
     saveConnectionInfo();
   }

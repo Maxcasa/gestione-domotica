@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 
 import 'package:flutter/material.dart';
-import 'package:gestione_domotica/models/remote_conf/remote_connection.dart';
+import 'package:gestione_domotica/models/configurazioni/remote_connection.dart';
 
 class AllowedDevice with ChangeNotifier {
   // costruttori

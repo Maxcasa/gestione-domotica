@@ -43,6 +43,9 @@ class SensoreLuce extends SensoreModel {
     setColore();
   }
 
+  @override
+  bool get sensoreVisibile => true;
+
   void setColore() {
     if (valoreInt > 0) {
       colore = Colors.yellow;

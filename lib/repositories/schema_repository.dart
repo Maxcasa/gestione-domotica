@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:gestione_domotica/models/remote_conf/remote_connection.dart';
+import 'package:gestione_domotica/models/configurazioni/remote_connection.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart' as io_client;

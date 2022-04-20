@@ -1,7 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:gestione_domotica/models/remote_conf/connection_data.dart';
-import 'package:gestione_domotica/models/remote_conf/remote_layer.dart';
+import 'package:gestione_domotica/models/configurazioni/connection_data.dart';
+import 'package:gestione_domotica/models/configurazioni/remote_layer.dart';
 import 'package:gestione_domotica/repositories/keep_alive_provider.dart';
 import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
 //import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
@@ -178,6 +178,20 @@ class ConfPage extends StatelessWidget with WidgetsBindingObserver {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            FormField(
+                initialValue: remoteConnection.sensoriVisibili,
+                onSaved: (value) {
+                  remoteConnection.sensoriVisibili = value as bool;
+                },
+                builder: (FormFieldState<bool> field) {
+                  return SwitchListTile(
+                    title: Text("Visualizza i sensori non attivi"),
+                    value: field.value ?? false,
+                    onChanged: (val) {
+                      field.didChange(val);
+                    },
+                  );
+                }),
             Container(
                 margin: EdgeInsets.all(10),
                 padding: EdgeInsets.all(5),

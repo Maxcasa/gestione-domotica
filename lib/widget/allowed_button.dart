@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:gestione_domotica/models/remote_conf/remote_connection.dart';
-import 'package:gestione_domotica/models/remote_conf/remote_layer.dart';
+import 'package:gestione_domotica/models/configurazioni/remote_connection.dart';
+import 'package:gestione_domotica/models/configurazioni/remote_layer.dart';
 import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
 
 /// Classe WIDGET che contiene la gestione per abilitare

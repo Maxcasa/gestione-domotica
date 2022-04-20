@@ -46,6 +46,8 @@ class SensoreModel {
 
   String get text => '';
 
+  bool get sensoreVisibile => false;
+
   // conversione Json
   SensoreModel.fromJson(Map<String, dynamic> json)
       : id = json['id'],

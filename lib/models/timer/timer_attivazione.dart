@@ -6,7 +6,7 @@ class TimerAttivazione {
   // costruttori
   TimerAttivazione();
 
-  List<dynamic> _timerInit = [
+  List<dynamic> timerInit = [
     [0, 10]
   ];
   int? id;
@@ -15,28 +15,28 @@ class TimerAttivazione {
   bool isActivated = false;
 
   set timer(List<dynamic> init) {
-    _timerInit = init;
+    timerInit = init;
   }
 
   void setTimer(List<int> init, int index) {
-    if (index < _timerInit.length) {
-      _timerInit[index] = init;
+    if (index < timerInit.length) {
+      timerInit[index] = init;
     } else {
       throw Exception('Index must be inside timers');
     }
   }
 
   List<int> getTimer({int index = 0}) {
-    if (index < _timerInit.length) {
+    if (index < timerInit.length) {
       //indexTimer = indexTimer <= maxTimers ? indexTimer : maxTimers;
-      return _timerInit[index];
+      return timerInit[index];
       //_timerInit[index] = init;
     } else {
       throw Exception('Index must be inside timers');
     }
   }
 
-  int getSum() => (_timerInit.reduce((a, b) => a + b));
+  int getSum() => (timerInit.reduce((a, b) => a + b));
 
   // conversione Json
   TimerAttivazione.fromJson(Map<String, dynamic> json)
@@ -44,9 +44,9 @@ class TimerAttivazione {
         id = json['id'],
         valore = json['valore'] ?? 0 {
     if (json.containsKey('time')) {
-      _timerInit = json['time'];
+      timerInit = json['time'];
     } else {
-      _timerInit = [];
+      timerInit = [];
     }
   }
 
@@ -56,7 +56,7 @@ class TimerAttivazione {
       'act': isActivated,
       'valore': valore,
       'max': maxTimers,
-      'time': _timerInit
+      'time': timerInit
     };
   }
 }

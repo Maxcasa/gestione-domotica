@@ -5,8 +5,8 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:network_info_plus/network_info_plus.dart';
-import 'package:gestione_domotica/models/remote_conf/allowed_device.dart';
-import 'package:gestione_domotica/models/remote_conf/remote_connection.dart';
+import 'package:gestione_domotica/models/configurazioni/allowed_device.dart';
+import 'package:gestione_domotica/models/configurazioni/remote_connection.dart';
 import 'package:path_provider/path_provider.dart';
 
 const String port = '8085';

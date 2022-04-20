@@ -133,7 +133,7 @@ class StatoModel {
   //   }
   // }
 
-  void setTimer(List<int> indexTimer, List<int> multiInit) {
+  void setTimer(List<int> multiInit, List<int> indexTimer) {
     if (timers != null &&
         indexTimer[0] >= 0 &&
         indexTimer[0] < timers!.timers.length) {

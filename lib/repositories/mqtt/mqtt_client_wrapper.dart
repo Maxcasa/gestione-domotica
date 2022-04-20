@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:gestione_domotica/models/remote_conf/remote_connection.dart';
+import 'package:gestione_domotica/models/configurazioni/remote_connection.dart';
 //import 'package:mqtt_client/mqtt_browser_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
