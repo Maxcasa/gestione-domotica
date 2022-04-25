@@ -185,8 +185,12 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
 
   bool get sensoriVisibili => localData.sensoriVisibili;
 
-  set sensoriVisibili(bool sensoriVisibili) =>
+  set sensoriVisibili(bool sensoriVisibili) {
+    if (localData.sensoriVisibili != sensoriVisibili) {
       localData.sensoriVisibili = sensoriVisibili;
+      notifyListeners();
+    }
+  }
 
   String get token => localData.token;
 

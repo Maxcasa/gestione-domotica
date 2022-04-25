@@ -178,20 +178,6 @@ class ConfPage extends StatelessWidget with WidgetsBindingObserver {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            FormField(
-                initialValue: remoteConnection.sensoriVisibili,
-                onSaved: (value) {
-                  remoteConnection.sensoriVisibili = value as bool;
-                },
-                builder: (FormFieldState<bool> field) {
-                  return SwitchListTile(
-                    title: Text("Visualizza i sensori non attivi"),
-                    value: field.value ?? false,
-                    onChanged: (val) {
-                      field.didChange(val);
-                    },
-                  );
-                }),
             Container(
                 margin: EdgeInsets.all(10),
                 padding: EdgeInsets.all(5),

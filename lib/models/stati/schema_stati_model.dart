@@ -21,7 +21,7 @@ const String topicSurName = "stati";
 
 final factories = <String, Object Function(int id)>{
   'Stato': (id) => StatoModel(id: id),
-  'StatoAllarme': (id) => StatoModel(id: id)
+  'StatoAllarme': (id) => StatoAllarme(id: id)
 };
 
 /// Classe che contiene la gestione degli allarmi
@@ -74,6 +74,7 @@ class SchemaStatiModel with ChangeNotifier {
   //metodi
   Future<void> _getDati() async {
     _getSchemaStato();
+    notifyListeners();
   }
 
   StatoModel? getStato(id) {
@@ -92,7 +93,7 @@ class SchemaStatiModel with ChangeNotifier {
   List<StatoModel> getModel(String tipoStato) {
     List<StatoModel> tmpStatiList = [];
     for (dynamic stato in stati) {
-      if ((stato).toString() == tipoStato) {
+      if ((stato).toString() == "Instance of '${tipoStato}'") {
         tmpStatiList.add(stato);
       }
     }
@@ -150,7 +151,7 @@ class SchemaStatiModel with ChangeNotifier {
             if (tipo == 'Stato') {
               stati.add(StatoModel.fromJson(element));
             } else if (tipo == 'StatoAllarme') {
-              stati.add(StatoModel.fromJson(element));
+              stati.add(StatoAllarme.fromJson(element));
             }
             stati.last.setAzioneStatoListener(callback: azioneStato);
           }

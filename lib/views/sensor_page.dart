@@ -26,13 +26,15 @@ class SensorPage extends StatelessWidget {
     //_planProviderState.id = idPlan;
     return Consumer<SchemaSensoriModel>(builder: (BuildContext context,
         SchemaSensoriModel schemaSensori, Widget? child) {
-      return RefreshIndicator(
-          // reload page
-          onRefresh: () => _refresh(),
-          child: SingleChildScrollView(
-              //physics: const AlwaysScrollableScrollPhysics(),
-              scrollDirection: Axis.vertical,
-              child: SchemaSensori(schemaSensoriModel: schemaSensori)));
+      return
+          // RefreshIndicator(
+          //     // reload page
+          //     onRefresh: () => _refresh(),
+          //     child: SingleChildScrollView(
+          //         //physics: const AlwaysScrollableScrollPhysics(),
+          //         scrollDirection: Axis.vertical,
+          //         child:
+          SchemaSensori(schemaSensoriModel: schemaSensori);
     });
     //floatingActionButton: _buildAddTaskButton(),
   }

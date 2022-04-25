@@ -65,6 +65,18 @@ class SchemaSensori extends StatelessWidget {
               //     ),
               //   ),
               // ])
+              Positioned(
+                  bottom: 90.0,
+                  left: 20.0,
+                  child: Row(children: [
+                    Icon(Icons.home_rounded, color: Colors.black54, size: 30.0),
+                    Switch(
+                      value: remoteConnection.sensoriVisibili,
+                      onChanged: (value) {
+                        remoteConnection.sensoriVisibili = value;
+                      },
+                    ),
+                  ])),
             ],
           ));
     });
@@ -81,3 +93,20 @@ class SchemaSensori extends StatelessWidget {
     }
   }
 }
+
+
+
+            // FormField(
+            //     initialValue: remoteConnection.sensoriVisibili,
+            //     onSaved: (value) {
+            //       remoteConnection.sensoriVisibili = value as bool;
+            //     },
+            //     builder: (FormFieldState<bool> field) {
+            //       return SwitchListTile(
+                //     title: Text("Visualizza i sensori non attivi"),
+                //     value: field.value ?? false,
+                //     onChanged: (val) {
+                //       field.didChange(val);
+                //     },
+                //   );
+                // }),

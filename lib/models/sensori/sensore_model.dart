@@ -46,7 +46,12 @@ class SensoreModel {
 
   String get text => '';
 
-  bool get sensoreVisibile => false;
+  bool get sensoreVisibile {
+    if (valoreInt != 0) {
+      return true;
+    }
+    return false;
+  }
 
   // conversione Json
   SensoreModel.fromJson(Map<String, dynamic> json)
