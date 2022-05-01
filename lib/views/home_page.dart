@@ -97,16 +97,19 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     //     'request/set', "{\"status\": \"sensori\"}", ['sensori/get']);
     // multiMessageProvider
     //     .addMessage('request/set', "{\"status\": \"stati\"}", ['stati/get']);
+    const sound = 'domo_allarm';
     WidgetsBinding.instance!.addObserver(this);
     super.initState();
 
     if (!kIsWeb) {
       channel = const AndroidNotificationChannel(
-        'high_importance_channel', // id
+        'high_importance_channel 2', // id
         'High Importance Notifications', // title
         description:
             'This channel is used for important notifications.', // description
         importance: Importance.high,
+        playSound: true,
+        sound: RawResourceAndroidNotificationSound(sound),
       );
 
       flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
@@ -174,6 +177,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               // TODO add a proper drawable resource to android, for now using
               //      one that already exists in example app.
               icon: '@mipmap/ic_launcher',
+              playSound: channel.playSound,
+              sound: channel.sound,
+              // sound: notification.android.sound!,
             ),
           ),
         );

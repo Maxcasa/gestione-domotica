@@ -61,7 +61,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '1018295187157',
     projectId: 'gestione-domotica',
     storageBucket: 'gestione-domotica.appspot.com',
-    iosClientId: '1018295187157-v6tkgpubdafs14197d699ch59dqp1886.apps.googleusercontent.com',
+    iosClientId:
+        '1018295187157-v6tkgpubdafs14197d699ch59dqp1886.apps.googleusercontent.com',
     iosBundleId: 'com.maxcasa.app',
   );
 }
