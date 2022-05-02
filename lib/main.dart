@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/configurazioni/remote_connection.dart';
 import 'package:gestione_domotica/models/timer/timer_attivazioni.dart';
 import 'package:gestione_domotica/repositories/firebase/firebase_options.dart';
+import 'package:gestione_domotica/repositories/firebase/notification_sender.dart';
 import 'package:gestione_domotica/repositories/timers_repository.dart';
 import 'package:gestione_domotica/views/home_page.dart';
 // import 'package:gestione_domotica/views/main_drawer.dart';
@@ -28,13 +29,16 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   // make sure you call `initializeApp` before using other Firebase services.
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   print('Handling a background message ${message.messageId}');
+  notificationSender.sendMessage(message);
 }
 
-// /// Create a [AndroidNotificationChannel] for heads up notifications
+NotificationSender notificationSender = NotificationSender();
+
+// // /// Create a [AndroidNotificationChannel] for heads up notifications
 // late AndroidNotificationChannel channel;
 
-/// Initialize the [FlutterLocalNotificationsPlugin] package.
-//late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
+// /// Initialize the [FlutterLocalNotificationsPlugin] package.
+// late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -42,28 +46,31 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
+  const sound = 'domo_allarm';
+
   // Set the background messaging handler early on, as a named top-level function
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
   if (!kIsWeb) {
-    // channel = const AndroidNotificationChannel(
-    //   'high_importance_channel', // id
-    //   'High Importance Notifications', // title
-    //   description:
-    //       'This channel is used for important notifications.', // description
-    //   importance: Importance.high,
-    // );
+    //   channel = const AndroidNotificationChannel(
+    //     'high_importance_channel 2', // id
+    //     'High Importance Notifications', // title
+    //     description:
+    //         'This channel is used for important notifications.', // description
+    //     importance: Importance.high,
+    //     playSound: true,
+    //     sound: RawResourceAndroidNotificationSound(sound),
+    //   );
 
-    // flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-
-    // /// Create an Android Notification Channel.
-    // ///
-    // /// We use this channel in the `AndroidManifest.xml` file to override the
-    // /// default FCM channel to enable heads up notifications.
-    // await flutterLocalNotificationsPlugin
-    //     .resolvePlatformSpecificImplementation<
-    //         AndroidFlutterLocalNotificationsPlugin>()
-    //     ?.createNotificationChannel(channel);
+    //   flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+    //   // /// Create an Android Notification Channel.
+    //   // ///
+    //   // /// We use this channel in the `AndroidManifest.xml` file to override the
+    //   // /// default FCM channel to enable heads up notifications.
+    //   flutterLocalNotificationsPlugin
+    //       .resolvePlatformSpecificImplementation<
+    //           AndroidFlutterLocalNotificationsPlugin>()
+    //       ?.createNotificationChannel(channel);
 
     // /// Requests & displays the current user permissions for this device.
     // NotificationSettings settings =
