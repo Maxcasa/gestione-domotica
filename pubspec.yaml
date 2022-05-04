@@ -44,7 +44,7 @@ dependencies:
   logger: ^1.0.2
   firebase_messaging: ^11.2.11
   multi_flutter_circular_slider : 
-    path: ../multi-flutter_circular-slider/
+    path: ../multi-flutter_circular_slider/
   #logger_flutter: ^0.7.1
   # wifi_iot: ^0.3.14
   # The following adds the Cupertino Icons font to your application.

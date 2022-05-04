@@ -27,7 +27,6 @@ class HomePage extends StatefulWidget {
   }
 
   MQTTClientWrapper? mqttClientWrapper;
-  bool active = true;
 
   void _connect() {
     mqttClientWrapper!.connectMqttClient();

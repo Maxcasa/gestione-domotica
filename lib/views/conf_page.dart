@@ -14,32 +14,32 @@ import 'package:provider/provider.dart';
 
 import 'main_drawer.dart';
 
-class ConfPage extends StatelessWidget with WidgetsBindingObserver {
+class ConfPage extends StatefulWidget {
   ConfPage({Key? key}) : super(key: key) {
     mqttClientWrapper = MQTTClientWrapper();
+    mqttClientWrapper!.wrapperState = MqttWrapperState.ACTIVE;
     if (mqttClientWrapper!.connectionState == MqttCurrentConnectionState.IDLE) {
       _connect();
     }
     mqttClientWrapper!.addListener(_connect, ['connectionState.disconnected']);
-    WidgetsBinding.instance!.addObserver(this);
   }
 
   // variabili
   MQTTClientWrapper? mqttClientWrapper;
-  bool active = true;
 
   void _connect() {
-    if (active) {
-      mqttClientWrapper!.active = true;
-      mqttClientWrapper!.connectMqttClient();
-    }
+    mqttClientWrapper!.connectMqttClient();
   }
 
   void _disconnect() {
-    mqttClientWrapper!.active = false;
     mqttClientWrapper!.disconnect();
   }
 
+  @override
+  _ConfPageState createState() => _ConfPageState();
+}
+
+class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
   PageController _controller = PageController(
     initialPage: 0,
   );
@@ -54,6 +54,11 @@ class ConfPage extends StatelessWidget with WidgetsBindingObserver {
       ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
 
   final _formAllowedKey = GlobalKey<FormState>();
+
+  bool _vediDettagli = false;
+
+  OverlayEntry? _menuOverlay;
+  BuildContext? _context;
   // @override
   // void dispose() {
   //   _controller.dispose();
@@ -66,30 +71,48 @@ class ConfPage extends StatelessWidget with WidgetsBindingObserver {
     switch (state) {
       case AppLifecycleState.resumed:
         print("app in resumed");
-        active = true;
-        _connect();
+        widget.mqttClientWrapper!.wrapperState = MqttWrapperState.ACTIVE;
+        widget._connect();
         break;
       case AppLifecycleState.inactive:
         print("app in inactive");
-        active = false;
-        _disconnect();
+        widget.mqttClientWrapper!.wrapperState = MqttWrapperState.INACTIVE;
+        widget._disconnect();
         break;
       case AppLifecycleState.paused:
         print("app in paused");
-        active = false;
-        _disconnect();
+        widget.mqttClientWrapper!.wrapperState = MqttWrapperState.INACTIVE;
+        widget._disconnect();
         break;
       case AppLifecycleState.detached:
         print("app in detached");
-        active = false;
-        _disconnect();
+        widget.mqttClientWrapper!.wrapperState = MqttWrapperState.INACTIVE;
+        widget._disconnect();
         break;
     }
+  }
+
+  @override
+  void initState() {
+    // multiMessageProvider.addMessage(
+    //     'request/set', "{\"status\": \"sensori\"}", ['sensori/get']);
+    // multiMessageProvider
+    //     .addMessage('request/set', "{\"status\": \"stati\"}", ['stati/get']);
+    WidgetsBinding.instance!.addObserver(this);
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    WidgetsBinding.instance!.removeObserver(this);
+    super.dispose();
   }
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    _context = context;
     return MultiProvider(
         providers: [
           ChangeNotifierProvider<AllowedDevices>(
@@ -105,7 +128,19 @@ class ConfPage extends StatelessWidget with WidgetsBindingObserver {
             endDrawer: const MainDrawer(),
             body: Column(children: <Widget>[
               selectConnection(),
-              remoteConnection(),
+              Row(children: [
+                Icon(Icons.expand_circle_down_outlined,
+                    color: Colors.black54, size: 30.0),
+                Switch(
+                  value: _vediDettagli,
+                  onChanged: (value) {
+                    setState(() {
+                      _vediDettagli = value;
+                    });
+                  },
+                ),
+              ]),
+              (_vediDettagli) ? remoteConnection() : const SizedBox.shrink(),
               Divider(color: Colors.black),
               Container(
                 alignment: Alignment.centerLeft,
@@ -154,6 +189,8 @@ class ConfPage extends StatelessWidget with WidgetsBindingObserver {
         IconButton(
             icon: Icon(Icons.add_circle_outline_rounded, size: 30.0),
             onPressed: () {
+              _menuOverlay = _MenuOverlay(remoteConnection);
+              Overlay.of(context)?.insert(_menuOverlay!);
               //remoteConnection.addItem();
             }),
         IconButton(
@@ -383,13 +420,70 @@ class ConfPage extends StatelessWidget with WidgetsBindingObserver {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  Widget connectionState() {
-    if (mqttClientWrapper == null ||
-        mqttClientWrapper!.connectionState !=
-            MqttCurrentConnectionState.CONNECTED) {
-      return Icon(Icons.cloud_off_outlined, color: Colors.red, size: 20);
-    } else {
-      return Icon(Icons.cloud_outlined, color: Colors.green, size: 20);
-    }
+  OverlayEntry _MenuOverlay(RemoteConnection remoteConnection) {
+    RenderBox renderBox = _context!.findRenderObject() as RenderBox;
+    var size = renderBox.size;
+    var offset = renderBox.localToGlobal(Offset.zero);
+    final serverController = TextEditingController();
+    return OverlayEntry(
+        builder: (_context) => Positioned(
+              left: offset.dx + 5,
+              top: offset.dy + size.height + 50,
+              child: Material(
+                  elevation: 4,
+                  child: Container(
+                      alignment: Alignment.topCenter,
+                      padding: const EdgeInsets.only(
+                          //top: size.height * .58,
+                          right: 20.0,
+                          left: 20.0),
+                      child: Column(
+                        children: [
+                          TextField(
+                            controller: serverController,
+                            decoration: const InputDecoration(
+                              border: UnderlineInputBorder(),
+                              hintText: 'Server Name',
+                            ),
+                            // The validator receives the text that the user has entered.
+                          ),
+                          Row(children: [
+                            IconButton(
+                                icon: Icon(Icons.add_circle_outline_rounded,
+                                    size: 30.0),
+                                onPressed: () async {
+                                  if (await remoteConnection
+                                      .addConnection(serverController.text)) {
+                                    mostraSnackBar('Aggiornato', context);
+                                    serverController.dispose();
+                                    _menuOverlay!.remove();
+                                  } else {
+                                    mostraSnackBar(
+                                        'Problema nella CONNESSIONE', context);
+                                  }
+
+                                  //remoteConnection.addItem();
+                                }),
+                            IconButton(
+                                icon:
+                                    Icon(Icons.backspace_outlined, size: 30.0),
+                                onPressed: () {
+                                  serverController.dispose();
+                                  _menuOverlay!.remove();
+                                }),
+                          ])
+                        ],
+                      ))),
+            ));
   }
+
+  // Widget connectionState() {
+  //   if (mqttClientWrapper == null ||
+  //       mqttClientWrapper!.connectionState !=
+  //           MqttCurrentConnectionState.CONNECTED) {
+  //     return Icon(Icons.cloud_off_outlined, color: Colors.red, size: 20);
+  //   } else {
+  //     return Icon(Icons.cloud_outlined, color: Colors.green, size: 20);
+  //   }
+  // }
 }

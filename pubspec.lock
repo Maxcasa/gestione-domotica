@@ -362,7 +362,7 @@ packages:
   multi_flutter_circular_slider:
     dependency: "direct main"
     description:
-      path: "../multi-flutter_circular-slider"
+      path: "../multi-flutter_circular_slider"
       relative: true
     source: path
     version: "1.0.0"

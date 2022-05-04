@@ -304,7 +304,7 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
   Future<void> _getAssetsInfo() async {
     try {
       String fileString =
-          await rootBundle.loadString('assets/json/remote_connection.json');
+          await rootBundle.loadString('assets/json/connection_info.json');
       List<dynamic> jsonData = json.decode(fileString);
       // remoteServerUri = jsonData['remoteServerUri'];
       for (var element in jsonData) {
@@ -436,5 +436,20 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
       }
       return null;
     }
+  }
+
+  Future<bool> addConnection(String serverController) async {
+    try {
+      http.Response httpResponse = await http
+          .get(Uri.parse('http://$serverController:$port/get/connection_info'));
+      if (httpResponse.statusCode == 200) {
+        connectionDataList
+            .add(ConnectionData.fromJson(json.decode(httpResponse.body)));
+        return true;
+      }
+    } on Exception catch (e) {
+      print('RemoteConnectionError :: $e');
+    }
+    return false;
   }
 }
