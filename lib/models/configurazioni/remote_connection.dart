@@ -71,9 +71,9 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
     } else {
       localData.activeIndex = activeIndex;
     }
-    if (changeFire) {
-      subscribeFirebase();
-    }
+    // if (changeFire) {
+    //   subscribeFirebase();
+    // }
     notifyListeners('activeIndex');
   }
 
@@ -205,11 +205,13 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
 
   // subscribe a FireBase
   Future<void> subscribeFirebase() async {
-    if (connectivity != 0 && remoteDomain != null) {
+    if (connectivity != 0 && connectionDataList.isNotEmpty) {
 //      FirebaseMessaging.instance.subscribeToTopic('${remoteDomain}_sirena');
-      await FirebaseMessaging.instance
-          .subscribeToTopic('${remoteDomain}_allarme');
-      print('Firebase subscribe :: ${remoteDomain}_allarme');
+      for (ConnectionData connection in connectionDataList) {
+        await FirebaseMessaging.instance
+            .subscribeToTopic('${connection.remoteDomain}_allarme');
+        print('Firebase subscribe :: ${connection.remoteDomain}_allarme');
+      }
     }
   }
 

@@ -59,7 +59,7 @@ class NotificationSender {
       //}
     });
 
-    FirebaseMessaging.instance.subscribeToTopic('fcm_test');
+    // FirebaseMessaging.instance.subscribeToTopic('fcm_test');
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       sendMessage(message);
