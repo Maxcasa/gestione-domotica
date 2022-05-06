@@ -43,6 +43,7 @@ dependencies:
   permission_handler: ^9.2.0
   logger: ^1.0.2
   firebase_messaging: ^11.2.11
+  material_design_icons_flutter: 5.0.6595
   multi_flutter_circular_slider : 
     path: ../multi-flutter_circular_slider/
   #logger_flutter: ^0.7.1

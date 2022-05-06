@@ -21,7 +21,8 @@ const String topicSurName = "stati";
 
 final factories = <String, Object Function(int id)>{
   'Stato': (id) => StatoModel(id: id),
-  'StatoAllarme': (id) => StatoAllarme(id: id)
+  'StatoAllarme': (id) => StatoAllarme(id: id),
+  'StatoClima': (id) => StatoClima(id: id)
 };
 
 /// Classe che contiene la gestione degli allarmi
@@ -152,6 +153,8 @@ class SchemaStatiModel with ChangeNotifier {
               stati.add(StatoModel.fromJson(element));
             } else if (tipo == 'StatoAllarme') {
               stati.add(StatoAllarme.fromJson(element));
+            } else if (tipo == 'StatoClima') {
+              stati.add(StatoClima.fromJson(element));
             }
             stati.last.setAzioneStatoListener(callback: azioneStato);
           }

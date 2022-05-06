@@ -440,8 +440,8 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
 
   Future<bool> addConnection(String serverController) async {
     try {
-      http.Response httpResponse = await http
-          .get(Uri.parse('http://$serverController:$port/get/connection_info'));
+      http.Response httpResponse = await http.get(
+          Uri.parse('http://$serverController:$port/get/remote_connection'));
       if (httpResponse.statusCode == 200) {
         connectionDataList
             .add(ConnectionData.fromJson(json.decode(httpResponse.body)));

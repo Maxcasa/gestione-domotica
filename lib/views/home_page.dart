@@ -13,6 +13,8 @@ import 'package:gestione_domotica/widget/connection_icon.dart';
 import 'package:gestione_domotica/widget/icons_indicator.dart';
 import 'package:provider/provider.dart';
 
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+
 // import 'package:logger_flutter/logger_flutter.dart';
 
 class HomePage extends StatefulWidget {
@@ -147,7 +149,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       }
       if (stati.getModel("StatoClima").isNotEmpty) {
         pageList.add(StatoPage(tipoStato: "StatoClima"));
-        iconsList.add(Icons.thermostat_rounded);
+        iconsList.add(MdiIcons.sunSnowflake);
       }
       return Scaffold(
           appBar: AppBar(
