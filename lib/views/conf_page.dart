@@ -178,6 +178,7 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
               }).toList(),
               onChanged: (int? selectedId) {
                 remoteConnection.activeIndex = selectedId ?? 0;
+                remoteConnection.saveConnectionConf();
                 // remoteConnection.activeIndex = Convert.ToInt32(selectedIndex)!;
                 // if (selectedName.isEmpty) {
                 //       return "can't empty";
