@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/foundation.dart';
-// import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:gestione_domotica/models/configurazioni/connection_data.dart';
 import 'package:gestione_domotica/models/configurazioni/local_data.dart';
@@ -16,6 +16,7 @@ import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:gestione_domotica/repositories/encrypt_data.dart';
+import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
 //import 'package:gestione_domotica/models/remote_conf/connection_data.dart';
 // import 'package:wifi_iot/wifi_iot.dart';
 
@@ -35,6 +36,7 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
     Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
       resultConnectivityHandler(result);
     });
+    _setupMqtt();
   }
 
   // variabili
@@ -50,6 +52,9 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
   ConnectivityResult _connectivityResult = ConnectivityResult.none;
   // PermissionWithService locationPermission = Permission.locationWhenInUse;
   var lock = Lock(reentrant: true);
+
+  MQTTClientWrapper? mqttClientWrapper;
+  String _serverCodeController = '';
 
   // getter & setter
   int get activeIndex => localData.activeIndex;
@@ -195,6 +200,16 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
   String get token => localData.token;
 
   //metodi
+
+  void _setupMqtt() {
+    mqttClientWrapper = MQTTClientWrapper();
+    // if (mqttClientWrapper!.connectionState ==
+    //     MqttCurrentConnectionState.CONNECTED) {
+    //   _subscribeTopic();
+    // }
+    // mqttClientWrapper!
+    //     .addListener(_subscribeTopic, ['connectionState.connected']);
+  }
 
   // metodo per gestire il cambio di connettività
   void resultConnectivityHandler(ConnectivityResult result) {
@@ -440,18 +455,54 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
     }
   }
 
-  Future<bool> addConnection(String serverController) async {
+  // final key = Key.fromUtf8('chiveDiMassimoCasarin1371Domotic'); //32 chars
+  // final iv = IV.fromUtf8('MassimoDomotic13'); //16 chars
+
+  Future<bool> addConnection(String serverCodeController) async {
     try {
-      http.Response httpResponse = await http.get(
-          Uri.parse('http://$serverController:$port/get/remote_connection'));
-      if (httpResponse.statusCode == 200) {
-        connectionDataList
-            .add(ConnectionData.fromJson(json.decode(httpResponse.body)));
+      _serverCodeController = serverCodeController;
+      if (mqttClientWrapper!.connectionState ==
+          MqttCurrentConnectionState.CONNECTED) {
+        mqttClientWrapper!.subscribeToGenericTopic(
+            totalTopic: 'configRemote/get',
+            onDataReceived: (messageData) => _onConnectionRecived(messageData));
+
+// MCC_${serverCodeController}/set
+        String messageData = encryptWithKey('{"code": $serverCodeController}',
+            _cutToLength(serverCodeController, 32));
+        mqttClientWrapper!.publishGenericMessage(
+            totalTopic: 'configRemote/set', messageData: messageData);
         return true;
       }
+      //   http.Response httpResponse = await http.get(
+      //       Uri.parse('http://$serverCodeController:$port/get/remote_connection'));
+      //   if (httpResponse.statusCode == 200) {
+      //     connectionDataList
+      //         .add(ConnectionData.fromJson(json.decode(httpResponse.body)));
+
+      //   }
     } on Exception catch (e) {
       print('RemoteConnectionError :: $e');
     }
     return false;
+  }
+
+  _onConnectionRecived(String messageData) {
+    Map<String, dynamic> jsonConfig = json.decode(
+        decryptWithKey(messageData, _cutToLength(_serverCodeController, 32)) ??
+            '');
+    if (jsonConfig.containsKey('code')) {
+      connectionDataList.add(ConnectionData.fromJson(jsonConfig));
+      saveConnectionConf();
+      mqttClientWrapper!
+          .unsubscribeToGenericTopic(totalTopic: 'configRemote/get');
+    }
+  }
+
+  String _cutToLength(String stringToCut, int cutLength) {
+    while (stringToCut.length < cutLength) {
+      stringToCut += stringToCut;
+    }
+    return stringToCut.characters.take(cutLength).toString();
   }
 }

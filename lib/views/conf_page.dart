@@ -425,7 +425,7 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
     RenderBox renderBox = _context!.findRenderObject() as RenderBox;
     var size = renderBox.size;
     var offset = renderBox.localToGlobal(Offset.zero);
-    final serverController = TextEditingController();
+    final serverCodeController = TextEditingController();
     return OverlayEntry(
         builder: (_context) => Positioned(
               left: offset.dx + 5,
@@ -441,7 +441,7 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
                       child: Column(
                         children: [
                           TextField(
-                            controller: serverController,
+                            controller: serverCodeController,
                             decoration: const InputDecoration(
                               border: UnderlineInputBorder(),
                               hintText: 'Server Name',
@@ -453,10 +453,10 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
                                 icon: Icon(Icons.add_circle_outline_rounded,
                                     size: 30.0),
                                 onPressed: () async {
-                                  if (await remoteConnection
-                                      .addConnection(serverController.text)) {
+                                  if (await remoteConnection.addConnection(
+                                      serverCodeController.text)) {
                                     mostraSnackBar('Aggiornato', context);
-                                    serverController.dispose();
+                                    serverCodeController.dispose();
                                     _menuOverlay!.remove();
                                   } else {
                                     mostraSnackBar(
@@ -469,7 +469,7 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
                                 icon:
                                     Icon(Icons.backspace_outlined, size: 30.0),
                                 onPressed: () {
-                                  serverController.dispose();
+                                  serverCodeController.dispose();
                                   _menuOverlay!.remove();
                                 }),
                           ])

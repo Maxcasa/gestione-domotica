@@ -220,6 +220,24 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     }
   }
 
+  // metodo per la sottoscizione ad un topic
+  // senza topicSurName
+  // onDataReceived: metodo che viene invocato quando viene ricevuto un messaggio
+  void subscribeToGenericTopic(
+      {required String totalTopic, required Function(String) onDataReceived}) {
+    // String totalTopic =
+    //     "$topicBase/${remoteConnection!.remoteDomain}/$topicSurName";
+    print('MQTTClientWrapper::Subscribing to the ' + totalTopic + ' topic');
+    if (!subscribedTopicList.contains(totalTopic)) {
+      client!.subscribe(totalTopic, MqttQos.exactlyOnce);
+    }
+    if (onDataReceivedArray.containsKey(totalTopic)) {
+      onDataReceivedArray[totalTopic]!.add(onDataReceived);
+    } else {
+      onDataReceivedArray[totalTopic] = [onDataReceived];
+    }
+  }
+
   void subscriptionCallback(
       {String topicSurName = '#all',
       required Function(String, bool) onSubscription}) {
@@ -242,9 +260,20 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
           '$topicBase/${remoteConnection!.remoteDomain}/' +
           '$topicSurName/' +
           ' topic');
-      client!.unsubscribe(
-          "$topicBase/${remoteConnection!.remoteDomain}/$topicSurName");
-      onDataReceivedArray.remove(topicSurName);
+      client!.unsubscribe(totalTopic);
+      onDataReceivedArray.remove(totalTopic);
+    }
+  }
+
+  // metodo per la rimozione della sottoscizione ad un topic
+  // senza topicSurName
+  void unsubscribeToGenericTopic({required String totalTopic}) {
+    // String totalTopic =
+    //     "$topicBase/${remoteConnection!.remoteDomain}/$topicSurName";
+    if (onDataReceivedArray.containsKey(totalTopic)) {
+      print('MQTTClientWrapper::UnSubscribing to the $totalTopic topic');
+      client!.unsubscribe(totalTopic);
+      onDataReceivedArray.remove(totalTopic);
     }
   }
 
@@ -270,6 +299,21 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
     String totalTopic =
         "$topicBase/${remoteConnection!.remoteDomain}/$topicSurName";
+    builder.addString(messageData);
+
+    print(
+        'MQTTClientWrapper::Publishing message ${messageData} to topic ${totalTopic}');
+    client!.publishMessage(totalTopic, MqttQos.exactlyOnce, builder.payload!);
+  }
+
+  // metodo per la pubblicazione di un messaggio
+  // senza topicSurName
+  // messageData: ModelData da inviare
+  void publishGenericMessage(
+      {required String totalTopic, required String messageData}) {
+    final MqttClientPayloadBuilder builder = MqttClientPayloadBuilder();
+    // String totalTopic =
+    //     "$topicBase/${remoteConnection!.remoteDomain}/$topicSurName";
     builder.addString(messageData);
 
     print(
