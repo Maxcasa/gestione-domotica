@@ -7,7 +7,7 @@ import 'package:encrypt/encrypt.dart';
 const keyString = 'chiveDiMassimoCasarin1371Domotic'; //32 chars
 // final iv = IV.fromUtf8('MassimoDomotic13'); //16 chars
 
-//encrypt
+// //encrypt
 String encryptMyData(String text) {
   return encryptWithKey(text, keyString);
 }
@@ -17,7 +17,7 @@ String? decryptMyData(String? text) {
   return decryptWithKey(text, keyString);
 }
 
-//encrypt
+// //encrypt
 String encryptWithKey(String text, String keyString) {
   final key = Key.fromUtf8(keyString); //32 chars
   final iv = IV.fromLength(16);
