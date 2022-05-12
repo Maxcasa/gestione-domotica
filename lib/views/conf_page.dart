@@ -435,7 +435,7 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
     return OverlayEntry(
         builder: (_context) => Positioned(
               left: offset.dx + 5,
-              top: offset.dy + size.height + 50,
+              top: offset.dy + 50,
               child: Material(
                   elevation: 4,
                   child: Container(
@@ -501,7 +501,7 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
                 remoteConnection, messageData, serverCodeController));
 
 // MCC_${serverCodeController}/set
-        String messageData = encryptWithKey('{"code": $serverCodeController}',
+        String messageData = encryptWithKey('{"code": "$serverCodeController"}',
             Utils.cutToLength(serverCodeController, 32));
         widget.mqttClientWrapper!.publishGenericMessage(
             totalTopic: 'configRemote/set', messageData: messageData);
