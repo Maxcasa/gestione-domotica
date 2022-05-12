@@ -37,9 +37,9 @@ String? decryptWithKey(String? text, String keyString) {
           iv: IV.fromUtf8(jsonText['iv']));
       return decrypted_data;
     } on Exception catch (e) {
-      return null;
+      throw Exception(e);
     }
   } else {
-    return null;
+    throw Exception('DecryptException');
   }
 }

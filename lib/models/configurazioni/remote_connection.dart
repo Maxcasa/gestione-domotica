@@ -36,7 +36,6 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
     Connectivity().onConnectivityChanged.listen((ConnectivityResult result) {
       resultConnectivityHandler(result);
     });
-    _setupMqtt();
   }
 
   // variabili
@@ -53,7 +52,6 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
   // PermissionWithService locationPermission = Permission.locationWhenInUse;
   var lock = Lock(reentrant: true);
 
-  MQTTClientWrapper? mqttClientWrapper;
   String _serverCodeController = '';
 
   // getter & setter
@@ -201,14 +199,10 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
 
   //metodi
 
-  void _setupMqtt() {
-    mqttClientWrapper = MQTTClientWrapper();
-    // if (mqttClientWrapper!.connectionState ==
-    //     MqttCurrentConnectionState.CONNECTED) {
-    //   _subscribeTopic();
-    // }
-    // mqttClientWrapper!
-    //     .addListener(_subscribeTopic, ['connectionState.connected']);
+  addConnection(ConnectionData connectionData) {
+    connectionDataList.add(connectionData);
+    saveConnectionConf();
+    activeIndex = connectionDataList.length;
   }
 
   // metodo per gestire il cambio di connettività
@@ -458,51 +452,4 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
   // final key = Key.fromUtf8('chiveDiMassimoCasarin1371Domotic'); //32 chars
   // final iv = IV.fromUtf8('MassimoDomotic13'); //16 chars
 
-  Future<bool> addConnection(String serverCodeController) async {
-    try {
-      _serverCodeController = serverCodeController;
-      if (mqttClientWrapper!.connectionState ==
-          MqttCurrentConnectionState.CONNECTED) {
-        mqttClientWrapper!.subscribeToGenericTopic(
-            totalTopic: 'configRemote/get',
-            onDataReceived: (messageData) => _onConnectionRecived(messageData));
-
-// MCC_${serverCodeController}/set
-        String messageData = encryptWithKey('{"code": $serverCodeController}',
-            _cutToLength(serverCodeController, 32));
-        mqttClientWrapper!.publishGenericMessage(
-            totalTopic: 'configRemote/set', messageData: messageData);
-        return true;
-      }
-      //   http.Response httpResponse = await http.get(
-      //       Uri.parse('http://$serverCodeController:$port/get/remote_connection'));
-      //   if (httpResponse.statusCode == 200) {
-      //     connectionDataList
-      //         .add(ConnectionData.fromJson(json.decode(httpResponse.body)));
-
-      //   }
-    } on Exception catch (e) {
-      print('RemoteConnectionError :: $e');
-    }
-    return false;
-  }
-
-  _onConnectionRecived(String messageData) {
-    Map<String, dynamic> jsonConfig = json.decode(
-        decryptWithKey(messageData, _cutToLength(_serverCodeController, 32)) ??
-            '');
-    if (jsonConfig.containsKey('code')) {
-      connectionDataList.add(ConnectionData.fromJson(jsonConfig));
-      saveConnectionConf();
-      mqttClientWrapper!
-          .unsubscribeToGenericTopic(totalTopic: 'configRemote/get');
-    }
-  }
-
-  String _cutToLength(String stringToCut, int cutLength) {
-    while (stringToCut.length < cutLength) {
-      stringToCut += stringToCut;
-    }
-    return stringToCut.characters.take(cutLength).toString();
-  }
 }

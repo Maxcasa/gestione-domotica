@@ -9,6 +9,13 @@ class Utils {
               (index, model) => MapEntry(index, builder(index, model)))
           .values
           .toList();
+
+  static String cutToLength(String stringToCut, int cutLength) {
+    while (stringToCut.length < cutLength) {
+      stringToCut += stringToCut;
+    }
+    return stringToCut.characters.take(cutLength).toString();
+  }
 }
 
 class HexColor extends Color {

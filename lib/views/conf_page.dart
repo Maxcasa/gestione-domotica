@@ -1,7 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/configurazioni/connection_data.dart';
 import 'package:gestione_domotica/models/configurazioni/remote_layer.dart';
+import 'package:gestione_domotica/models/utils.dart';
+import 'package:gestione_domotica/repositories/encrypt_data.dart';
 import 'package:gestione_domotica/repositories/keep_alive_provider.dart';
 import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
 //import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
@@ -106,6 +110,8 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
   void dispose() {
     _controller.dispose();
     WidgetsBinding.instance!.removeObserver(this);
+    widget.mqttClientWrapper!
+        .unsubscribeToGenericTopic(totalTopic: 'configRemote/get');
     super.dispose();
   }
 
@@ -440,11 +446,16 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
                           left: 20.0),
                       child: Column(
                         children: [
-                          TextField(
-                            controller: serverCodeController,
-                            decoration: const InputDecoration(
-                              border: UnderlineInputBorder(),
-                              hintText: 'Server Name',
+                          Container(
+                            margin: EdgeInsets.all(10),
+                            padding: EdgeInsets.all(5),
+                            width: 200,
+                            child: TextField(
+                              controller: serverCodeController,
+                              decoration: const InputDecoration(
+                                border: UnderlineInputBorder(),
+                                hintText: 'Server Name',
+                              ),
                             ),
                             // The validator receives the text that the user has entered.
                           ),
@@ -453,7 +464,7 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
                                 icon: Icon(Icons.add_circle_outline_rounded,
                                     size: 30.0),
                                 onPressed: () async {
-                                  if (await remoteConnection.addConnection(
+                                  if (_addConnection(remoteConnection,
                                       serverCodeController.text)) {
                                     mostraSnackBar('Aggiornato', context);
                                     serverCodeController.dispose();
@@ -476,6 +487,49 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
                         ],
                       ))),
             ));
+  }
+
+  bool _addConnection(
+      RemoteConnection remoteConnection, String serverCodeController) {
+    try {
+      //_serverCodeController = serverCodeController;
+      if (widget.mqttClientWrapper!.connectionState ==
+          MqttCurrentConnectionState.CONNECTED) {
+        widget.mqttClientWrapper!.subscribeToGenericTopic(
+            totalTopic: 'configRemote/get',
+            onDataReceived: (messageData) => _onConnectionRecived(
+                remoteConnection, messageData, serverCodeController));
+
+// MCC_${serverCodeController}/set
+        String messageData = encryptWithKey('{"code": $serverCodeController}',
+            Utils.cutToLength(serverCodeController, 32));
+        widget.mqttClientWrapper!.publishGenericMessage(
+            totalTopic: 'configRemote/set', messageData: messageData);
+        return true;
+      }
+      //   http.Response httpResponse = await http.get(
+      //       Uri.parse('http://$serverCodeController:$port/get/remote_connection'));
+      //   if (httpResponse.statusCode == 200) {
+      //     connectionDataList
+      //         .add(ConnectionData.fromJson(json.decode(httpResponse.body)));
+
+      //   }
+    } on Exception catch (e) {
+      print('RemoteConnectionError :: $e');
+    }
+    return false;
+  }
+
+  _onConnectionRecived(RemoteConnection remoteConnection, String messageData,
+      String serverCodeController) {
+    Map<String, dynamic> jsonConfig = json.decode(decryptWithKey(
+            messageData, Utils.cutToLength(serverCodeController, 32)) ??
+        '');
+    if (jsonConfig.containsKey('code')) {
+      remoteConnection.addConnection(ConnectionData.fromJson(jsonConfig));
+      widget.mqttClientWrapper!
+          .unsubscribeToGenericTopic(totalTopic: 'configRemote/get');
+    }
   }
 
   // Widget connectionState() {
