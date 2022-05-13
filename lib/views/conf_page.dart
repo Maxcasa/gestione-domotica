@@ -525,11 +525,9 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
     Map<String, dynamic> jsonConfig = json.decode(decryptWithKey(
             messageData, Utils.cutToLength(serverCodeController, 32)) ??
         '');
-    if (jsonConfig.containsKey('code')) {
-      remoteConnection.addConnection(ConnectionData.fromJson(jsonConfig));
-      widget.mqttClientWrapper!
-          .unsubscribeToGenericTopic(totalTopic: 'configRemote/get');
-    }
+    remoteConnection.addConnection(ConnectionData.fromJson(jsonConfig));
+    widget.mqttClientWrapper!
+        .unsubscribeToGenericTopic(totalTopic: 'configRemote/get');
   }
 
   // Widget connectionState() {

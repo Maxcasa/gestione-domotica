@@ -25,7 +25,7 @@ String encryptWithKey(String text, String keyString) {
   final iv = IV.fromUtf8(generetedIV);
   final e = Encrypter(AES(key, mode: AESMode.cbc));
   final encryptedData = e.encrypt(text, iv: iv);
-  return '{iv: "${generetedIV}", text: "${encryptedData.base64}"}';
+  return '{iv: "$generetedIV", text: "${encryptedData.base64}"}';
 }
 
 //dycrypt
@@ -36,7 +36,7 @@ String? decryptWithKey(String? text, String keyString) {
     try {
       final e = Encrypter(AES(key, mode: AESMode.cbc));
       final decryptedData = e.decrypt(Encrypted.fromBase64(jsonText['text']),
-          iv: IV.fromBase64(jsonText['iv']));
+          iv: IV.fromUtf8(jsonText['iv']));
       return decryptedData;
     } on Exception catch (e) {
       throw Exception(e);
@@ -51,15 +51,15 @@ String generatePassword(
     bool isNumber = true,
     bool isSpecial = true,
     int length = 16}) {
-  final letterLowerCase = "abcdefghijklmnopqrstuvwxyz";
-  final letterUpperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-  final number = '0123456789';
-  final special = '@#%^*>\$@?/[]=+';
+  const letterLowerCase = "abcdefghijklmnopqrstuvwxyz";
+  const letterUpperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  const number = '0123456789';
+  const special = '@#%^*>\$@?/[]=+';
 
   String chars = "";
   if (letter) chars += '$letterLowerCase$letterUpperCase';
-  if (isNumber) chars += '$number';
-  if (isSpecial) chars += '$special';
+  if (isNumber) chars += number;
+  if (isSpecial) chars += special;
 
   return List.generate(length, (index) {
     final indexRandom = Random.secure().nextInt(chars.length);
