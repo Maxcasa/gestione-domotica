@@ -72,7 +72,7 @@ class _StatoPageState extends State<StatoPage> {
                     : const SizedBox.shrink(),
                 (num_timers > 0 && stato.timers!.isActivated)
                     ? Switch(
-                        value: stato.timers?.timers![0].isActivated ?? false,
+                        value: stato.timers?.timers[0].isActivated ?? false,
                         inactiveThumbColor: Colors.red[100],
                         activeColor: Colors.red,
                         onChanged: (value) {

@@ -1,18 +1,19 @@
 import 'dart:convert';
 
-import 'package:flutter/gestures.dart';
+//import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/configurazioni/connection_data.dart';
 import 'package:gestione_domotica/models/configurazioni/remote_layer.dart';
 import 'package:gestione_domotica/models/utils.dart';
 import 'package:gestione_domotica/repositories/encrypt_data.dart';
-import 'package:gestione_domotica/repositories/keep_alive_provider.dart';
+//import 'package:gestione_domotica/repositories/keep_alive_provider.dart';
 import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
 //import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
-import 'package:gestione_domotica/views/page_layer.dart';
+//import 'package:gestione_domotica/views/page_layer.dart';
+import 'package:gestione_domotica/widget/allow_new_connection_button.dart';
 import 'package:gestione_domotica/widget/allowed_button.dart';
 import 'package:gestione_domotica/widget/connection_icon.dart';
-import 'package:gestione_domotica/widget/icons_indicator.dart';
+//import 'package:gestione_domotica/widget/icons_indicator.dart';
 import 'package:gestione_domotica/widget/remote_device_manager.dart';
 import 'package:provider/provider.dart';
 
@@ -44,20 +45,20 @@ class ConfPage extends StatefulWidget {
 }
 
 class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
-  PageController _controller = PageController(
+  final PageController _controller = PageController(
     initialPage: 0,
   );
 
-  int _counter = 0;
+  // int _counter = 0;
 
-  static const _kDuration = const Duration(milliseconds: 300);
+  // static const _kDuration = const Duration(milliseconds: 300);
 
-  static const _kCurve = Curves.ease;
+  // static const _kCurve = Curves.ease;
 
   final ButtonStyle style =
       ElevatedButton.styleFrom(textStyle: const TextStyle(fontSize: 20));
 
-  final _formAllowedKey = GlobalKey<FormState>();
+  // final _formAllowedKey = GlobalKey<FormState>();
 
   bool _vediDettagli = false;
 
@@ -129,13 +130,13 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
             appBar: AppBar(
               leadingWidth: 100,
               leading: ConnectionIcon(),
-              title: Text('Gestione Domotica'),
+              title: const Text('Gestione Domotica'),
             ),
             endDrawer: const MainDrawer(),
             body: Column(children: <Widget>[
               selectConnection(),
               Row(children: [
-                Icon(Icons.expand_circle_down_outlined,
+                const Icon(Icons.expand_circle_down_outlined,
                     color: Colors.black54, size: 30.0),
                 Switch(
                   value: _vediDettagli,
@@ -147,20 +148,22 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
                 ),
               ]),
               (_vediDettagli) ? remoteConnection() : const SizedBox.shrink(),
-              Divider(color: Colors.black),
+              const Divider(color: Colors.black),
+              AllowNewConnectionButton(),
+              const Divider(color: Colors.black),
               Container(
                 alignment: Alignment.centerLeft,
-                margin: EdgeInsets.all(10),
-                padding: EdgeInsets.all(5),
+                margin: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(5),
                 child: AllowedButton(),
               ),
-              Divider(color: Colors.black),
+              const Divider(color: Colors.black),
               allowedDevice(),
-              Divider(color: Colors.black),
+              const Divider(color: Colors.black),
               Container(
                 alignment: Alignment.centerLeft,
-                margin: EdgeInsets.all(10),
-                padding: EdgeInsets.all(5),
+                margin: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(5),
                 child: RemoteDeviceManage(),
               )
             ])));
@@ -171,11 +174,11 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
         RemoteConnection remoteConnection, Widget? child) {
       return Row(children: [
         Container(
-            margin: EdgeInsets.all(10),
-            padding: EdgeInsets.all(5),
+            margin: const EdgeInsets.all(10),
+            padding: const EdgeInsets.all(5),
             width: 200,
             child: DropdownButton(
-              hint: Text('Scegli uno'),
+              hint: const Text('Scegli uno'),
               value: remoteConnection.activeIndex,
               items: remoteConnection.connectionDataList
                   .map((ConnectionData element) {
@@ -194,14 +197,14 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
               },
             )),
         IconButton(
-            icon: Icon(Icons.add_circle_outline_rounded, size: 30.0),
+            icon: const Icon(Icons.add_circle_outline_rounded, size: 30.0),
             onPressed: () {
               _menuOverlay = _MenuOverlay(remoteConnection);
               Overlay.of(context)?.insert(_menuOverlay!);
               //remoteConnection.addItem();
             }),
         IconButton(
-            icon: Icon(Icons.remove_circle_outline_rounded, size: 30.0),
+            icon: const Icon(Icons.remove_circle_outline_rounded, size: 30.0),
             onPressed: () {
               remoteConnection.removeItem();
             }),
@@ -223,8 +226,8 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-                margin: EdgeInsets.all(10),
-                padding: EdgeInsets.all(5),
+                margin: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(5),
                 width: 200,
                 child: TextFormField(
                   controller: nameController,
@@ -246,8 +249,8 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
             Row(
               children: [
                 Container(
-                    margin: EdgeInsets.all(10),
-                    padding: EdgeInsets.all(5),
+                    margin: const EdgeInsets.all(10),
+                    padding: const EdgeInsets.all(5),
                     width: 200,
                     child: TextFormField(
                       controller: wiFiController,
@@ -275,7 +278,7 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
               ],
             ),
             Container(
-              margin: EdgeInsets.all(10),
+              margin: const EdgeInsets.all(10),
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               child: ElevatedButton(
                 onPressed: () async {
@@ -340,8 +343,8 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
                         },
                       ),
                       Container(
-                        margin: EdgeInsets.all(10),
-                        padding: EdgeInsets.all(5),
+                        margin: const EdgeInsets.all(10),
+                        padding: const EdgeInsets.all(5),
                         width: 200,
                         child: TextFormField(
                           controller: _controllers[index],
@@ -364,7 +367,7 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
                 } else {
                   item = Container(
                     width: 100,
-                    margin: EdgeInsets.all(10),
+                    margin: const EdgeInsets.all(10),
                     padding: const EdgeInsets.symmetric(vertical: 16.0),
                     child: ElevatedButton(
                       onPressed: () {
@@ -427,9 +430,10 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
+  // ignore: non_constant_identifier_names
   OverlayEntry _MenuOverlay(RemoteConnection remoteConnection) {
     RenderBox renderBox = _context!.findRenderObject() as RenderBox;
-    var size = renderBox.size;
+    // var size = renderBox.size;
     var offset = renderBox.localToGlobal(Offset.zero);
     final serverCodeController = TextEditingController();
     return OverlayEntry(
@@ -447,8 +451,8 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
                       child: Column(
                         children: [
                           Container(
-                            margin: EdgeInsets.all(10),
-                            padding: EdgeInsets.all(5),
+                            margin: const EdgeInsets.all(10),
+                            padding: const EdgeInsets.all(5),
                             width: 200,
                             child: TextField(
                               controller: serverCodeController,
@@ -461,7 +465,8 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
                           ),
                           Row(children: [
                             IconButton(
-                                icon: Icon(Icons.add_circle_outline_rounded,
+                                icon: const Icon(
+                                    Icons.add_circle_outline_rounded,
                                     size: 30.0),
                                 onPressed: () async {
                                   if (_addConnection(remoteConnection,
@@ -477,8 +482,8 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
                                   //remoteConnection.addItem();
                                 }),
                             IconButton(
-                                icon:
-                                    Icon(Icons.backspace_outlined, size: 30.0),
+                                icon: const Icon(Icons.backspace_outlined,
+                                    size: 30.0),
                                 onPressed: () {
                                   serverCodeController.dispose();
                                   _menuOverlay!.remove();
