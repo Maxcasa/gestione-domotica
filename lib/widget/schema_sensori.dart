@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:gestione_domotica/models/sensori/sensori_layer.dart';
 import 'sensore.dart';
 
+/// Classe WIDGET che contiene la gestione di riepilogo del singolo
+/// schema dei sensori
 class SchemaSensori extends StatelessWidget {
   // costruttori
   SchemaSensori({Key? key, required this.schemaSensoriModel}) : super(key: key);
@@ -16,6 +18,7 @@ class SchemaSensori extends StatelessWidget {
   Widget build(BuildContext context) {
     return Consumer<RemoteConnection>(builder: (BuildContext context,
         RemoteConnection remoteConnection, Widget? child) {
+      /// Lista dei sensori da visualizzare
       sensoreList = [];
       for (var item in schemaSensoriModel.sensori) {
         if (remoteConnection.sensoriVisibili || item.sensoreVisibile) {
@@ -42,6 +45,8 @@ class SchemaSensori extends StatelessWidget {
                   left: 0,
                   top: 0,
                   child: Container(
+
+                      /// Immagine di sfondo
                       child: schemaSensoriModel.sensoriBack ??
                           const Image(
                             image: AssetImage('assets/images/sfondo_vuoto.png'),
@@ -70,6 +75,8 @@ class SchemaSensori extends StatelessWidget {
                   left: 20.0,
                   child: Row(children: [
                     Icon(Icons.home_rounded, color: Colors.black54, size: 30.0),
+
+                    /// Switch per mostrare solo i Visibili o tutti.
                     Switch(
                       value: remoteConnection.sensoriVisibili,
                       onChanged: (value) {
@@ -85,11 +92,8 @@ class SchemaSensori extends StatelessWidget {
   void reorderListaSensori() {
     if (sensoreList.isNotEmpty) {
       // ignore: unnecessary_null_comparison
-      return sensoreList.sort((a, b) => a == null
-          ? 1
-          : b == null
-              ? -1
-              : a.sensore.zIndex.compareTo(b.sensore.zIndex));
+      return sensoreList.sort((a, b) =>
+          a == null ? 1 : a.sensore.zIndex.compareTo(b.sensore.zIndex));
     }
   }
 }

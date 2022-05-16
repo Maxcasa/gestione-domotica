@@ -16,7 +16,7 @@ import 'package:provider/provider.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
 // import 'package:logger_flutter/logger_flutter.dart';
-
+/// Pagina di Home contenente diverse schermate che scrollano orizzontalmente
 class HomePage extends StatefulWidget {
   HomePage({Key? key}) : super(key: key) {
     mqttClientWrapper = MQTTClientWrapper();
@@ -51,13 +51,13 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   // MultiMessageProvider multiMessageProvider = MultiMessageProvider();
 
   // variabili
-  int _counter = 0;
-
-  static const _kDuration = const Duration(milliseconds: 300);
-
+  //int _counter = 0;
+  ///varibili per la transizione di pagina
+  static const _kDuration = Duration(milliseconds: 300);
   static const _kCurve = Curves.ease;
 
-  // AppLifecycleState _notification;
+  /// Funzione per la gestione della connessione Mqtt al variare dello
+  /// stato LifeCycle dell'applicativo
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     switch (state) {
@@ -93,9 +93,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     //     'request/set', "{\"status\": \"sensori\"}", ['sensori/get']);
     // multiMessageProvider
     //     .addMessage('request/set', "{\"status\": \"stati\"}", ['stati/get']);
+    /// Observer per il LifeCycle
     WidgetsBinding.instance!.addObserver(this);
     super.initState();
 
+    /// Impostazioni per l'invio delle notifiche al sistema
     NotificationSender notificationSender = NotificationSender();
     notificationSender.addReceivedMessageAction((RemoteMessage remoteMessage) {
       _controller.animateToPage(

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/sensori/sensori_layer.dart';
 import 'package:gestione_domotica/widget/domo_button.dart';
 
-// /// Widget di visualizzazione del Sensore
+/// Classe WIDGET che contiene la gestione singolo sensore
 class Sensore extends StatelessWidget {
   // costruttori
   Sensore({Key? key, required this.sensore}) : super(key: key);

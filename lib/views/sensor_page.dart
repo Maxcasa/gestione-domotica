@@ -9,7 +9,7 @@ import 'package:gestione_domotica/widget/schema_sensori.dart';
 import 'package:provider/provider.dart';
 //import '../widget/AzioneForm.dart';
 
-/// Classe WIDGET che contiene la gestione degli allarmi
+/// Classe WIDGET che contiene la gestione di riepilogo degli schemi dei sensori
 class SensorPage extends StatelessWidget {
   SensorPage({Key? key}) : super(key: key) {
     // MultiMessageProvider multiMessageProvider = MultiMessageProvider();

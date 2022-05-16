@@ -34,19 +34,20 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 NotificationSender notificationSender = NotificationSender();
 
-// // /// Create a [AndroidNotificationChannel] for heads up notifications
+// // Create a [AndroidNotificationChannel] for heads up notifications
 // late AndroidNotificationChannel channel;
 
-// /// Initialize the [FlutterLocalNotificationsPlugin] package.
+// Initialize the [FlutterLocalNotificationsPlugin] package.
 // late FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin;
 
+/// Classe main dell'applicativo
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  const sound = 'domo_allarm';
+  // const sound = 'domo_allarm';
 
   // Set the background messaging handler early on, as a named top-level function
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -63,16 +64,16 @@ Future<void> main() async {
     //   );
 
     //   flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
-    //   // /// Create an Android Notification Channel.
-    //   // ///
-    //   // /// We use this channel in the `AndroidManifest.xml` file to override the
-    //   // /// default FCM channel to enable heads up notifications.
+    //   //  Create an Android Notification Channel.
+    //   //
+    //   //  We use this channel in the `AndroidManifest.xml` file to override the
+    //   //  default FCM channel to enable heads up notifications.
     //   flutterLocalNotificationsPlugin
     //       .resolvePlatformSpecificImplementation<
     //           AndroidFlutterLocalNotificationsPlugin>()
     //       ?.createNotificationChannel(channel);
 
-    // /// Requests & displays the current user permissions for this device.
+    //  Requests & displays the current user permissions for this device.
     // NotificationSettings settings =
     //     await FirebaseMessaging.instance.requestPermission(
     //   announcement: true,
@@ -119,6 +120,9 @@ Future<void> main() async {
   ], child: MyApp()));
 }
 
+/// Classe base per la schermata
+///
+/// Attualmente può cambiare tra Home e Conf
 class MyApp extends StatelessWidget {
   MyApp({Key? key}) : super(key: key) {
     mqttClientWrapper = MQTTClientWrapper();
