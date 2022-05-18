@@ -149,7 +149,12 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
               ]),
               (_vediDettagli) ? remoteConnection() : const SizedBox.shrink(),
               const Divider(color: Colors.black),
-              AllowNewConnectionButton(),
+              Container(
+                alignment: Alignment.centerLeft,
+                margin: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(5),
+                child: const AllowNewConnectionButton(),
+              ),
               const Divider(color: Colors.black),
               Container(
                 alignment: Alignment.centerLeft,
@@ -472,7 +477,7 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
                                   if (_addConnection(remoteConnection,
                                       serverCodeController.text)) {
                                     mostraSnackBar('Aggiornato', context);
-                                    serverCodeController.dispose();
+                                    // serverCodeController.dispose();
                                     _menuOverlay!.remove();
                                   } else {
                                     mostraSnackBar(
@@ -485,7 +490,7 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
                                 icon: const Icon(Icons.backspace_outlined,
                                     size: 30.0),
                                 onPressed: () {
-                                  serverCodeController.dispose();
+                                  // serverCodeController.dispose();
                                   _menuOverlay!.remove();
                                 }),
                           ])

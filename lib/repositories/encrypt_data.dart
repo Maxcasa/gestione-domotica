@@ -25,7 +25,7 @@ String encryptWithKey(String text, String keyString) {
   final iv = IV.fromUtf8(generetedIV);
   final e = Encrypter(AES(key, mode: AESMode.cbc));
   final encryptedData = e.encrypt(text, iv: iv);
-  return '{iv: "$generetedIV", text: "${encryptedData.base64}"}';
+  return '{"iv": "$generetedIV", "text": "${encryptedData.base64}"}';
 }
 
 //dycrypt

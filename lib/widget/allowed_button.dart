@@ -49,13 +49,13 @@ class _AllowedButtonState extends State<AllowedButton> {
               onPressed: () {
                 _autorizza(false);
               },
-              child: Text('NON AUTORIZZA'));
+              child: Text('Non collegato'));
         } else {
           _button = ElevatedButton(
               onPressed: () {
                 _autorizza(true);
               },
-              child: Text('AUTORIZZA'));
+              child: Text('Collegato'));
         }
       }
     });

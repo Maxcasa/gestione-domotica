@@ -33,7 +33,7 @@ class _AllowNewConnectionButtonState extends State<AllowNewConnectionButton> {
         onPressed: () {
           _setButton();
         },
-        child: const Text('NON AUTORIZZA'));
+        child: const Text('AUTORIZZA'));
     mqttClientWrapper = MQTTClientWrapper();
     super.initState();
   }
@@ -54,14 +54,16 @@ class _AllowNewConnectionButtonState extends State<AllowNewConnectionButton> {
   }
 
   void _setButton() {
-    statoAutorizza != statoAutorizza;
+    statoAutorizza = !statoAutorizza;
     if (statoAutorizza) {
       // cosa fare per abilitare
-      _button = ElevatedButton(
-          onPressed: () {
-            _setButton();
-          },
-          child: const Text('NON AUTORIZZA'));
+      setState(() {
+        _button = ElevatedButton(
+            onPressed: () {
+              _setButton();
+            },
+            child: const Text('NON AUTORIZZA'));
+      });
       _timer = Timer.periodic(
           const Duration(seconds: 1),
           (Timer _timer) => setState(() {
@@ -83,11 +85,13 @@ class _AllowNewConnectionButtonState extends State<AllowNewConnectionButton> {
       }
     } else {
       // cosa fare quando non abilito
-      _button = ElevatedButton(
-          onPressed: () {
-            _setButton();
-          },
-          child: const Text('AUTORIZZA'));
+      setState(() {
+        _button = ElevatedButton(
+            onPressed: () {
+              _setButton();
+            },
+            child: const Text('AUTORIZZA'));
+      });
       _secondiRimanenti = 60 * 5;
       _timer.cancel();
     }
