@@ -67,8 +67,8 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
       //unSubscribeFirebase();
       changeFire = true;
     }
-    if (connectionDataList.length <= activeIndex) {
-      localData.activeIndex = connectionDataList.length;
+    if (connectionDataList.length < activeIndex) {
+      localData.activeIndex = connectionDataList.length - 1;
     } else if (activeIndex < 0) {
       localData.activeIndex = 0;
     } else {
@@ -152,6 +152,19 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
         localWiFiConnectionName ?? '';
   }
 
+  int get id {
+    if (connectionDataList.length > localData.activeIndex &&
+        localData.activeIndex >= 0) {
+      return connectionDataList[localData.activeIndex].id;
+    } else {
+      return -1;
+    }
+  }
+
+  set activeId(int id) {
+    activeIndex = connectionDataList.indexWhere((element) => element.id == id);
+  }
+
   bool get connectionDataNull {
     if (connectionName != null &&
         localServerName != null &&
@@ -200,9 +213,12 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
   //metodi
 
   addConnection(ConnectionData connectionData) {
+    if (connectionData.id < 0) {
+      connectionData.id = connectionDataList.length;
+    }
     connectionDataList.add(connectionData);
+    localData.activeIndex = connectionDataList.length - 1;
     saveConnectionConf();
-    activeIndex = connectionDataList.length;
   }
 
   // metodo per gestire il cambio di connettività
@@ -289,6 +305,10 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
             String fileString = decryptMyData(await file.readAsString()) ?? '';
             Map<String, dynamic> jsonConfig = json.decode(fileString);
             localData = LocalData.fromJson(jsonConfig);
+            if (localData.activeIndex < 0 ||
+                localData.activeIndex > connectionDataList.length - 1) {
+              localData.activeIndex = 0;
+            }
             String tmpToken = await FirebaseMessaging.instance.getToken() ?? '';
             if (localData.token == '' || localData.token != tmpToken) {
               localData.token = tmpToken;

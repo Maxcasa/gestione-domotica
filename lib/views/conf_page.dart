@@ -133,7 +133,10 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
               title: const Text('Gestione Domotica'),
             ),
             endDrawer: const MainDrawer(),
-            body: Column(children: <Widget>[
+            body:
+                // SingleChildScrollView(
+                //     child:
+                Column(children: <Widget>[
               selectConnection(),
               Row(children: [
                 const Icon(Icons.expand_circle_down_outlined,
@@ -171,7 +174,9 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
                 padding: const EdgeInsets.all(5),
                 child: RemoteDeviceManage(),
               )
-            ])));
+            ])
+            //)
+            ));
   }
 
   Widget selectConnection() {
@@ -182,25 +187,28 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
             margin: const EdgeInsets.all(10),
             padding: const EdgeInsets.all(5),
             width: 200,
-            child: DropdownButton(
-              hint: const Text('Scegli uno'),
-              value: remoteConnection.activeIndex,
-              items: remoteConnection.connectionDataList
-                  .map((ConnectionData element) {
-                return DropdownMenuItem(
-                    value: element.id, child: Text(element.connectionName));
-              }).toList(),
-              onChanged: (int? selectedId) {
-                remoteConnection.activeIndex = selectedId ?? 0;
-                remoteConnection.saveConnectionConf();
-                // remoteConnection.activeIndex = Convert.ToInt32(selectedIndex)!;
-                // if (selectedName.isEmpty) {
-                //       return "can't empty";
-                //     } else {
-                //       return null;
-                //     }
-              },
-            )),
+            child: remoteConnection.connectionDataList.length > 0
+                ? DropdownButton(
+                    hint: const Text('Scegli uno'),
+                    value: remoteConnection.id,
+                    items: remoteConnection.connectionDataList
+                        .map((ConnectionData element) {
+                      return DropdownMenuItem(
+                          value: element.id,
+                          child: Text(element.connectionName));
+                    }).toList(),
+                    onChanged: (int? selectedId) {
+                      remoteConnection.activeId = selectedId ?? -1;
+                      remoteConnection.saveConnectionConf();
+                      // remoteConnection.activeIndex = Convert.ToInt32(selectedIndex)!;
+                      // if (selectedName.isEmpty) {
+                      //       return "can't empty";
+                      //     } else {
+                      //       return null;
+                      //     }
+                    },
+                  )
+                : const Text('Nessuna Connessione')),
         IconButton(
             icon: const Icon(Icons.add_circle_outline_rounded, size: 30.0),
             onPressed: () {
@@ -211,7 +219,9 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
         IconButton(
             icon: const Icon(Icons.remove_circle_outline_rounded, size: 30.0),
             onPressed: () {
-              remoteConnection.removeItem();
+              setState(() {
+                remoteConnection.removeItem();
+              });
             }),
       ]);
     });
@@ -535,7 +545,9 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
     Map<String, dynamic> jsonConfig = json.decode(decryptWithKey(
             messageData, Utils.cutToLength(serverCodeController, 32)) ??
         '');
-    remoteConnection.addConnection(ConnectionData.fromJson(jsonConfig));
+    setState(() {
+      remoteConnection.addConnection(ConnectionData.fromJson(jsonConfig));
+    });
     widget.mqttClientWrapper!
         .unsubscribeToGenericTopic(totalTopic: 'configRemote/get');
   }
