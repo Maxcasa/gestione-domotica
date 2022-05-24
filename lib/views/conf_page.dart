@@ -138,18 +138,30 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
                 //     child:
                 Column(children: <Widget>[
               selectConnection(),
-              Row(children: [
-                const Icon(Icons.expand_circle_down_outlined,
-                    color: Colors.black54, size: 30.0),
-                Switch(
-                  value: _vediDettagli,
-                  onChanged: (value) {
+              IconButton(
+                  icon: _vediDettagli
+                      ? const Icon(Icons.arrow_circle_up_rounded,
+                          color: Colors.black, size: 30.0)
+                      : const Icon(Icons.arrow_circle_down_rounded,
+                          color: Colors.black, size: 30.0),
+                  onPressed: () {
                     setState(() {
-                      _vediDettagli = value;
+                      _vediDettagli = !_vediDettagli;
                     });
-                  },
-                ),
-              ]),
+                  }),
+
+              // Row(children: [
+              //   const Icon(Icons.expand_circle_down_outlined,
+              //       color: Colors.black54, size: 30.0),
+              //   Switch(
+              //     value: _vediDettagli,
+              //     onChanged: (value) {
+              //       setState(() {
+              //         _vediDettagli = value;
+              //       });
+              //     },
+              //   ),
+              // ]),
               (_vediDettagli) ? remoteConnection() : const SizedBox.shrink(),
               const Divider(color: Colors.black),
               Container(

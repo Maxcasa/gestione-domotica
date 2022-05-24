@@ -221,6 +221,7 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
             (element) => element.remoteDomain == connectionData.remoteDomain) <
         0) {
       connectionDataList.add(connectionData);
+      resetId();
       // localData.activeIndex = connectionDataList.length - 1;
       saveConnectionInfo();
     }
@@ -438,7 +439,14 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
   void removeItem() {
     connectionDataList.removeAt(localData.activeIndex);
     activeIndex = 0;
+    resetId();
     saveConnectionInfo();
+  }
+
+  void resetId() {
+    for (int i = 0; i < connectionDataList.length; i++) {
+      connectionDataList[i].id = i;
+    }
   }
 
   Future<String?> getWifiName() async {
