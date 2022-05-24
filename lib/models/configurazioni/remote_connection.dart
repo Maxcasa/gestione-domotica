@@ -214,11 +214,16 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
 
   addConnection(ConnectionData connectionData) {
     if (connectionData.id < 0) {
-      connectionData.id = connectionDataList.length;
+      connectionData.id =
+          connectionDataList[connectionDataList.length - 1].id + 1;
     }
-    connectionDataList.add(connectionData);
-    localData.activeIndex = connectionDataList.length - 1;
-    saveConnectionConf();
+    if (connectionDataList.indexWhere(
+            (element) => element.remoteDomain == connectionData.remoteDomain) <
+        0) {
+      connectionDataList.add(connectionData);
+      // localData.activeIndex = connectionDataList.length - 1;
+      saveConnectionInfo();
+    }
   }
 
   // metodo per gestire il cambio di connettività
@@ -270,8 +275,11 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
             String fileString = decryptMyData(await file.readAsString()) ?? '';
             List<dynamic> jsonData = json.decode(fileString);
             // remoteServerUri = jsonData['remoteServerUri'];
-            for (var element in jsonData) {
-              connectionDataList.add(ConnectionData.fromJson(element));
+            for (int i = 0; i < jsonData.length; i++) {
+              ConnectionData localConnectionData =
+                  ConnectionData.fromJson(jsonData[i]);
+              localConnectionData.id = i;
+              connectionDataList.add(localConnectionData);
             }
           } on Exception catch (e) {
             print('ConnectionInfo::client exception - $e');
@@ -366,8 +374,7 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
       String stringToWrite = encryptMyData(jsonEncode(connectionDataList));
       await file.writeAsString(stringToWrite);
       final File configFile = File('${directory.path}/config.json');
-      stringToWrite =
-          encryptMyData(jsonEncode({"activeIndex": localData.activeIndex}));
+      stringToWrite = encryptMyData(jsonEncode(localData.toJson()));
       await configFile.writeAsString(stringToWrite);
     }
     // forzo il ricaricare i valori
