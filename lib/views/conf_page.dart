@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/configurazioni/connection_data.dart';
 import 'package:gestione_domotica/models/configurazioni/remote_layer.dart';
+import 'package:gestione_domotica/models/hw/hw_model.dart';
+import 'package:gestione_domotica/models/hw/schema_hw_model.dart';
 import 'package:gestione_domotica/models/utils.dart';
 import 'package:gestione_domotica/repositories/encrypt_data.dart';
 //import 'package:gestione_domotica/repositories/keep_alive_provider.dart';
@@ -15,6 +17,7 @@ import 'package:gestione_domotica/widget/allowed_button.dart';
 import 'package:gestione_domotica/widget/connection_icon.dart';
 //import 'package:gestione_domotica/widget/icons_indicator.dart';
 import 'package:gestione_domotica/widget/remote_device_manager.dart';
+import 'package:gestione_domotica/widget/rf_manager_button.dart';
 import 'package:provider/provider.dart';
 
 import 'main_drawer.dart';
@@ -163,6 +166,13 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
               //   ),
               // ]),
               (_vediDettagli) ? remoteConnection() : const SizedBox.shrink(),
+              const Divider(color: Colors.black),
+              Container(
+                alignment: Alignment.centerLeft,
+                margin: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(5),
+                child: rfButton(),
+              ),
               const Divider(color: Colors.black),
               Container(
                 alignment: Alignment.centerLeft,
@@ -341,6 +351,18 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
           ],
         ),
       );
+    });
+  }
+
+  Widget rfButton() {
+    return Consumer<SchemaHwModel>(
+        builder: (BuildContext context, SchemaHwModel hw, Widget? child) {
+      List<HwModel> hwLista = hw.getModel("ReceiverHF");
+      if (hwLista.length > 0) {
+        return RfManagerButton();
+      } else {
+        return SizedBox.shrink();
+      }
     });
   }
 

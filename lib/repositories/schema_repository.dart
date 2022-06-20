@@ -82,6 +82,7 @@ class SchemaRepository extends ChangeNotifier {
   }
 
   Future<void> _getSchema() async {
+    final directory = await getApplicationDocumentsDirectory();
     if (remoteConnection != null &&
         !remoteConnection!.connectionDataNull &&
         remoteConnection!.connectionPresent) {
@@ -89,31 +90,34 @@ class SchemaRepository extends ChangeNotifier {
         // String? localWiFi = await remoteConnection!.getWifiName();
         // //  await info.getWifiName();
         // String? savedWiFi = remoteConnection!.localWiFiConnectionName;
-        schemaTree = await _getSchemaFromRemote();
+        schemaTree = await _getJsonFromRemote('domo_json',
+            '${directory.path}/domo_${remoteConnection!.connectionName}.json');
       } else if (!kIsWeb) {
-        schemaTree = await _getSchemaFromLocal();
+        schemaTree = await _getJsonFromLocal(
+            '${directory.path}/domo_${remoteConnection!.connectionName}.json');
       }
     }
   }
 
   Future<void> _getSensoriBack() async {
+    final directory = await getApplicationDocumentsDirectory();
     if (remoteConnection != null &&
         !remoteConnection!.connectionDataNull &&
         remoteConnection!.connectionPresent) {
       if (await remoteConnection!.checkLocal()) {
         // String? localWiFi = await remoteConnection!.getWifiName();
         // String? savedWiFi = remoteConnection!.localWiFiConnectionName;
-        _sensoriBack = await _getSensoriBackFromRemote();
+        _sensoriBack = await _getImageFromRemote('domo_image',
+            '${directory.path}/domo_${remoteConnection!.connectionName}.jpg');
       } else if (!kIsWeb) {
-        _sensoriBack = await _getSensoriBackFromLocal();
+        _sensoriBack = await _getImageFromLocal(
+            '${directory.path}/domo_${remoteConnection!.connectionName}.jpg');
       }
     }
   }
 
-  Future<Map<String, dynamic>> _getSchemaFromLocal() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final File file =
-        File('${directory.path}/domo_${remoteConnection!.connectionName}.json');
+  Future<Map<String, dynamic>> _getJsonFromLocal(String fileName) async {
+    final File file = File(fileName);
     if (await file.exists()) {
       String fileString = await file.readAsString();
       return json.decode(fileString);
@@ -123,10 +127,8 @@ class SchemaRepository extends ChangeNotifier {
     //notifyListeners();
   }
 
-  Future<Image?> _getSensoriBackFromLocal() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final File file =
-        File('${directory.path}/domo_${remoteConnection!.connectionName}.jpg');
+  Future<Image?> _getImageFromLocal(String fileName) async {
+    final File file = File(fileName);
     if (await file.exists()) {
       return Image.file(file);
     } else {
@@ -134,22 +136,24 @@ class SchemaRepository extends ChangeNotifier {
     }
   }
 
-  Future<Map<String, dynamic>> _getSchemaFromRemote() async {
+  Future<Map<String, dynamic>> _getJsonFromRemote(
+      String urlName, String fileName) async {
     // HttpClient httpClient = HttpClient()
     //   ..badCertificateCallback =
     //       ((X509Certificate cert, String host, int port) => true);
     // io_client.IOClient ioClient = io_client.IOClient(httpClient);
     remoteFileUri =
-        'http://${remoteConnection!.localServerName}:$port/get/domo_json';
+        'http://${remoteConnection!.localServerName}:$port/get/${urlName}';
     // http.Response? httpResponse = await lock.synchronized(() async {
     //   return http.get(Uri.parse(remoteFileUri!));
     // });
     http.Response httpResponse = await http.get(Uri.parse(remoteFileUri!));
     //http.Response httpResponse = await ioClient.get(Uri.parse(remoteFileUri));
     if (httpResponse.statusCode == 200) {
+      final directory = await getApplicationDocumentsDirectory();
       // If the server did return a 200 OK response,
       // then parse the JSON.
-      saveSchema(httpResponse.body);
+      saveJson(httpResponse.body, fileName);
       return json.decode(httpResponse.body);
     } else {
       // If the server did not return a 200 OK response,
@@ -159,18 +163,19 @@ class SchemaRepository extends ChangeNotifier {
     }
   }
 
-  Future<Image?> _getSensoriBackFromRemote() async {
+  Future<Image?> _getImageFromRemote(String urlName, String fileName) async {
     remoteBackUri =
-        'http://${remoteConnection!.localServerName}:$port/get/domo_image';
+        'http://${remoteConnection!.localServerName}:$port/get/${urlName}';
     // http.Response? httpResponse = await lock.synchronized(() async {
     //   return http.get(Uri.parse(remoteBackUri!));
     // });
     http.Response httpResponse = await http.get(Uri.parse(remoteBackUri!));
     //http.Response httpResponse = await ioClient.get(Uri.parse(remoteFileUri));
     if (httpResponse.statusCode == 200) {
+      final directory = await getApplicationDocumentsDirectory();
       // If the server did return a 200 OK response,
       // then parse the JSON.
-      saveSensoriBack(httpResponse.bodyBytes);
+      saveImage(httpResponse.bodyBytes, fileName);
       return Image.memory(httpResponse.bodyBytes);
     } else {
       // If the server did not return a 200 OK response,
@@ -180,21 +185,18 @@ class SchemaRepository extends ChangeNotifier {
     }
   }
 
-  Future<void> saveSchema(schemaData) async {
+  Future<void> saveJson(schemaData, String fileName) async {
     if (!kIsWeb) {
-      final directory = await getApplicationDocumentsDirectory();
-      final File file = File(
-          '${directory.path}/domo_${remoteConnection!.connectionName}.json');
+      final File file = File(fileName);
       String stringToWrite = schemaData;
       await file.writeAsString(stringToWrite);
     }
   }
 
-  Future<void> saveSensoriBack(imageData) async {
+  Future<void> saveImage(imageData, String fileName) async {
     if (!kIsWeb) {
       final directory = await getApplicationDocumentsDirectory();
-      final File file = File(
-          '${directory.path}/domo_${remoteConnection!.connectionName}.jpg');
+      final File file = File(fileName);
       await file.writeAsBytes(imageData);
     }
   }

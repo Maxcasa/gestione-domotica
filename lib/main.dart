@@ -12,6 +12,7 @@ import 'package:gestione_domotica/views/home_page.dart';
 import 'package:provider/provider.dart';
 import 'package:gestione_domotica/models/sensori/sensori_layer.dart';
 import 'package:gestione_domotica/models/stati/schema_stati_model.dart';
+import 'package:gestione_domotica/models/hw/schema_hw_model.dart';
 import 'package:gestione_domotica/views/page_layer.dart';
 import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
 import 'models/drawer/main_drawer_provider.dart';
@@ -105,6 +106,9 @@ Future<void> main() async {
     ChangeNotifierProvider<SchemaSensoriModel>(
         //   create: (_) => SchemaSensori(id: 0),
         create: (context) => SchemaSensoriModel()),
+    ChangeNotifierProvider<SchemaHwModel>(
+        //   create: (_) => SchemaSensori(id: 0),
+        create: (context) => SchemaHwModel()),
     ChangeNotifierProvider<RemoteConnection>(
       create: (context) => RemoteConnection(),
     ),
