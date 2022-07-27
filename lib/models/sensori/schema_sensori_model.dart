@@ -24,7 +24,8 @@ final factories = <String, Object Function(int id)>{
   'SensoreInfisso': (id) => SensoreInfisso(id: id),
   'SensoreTeH': (id) => SensoreTeH(id: id),
   'Sirena_1': (id) => SensoreSirena(id: id, numeroRele: 1),
-  'Sirena_2': (id) => SensoreSirena(id: id, numeroRele: 2)
+  'Sirena_2': (id) => SensoreSirena(id: id, numeroRele: 2),
+  'SensorePresenza': (id) => SensorePresenza(id: id)
 };
 
 /// Classe che gestisce l'insieme dei sensori
@@ -125,6 +126,8 @@ class SchemaSensoriModel with ChangeNotifier {
               sensori.add(SensoreSirena.fromJson(element, numeroRele: 1));
             } else if (tipo == 'Sirena_2') {
               sensori.add(SensoreSirena.fromJson(element, numeroRele: 2));
+            } else if (tipo == 'SensorePresenza') {
+              sensori.add(SensorePresenza.fromJson(element));
             }
             sensori.last.setAzioneSensoreListener(callback: azioneSensore);
           }
