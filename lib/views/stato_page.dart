@@ -193,6 +193,17 @@ class _StatoPageState extends State<StatoPage> {
                       'SensoreInfisso', !isSensoreInfissoAttivo);
                 })
             : const SizedBox.shrink(),
+        isSensorePresenza
+            ? IconButton(
+                icon: Icon(Icons.directions_walk_rounded,
+                    size: 10,
+                    color:
+                        (isSensorePresenzaAttivo) ? Colors.red : Colors.black),
+                onPressed: () {
+                  stati.attivaSensori(
+                      'SensorePresenza', !isSensorePresenzaAttivo);
+                })
+            : const SizedBox.shrink(),
       ]);
     });
   }
