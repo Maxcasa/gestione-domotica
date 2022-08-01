@@ -258,6 +258,13 @@ class SchemaStatiModel with ChangeNotifier {
     }
   }
 
+  void attivaSensori(String tipoSensore, bool attiva) {
+    String attivaDisattiva = attiva ? "attiva" : "disattiva";
+    String messageData = '{"$attivaDisattiva": "$tipoSensore"}';
+    mqttClientWrapper!
+        .publishMessage(topicSurName: 'request/set', messageData: messageData);
+  }
+
   // _onStatoChanged(String messageData) {
   //   Map<String, dynamic> jsonData = jsonDecode(messageData);
   //   if (jsonData.containsKey('stato')) {

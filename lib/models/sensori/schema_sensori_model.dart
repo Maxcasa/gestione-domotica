@@ -158,6 +158,9 @@ class SchemaSensoriModel with ChangeNotifier {
     mqttClientWrapper!.subscribeToTopic(
         topicSurName: '${topicSurName}/get',
         onDataReceived: (messageData) => _onSensorChanged(messageData));
+    mqttClientWrapper!.subscribeToTopic(
+        topicSurName: 'request/get',
+        onDataReceived: (messageData) => _attivaSensori(messageData));
   }
 
   void _consumeWaitingSensore() {
@@ -256,6 +259,18 @@ class SchemaSensoriModel with ChangeNotifier {
   // operator ==(Plan other) {
   //   return false;
   // }
+
+  void _attivaSensori(String messageData) {
+    Map<String, dynamic> jsonData = jsonDecode(messageData);
+    // se risponde che il join è permesso
+    if (jsonData.containsKey('attiva')) {
+      for (var element in sensori) {
+        if (element.tipo is maxIdAzione) {
+          maxIdAzione = element.id;
+        }
+      }
+    }
+  }
 
   // conversione Json
   SchemaSensoriModel.fromJson(Map<String, dynamic> json)

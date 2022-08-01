@@ -29,6 +29,7 @@ class SensoreModel {
   double posLeft = 0;
   double posTop = 0;
   bool abilitato = true;
+  int attiva = 0;
   void Function(int, AzioneSensore, String)? azioneSensoreCallBack;
 
   int zIndex = 0;
@@ -68,7 +69,8 @@ class SensoreModel {
             : Icons.crop_square_outlined,
         posLeft = double.parse(json['posLeft'] ?? '0'),
         posTop = double.parse(json['posTop'] ?? '0'),
-        abilitato = json['abilitato'] ?? true;
+        abilitato = json['abilitato'] ?? true,
+        attiva = json['attiva'] ?? 0;
 
   void setAzioneSensoreListener(
       {Function(int, AzioneSensore, String)? callback}) {
@@ -93,6 +95,7 @@ class SensoreModel {
       //'colore': colore,
       'size': size,
       'abilitato': abilitato,
+      'attiva': attiva,
       'icona': {'codePoint': icona.codePoint, 'fontFamily': icona.fontFamily}
     };
     return result;

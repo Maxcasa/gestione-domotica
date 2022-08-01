@@ -3,6 +3,7 @@ import 'dart:convert';
 
 //import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:gestione_domotica/models/sensori/sensori_layer.dart';
 import 'package:gestione_domotica/models/stati/stati_layer.dart';
 import 'package:gestione_domotica/models/timer/timer_attivazioni.dart';
 import 'package:gestione_domotica/repositories/mqtt/multi_message_provider.dart';
@@ -44,6 +45,11 @@ class _StatoPageState extends State<StatoPage> {
         StatoModel stato = statiLista[0];
         int num_timers = stato.timers?.timers.length ?? 0;
         return Stack(children: [
+          Positioned(
+            top: 90.0,
+            left: 20.0,
+            child: visualizzaAttivi(stati, context),
+          ),
           Center(
             child: visalizzaAllarme(stato),
           ),
@@ -144,5 +150,50 @@ class _StatoPageState extends State<StatoPage> {
               },
             ),
           );
+  }
+
+  Widget visualizzaAttivi(SchemaStatiModel stati, BuildContext context) {
+    return Consumer<SchemaSensoriModel>(builder: (BuildContext context,
+        SchemaSensoriModel schemaSensori, Widget? child) {
+      bool isSensoreInfisso = false;
+      bool isSensoreInfissoAttivo = true;
+      bool isSensorePresenza = false;
+      bool isSensorePresenzaAttivo = true;
+      for (var sensore in schemaSensori.sensori) {
+        if (sensore is SensoreInfisso) {
+          isSensoreInfisso = true;
+          if (sensore.attiva == 0) {
+            isSensoreInfissoAttivo = false;
+          }
+        }
+        if (sensore is SensorePresenza) {
+          isSensorePresenza = true;
+          if (sensore.attiva == 0) {
+            isSensoreInfissoAttivo = false;
+          }
+        }
+      }
+      return
+          // RefreshIndicator(
+          //     // reload page
+          //     onRefresh: () => _refresh(),
+          //     child: SingleChildScrollView(
+          //         //physics: const AlwaysScrollableScrollPhysics(),
+          //         scrollDirection: Axis.vertical,
+          //         child:
+          Row(children: [
+        isSensoreInfisso
+            ? IconButton(
+                icon: Icon(Icons.sensor_window_outlined,
+                    size: 10,
+                    color:
+                        (isSensoreInfissoAttivo) ? Colors.red : Colors.black),
+                onPressed: () {
+                  stati.attivaSensori(
+                      'SensoreInfisso', !isSensoreInfissoAttivo);
+                })
+            : const SizedBox.shrink(),
+      ]);
+    });
   }
 }
