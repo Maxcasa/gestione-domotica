@@ -46,9 +46,16 @@ class _StatoPageState extends State<StatoPage> {
         int num_timers = stato.timers?.timers.length ?? 0;
         return Stack(children: [
           Positioned(
-            top: 90.0,
+            top: 20.0,
             left: 20.0,
-            child: visualizzaAttivi(stati, context),
+            child:
+                visualizzaAttiviAllarme(stati, context, 1, Icons.alarm_rounded),
+          ),
+          Positioned(
+            top: 20.0,
+            right: 80.0,
+            child: visualizzaAttiviAllarme(
+                stati, context, 2, Icons.notifications_on_rounded),
           ),
           Center(
             child: visalizzaAllarme(stato),
@@ -152,7 +159,8 @@ class _StatoPageState extends State<StatoPage> {
           );
   }
 
-  Widget visualizzaAttivi(SchemaStatiModel stati, BuildContext context) {
+  Widget visualizzaAttiviAllarme(SchemaStatiModel stati, BuildContext context,
+      int attivazione, IconData icona) {
     return Consumer<SchemaSensoriModel>(builder: (BuildContext context,
         SchemaSensoriModel schemaSensori, Widget? child) {
       bool isSensoreInfisso = false;
@@ -162,13 +170,13 @@ class _StatoPageState extends State<StatoPage> {
       for (var sensore in schemaSensori.sensori) {
         if (sensore is SensoreInfisso) {
           isSensoreInfisso = true;
-          if (sensore.attiva == 0) {
+          if (sensore.attiva & attivazione == 0) {
             isSensoreInfissoAttivo = false;
           }
         }
         if (sensore is SensorePresenza) {
           isSensorePresenza = true;
-          if (sensore.attiva == 0) {
+          if (sensore.attiva & attivazione == 0) {
             isSensoreInfissoAttivo = false;
           }
         }
@@ -182,26 +190,29 @@ class _StatoPageState extends State<StatoPage> {
           //         scrollDirection: Axis.vertical,
           //         child:
           Row(children: [
+        (isSensoreInfisso || isSensorePresenza)
+            ? Icon(icona, size: 20, color: Colors.black)
+            : const SizedBox.shrink(),
         isSensoreInfisso
             ? IconButton(
                 icon: Icon(Icons.sensor_window_outlined,
-                    size: 10,
+                    size: 20,
                     color:
                         (isSensoreInfissoAttivo) ? Colors.red : Colors.black),
                 onPressed: () {
-                  stati.attivaSensori(
-                      'SensoreInfisso', !isSensoreInfissoAttivo);
+                  stati.attivaSensori('SensoreInfisso',
+                      isSensoreInfissoAttivo ? -attivazione : attivazione);
                 })
             : const SizedBox.shrink(),
         isSensorePresenza
             ? IconButton(
                 icon: Icon(Icons.directions_walk_rounded,
-                    size: 10,
+                    size: 20,
                     color:
                         (isSensorePresenzaAttivo) ? Colors.red : Colors.black),
                 onPressed: () {
-                  stati.attivaSensori(
-                      'SensorePresenza', !isSensorePresenzaAttivo);
+                  stati.attivaSensori('SensorePresenza',
+                      isSensoreInfissoAttivo ? -attivazione : attivazione);
                 })
             : const SizedBox.shrink(),
       ]);

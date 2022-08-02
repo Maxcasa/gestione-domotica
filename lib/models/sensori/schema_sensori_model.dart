@@ -263,17 +263,22 @@ class SchemaSensoriModel with ChangeNotifier {
   void _attivaSensori(String messageData) {
     Map<String, dynamic> jsonData = jsonDecode(messageData);
     // se risponde che il join è permesso
-    if (jsonData.containsKey('attiva') || jsonData.containsKey('disattiva')) {
-      int valoreDaAttivare = jsonData.containsKey('attiva') ? 1 : 0;
+    if (jsonData.containsKey('attiva')) {
       for (var element in sensori) {
-        if (jsonData['attiva'] == 'SensoreInfisso' &&
-            element is SensoreInfisso) {
+        int valoreDaAttivare = int.parse(jsonData['attiva']);
+        if (valoreDaAttivare > 0) {
+          valoreDaAttivare = element.attiva | valoreDaAttivare;
+        } else {
+          valoreDaAttivare = element.attiva & ~(-valoreDaAttivare);
+        }
+        if (jsonData['tipo'] == 'SensoreInfisso' && element is SensoreInfisso) {
           element.attiva = valoreDaAttivare;
-        } else if (jsonData['attiva'] == 'SensorePresenza' &&
+        } else if (jsonData['tipo'] == 'SensorePresenza' &&
             element is SensorePresenza) {
           element.attiva = valoreDaAttivare;
         }
       }
+      notifyListeners();
     }
   }
 

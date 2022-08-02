@@ -258,9 +258,8 @@ class SchemaStatiModel with ChangeNotifier {
     }
   }
 
-  void attivaSensori(String tipoSensore, bool attiva) {
-    String attivaDisattiva = attiva ? "attiva" : "disattiva";
-    String messageData = '{"$attivaDisattiva": "$tipoSensore"}';
+  void attivaSensori(String tipoSensore, int attivazione) {
+    String messageData = '{"attiva": "$attivazione", "tipo": "$tipoSensore"}';
     mqttClientWrapper!
         .publishMessage(topicSurName: 'request/set', messageData: messageData);
   }
