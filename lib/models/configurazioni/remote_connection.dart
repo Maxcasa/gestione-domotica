@@ -242,6 +242,9 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
         await FirebaseMessaging.instance
             .subscribeToTopic('${connection.remoteDomain}_allarme');
         print('Firebase subscribe :: ${connection.remoteDomain}_allarme');
+        await FirebaseMessaging.instance
+            .subscribeToTopic('${connection.remoteDomain}_sensori');
+        print('Firebase subscribe :: ${connection.remoteDomain}_sensori');
       }
     }
   }
