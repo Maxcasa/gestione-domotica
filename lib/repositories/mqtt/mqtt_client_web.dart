@@ -23,4 +23,8 @@ class MqttDomoClient extends MqttBrowserClient {
   }
 
   set secure(secure) {}
+
+  set securityContext(securityContext) {
+    //super.securityContext = securityContext;
+  }
 }

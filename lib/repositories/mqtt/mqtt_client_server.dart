@@ -21,4 +21,8 @@ class MqttDomoClient extends MqttServerClient {
   set secure(secure) {
     super.secure = secure;
   }
+
+  set securityContext(securityContext) {
+    super.securityContext = securityContext;
+  }
 }

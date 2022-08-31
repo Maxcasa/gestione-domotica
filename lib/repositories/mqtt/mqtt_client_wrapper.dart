@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:gestione_domotica/models/configurazioni/remote_connection.dart';
 //import 'package:mqtt_client/mqtt_browser_client.dart';
@@ -142,6 +144,18 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     } else if (remote) {
       print('MQTTClientWrapper::Secure activated');
       client!.secure = true;
+
+      /// Security context
+      SecurityContext securityContext = SecurityContext.defaultContext;
+      if (remoteConnection!.caFile != null) {}
+      //securityContext.setClientAuthorities (remoteConnection.caFile)
+      if (remoteConnection!.keyFile != null) {
+        securityContext.usePrivateKey(remoteConnection!.keyFile!);
+      }
+      if (remoteConnection!.certFile != null) {
+        securityContext.setClientAuthorities(remoteConnection!.certFile!);
+      }
+      client!.securityContext = securityContext;
     }
     client!.logging(on: false);
     client!.keepAlivePeriod = 60;

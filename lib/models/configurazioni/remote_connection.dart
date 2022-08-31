@@ -129,6 +129,56 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
     }
   }
 
+  String? get remotePassword {
+    if (connectionDataList.length > localData.activeIndex &&
+        localData.activeIndex >= 0 &&
+        connectionDataList[localData.activeIndex].remotePassword != '') {
+      return connectionDataList[localData.activeIndex].remotePassword;
+    } else {
+      return null;
+    }
+  }
+
+  String? get certDirBase {
+    if (connectionDataList.length > localData.activeIndex &&
+        localData.activeIndex >= 0 &&
+        connectionDataList[localData.activeIndex].certDirBase != '') {
+      return connectionDataList[localData.activeIndex].certDirBase;
+    } else {
+      return null;
+    }
+  }
+
+  String? get caFile {
+    if (connectionDataList.length > localData.activeIndex &&
+        localData.activeIndex >= 0 &&
+        connectionDataList[localData.activeIndex].caFile != '') {
+      return connectionDataList[localData.activeIndex].caFile;
+    } else {
+      return null;
+    }
+  }
+
+  String? get certFile {
+    if (connectionDataList.length > localData.activeIndex &&
+        localData.activeIndex >= 0 &&
+        connectionDataList[localData.activeIndex].caFile != '') {
+      return connectionDataList[localData.activeIndex].certFile;
+    } else {
+      return null;
+    }
+  }
+
+  String? get keyFile {
+    if (connectionDataList.length > localData.activeIndex &&
+        localData.activeIndex >= 0 &&
+        connectionDataList[localData.activeIndex].keyFile != '') {
+      return connectionDataList[localData.activeIndex].keyFile;
+    } else {
+      return null;
+    }
+  }
+
   String? get remoteDomain {
     if (connectionDataList.length > localData.activeIndex &&
         localData.activeIndex >= 0) {

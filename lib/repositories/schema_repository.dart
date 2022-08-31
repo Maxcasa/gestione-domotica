@@ -150,7 +150,6 @@ class SchemaRepository extends ChangeNotifier {
     http.Response httpResponse = await http.get(Uri.parse(remoteFileUri!));
     //http.Response httpResponse = await ioClient.get(Uri.parse(remoteFileUri));
     if (httpResponse.statusCode == 200) {
-      final directory = await getApplicationDocumentsDirectory();
       // If the server did return a 200 OK response,
       // then parse the JSON.
       saveJson(httpResponse.body, fileName);
@@ -172,7 +171,6 @@ class SchemaRepository extends ChangeNotifier {
     http.Response httpResponse = await http.get(Uri.parse(remoteBackUri!));
     //http.Response httpResponse = await ioClient.get(Uri.parse(remoteFileUri));
     if (httpResponse.statusCode == 200) {
-      final directory = await getApplicationDocumentsDirectory();
       // If the server did return a 200 OK response,
       // then parse the JSON.
       saveImage(httpResponse.bodyBytes, fileName);
@@ -195,7 +193,6 @@ class SchemaRepository extends ChangeNotifier {
 
   Future<void> saveImage(imageData, String fileName) async {
     if (!kIsWeb) {
-      final directory = await getApplicationDocumentsDirectory();
       final File file = File(fileName);
       await file.writeAsBytes(imageData);
     }

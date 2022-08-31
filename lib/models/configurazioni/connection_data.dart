@@ -7,6 +7,11 @@ class ConnectionData {
     required this.localServerName,
     required this.remoteServerName,
     required this.remoteUser,
+    required this.remotePassword,
+    required this.certDirBase,
+    required this.caFile,
+    required this.certFile,
+    required this.keyFile,
     required this.remoteDomain,
     required this.localWiFiConnectionName,
   });
@@ -17,6 +22,11 @@ class ConnectionData {
   String localServerName;
   String remoteServerName;
   String remoteUser;
+  String remotePassword;
+  String certDirBase;
+  String caFile;
+  String certFile;
+  String keyFile;
   String remoteDomain;
   String localWiFiConnectionName;
 
@@ -27,6 +37,11 @@ class ConnectionData {
         localServerName = json['localServerName'] ?? '',
         remoteServerName = json['remoteServerName'] ?? '',
         remoteUser = json['remoteUser'] ?? '',
+        remotePassword = json['remotePassword'] ?? '',
+        certDirBase = json['certDirBase'] ?? '',
+        caFile = json['caFile'] ?? '',
+        certFile = json['certFile'] ?? '',
+        keyFile = json['keyFile'] ?? '',
         remoteDomain = json['remoteDomain'] ?? '',
         localWiFiConnectionName = json['localWiFiConnectionName'] ?? '';
 
@@ -37,6 +52,11 @@ class ConnectionData {
       'localServerName': localServerName,
       'remoteServerName': remoteServerName,
       'remoteUser': remoteUser,
+      'remotePassword': remotePassword,
+      'certDirBase': certDirBase,
+      'caFile': caFile,
+      'certFile': certFile,
+      'keyFile': keyFile,
       'remoteDomain': remoteDomain,
       'localWiFiConnectionName': localWiFiConnectionName,
     };
