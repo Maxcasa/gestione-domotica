@@ -19,6 +19,7 @@ import 'package:gestione_domotica/widget/connection_icon.dart';
 import 'package:gestione_domotica/widget/remote_device_manager.dart';
 import 'package:gestione_domotica/widget/rf_manager_button.dart';
 import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
 
 import 'main_drawer.dart';
 
@@ -485,6 +486,7 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
     // var size = renderBox.size;
     var offset = renderBox.localToGlobal(Offset.zero);
     final serverCodeController = TextEditingController();
+    final serverNameController = TextEditingController();
     return OverlayEntry(
         builder: (_context) => Positioned(
               left: offset.dx + 5,
@@ -507,6 +509,19 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
                               controller: serverCodeController,
                               decoration: const InputDecoration(
                                 border: UnderlineInputBorder(),
+                                hintText: 'Server Code',
+                              ),
+                            ),
+                            // The validator receives the text that the user has entered.
+                          ),
+                          Container(
+                            margin: const EdgeInsets.all(10),
+                            padding: const EdgeInsets.all(5),
+                            width: 200,
+                            child: TextField(
+                              controller: serverNameController,
+                              decoration: const InputDecoration(
+                                border: UnderlineInputBorder(),
                                 hintText: 'Server Name',
                               ),
                             ),
@@ -518,8 +533,10 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
                                     Icons.add_circle_outline_rounded,
                                     size: 30.0),
                                 onPressed: () async {
-                                  if (_addConnection(remoteConnection,
-                                      serverCodeController.text)) {
+                                  if (_addConnection(
+                                      remoteConnection,
+                                      serverCodeController.text,
+                                      serverNameController.text)) {
                                     mostraSnackBar('Aggiornato', context);
                                     // serverCodeController.dispose();
                                     _menuOverlay!.remove();
@@ -543,24 +560,39 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
             ));
   }
 
-  bool _addConnection(
-      RemoteConnection remoteConnection, String serverCodeController) {
+  Future<bool> _addConnection(RemoteConnection remoteConnection,
+      String serverCode, String serverName) async {
     try {
-      //_serverCodeController = serverCodeController;
-      if (widget.mqttClientWrapper!.connectionState ==
-          MqttCurrentConnectionState.CONNECTED) {
-        widget.mqttClientWrapper!.subscribeToGenericTopic(
-            totalTopic: 'configRemote/get',
-            onDataReceived: (messageData) => _onConnectionRecived(
-                remoteConnection, messageData, serverCodeController));
-
-// MCC_${serverCodeController}/set
-        String messageData = encryptWithKey('{"code": "$serverCodeController"}',
-            Utils.cutToLength(serverCodeController, 32));
-        widget.mqttClientWrapper!.publishGenericMessage(
-            totalTopic: 'configRemote/set', messageData: messageData);
-        return true;
+      String remoteUri = 'http://$serverName:$port/get/remote_connection';
+      // http.Response? httpResponse = await lock.synchronized(() async {
+      //   return http.get(Uri.parse(remoteBackUri!));
+      // });
+      http.Response httpResponse = await http.get(Uri.parse(remoteUri!));
+      //http.Response httpResponse = await ioClient.get(Uri.parse(remoteFileUri));
+      if (httpResponse.statusCode == 200) {
+        // If the server did return a 200 OK response,
+        // then parse the JSON.
+        remoteConnection
+            .addConnection(ConnectionData.fromJson(httpResponse.bodyBytes));
+      } else {
+        // If the server did not return a 200 OK response,
+        // then throw an exception.
+        //throw Exception('Failed to load album');
       }
+      //_serverCodeController = serverCodeController;
+//       if (widget.mqttClientWrapper!.connectionState ==
+//           MqttCurrentConnectionState.CONNECTED) {
+//         widget.mqttClientWrapper!.subscribeToGenericTopic(
+//             totalTopic: 'configRemote/get',
+//             onDataReceived: (messageData) => _onConnectionRecived(
+//                 remoteConnection, messageData, serverCode));
+
+// // MCC_${serverCodeController}/set
+//         String messageData = encryptWithKey('{"code": "$serverCode"}',
+//             Utils.cutToLength(serverCode, 32));
+//         widget.mqttClientWrapper!.publishGenericMessage(
+//             totalTopic: 'configRemote/set', messageData: messageData);
+//         return true;
       //   http.Response httpResponse = await http.get(
       //       Uri.parse('http://$serverCodeController:$port/get/remote_connection'));
       //   if (httpResponse.statusCode == 200) {
