@@ -487,6 +487,7 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
     var offset = renderBox.localToGlobal(Offset.zero);
     final serverCodeController = TextEditingController();
     final serverNameController = TextEditingController();
+    final serverPortController = TextEditingController(text: '8085');
     return OverlayEntry(
         builder: (_context) => Positioned(
               left: offset.dx + 5,
@@ -527,16 +528,30 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
                             ),
                             // The validator receives the text that the user has entered.
                           ),
+                          Container(
+                            margin: const EdgeInsets.all(10),
+                            padding: const EdgeInsets.all(5),
+                            width: 200,
+                            child: TextField(
+                              controller: serverPortController,
+                              decoration: const InputDecoration(
+                                border: UnderlineInputBorder(),
+                                hintText: 'Server Port',
+                              ),
+                            ),
+                            // The validator receives the text that the user has entered.
+                          ),
                           Row(children: [
                             IconButton(
                                 icon: const Icon(
                                     Icons.add_circle_outline_rounded,
                                     size: 30.0),
                                 onPressed: () async {
-                                  if (_addConnection(
+                                  if (await _addConnection(
                                       remoteConnection,
                                       serverCodeController.text,
-                                      serverNameController.text)) {
+                                      serverNameController.text,
+                                      serverPortController.text)) {
                                     mostraSnackBar('Aggiornato', context);
                                     // serverCodeController.dispose();
                                     _menuOverlay!.remove();
@@ -561,19 +576,21 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
   }
 
   Future<bool> _addConnection(RemoteConnection remoteConnection,
-      String serverCode, String serverName) async {
+      String serverCode, String serverName, String port) async {
     try {
       String remoteUri = 'http://$serverName:$port/get/remote_connection';
       // http.Response? httpResponse = await lock.synchronized(() async {
       //   return http.get(Uri.parse(remoteBackUri!));
       // });
-      http.Response httpResponse = await http.get(Uri.parse(remoteUri!));
+      http.Response httpResponse = await http.get(Uri.parse(remoteUri));
       //http.Response httpResponse = await ioClient.get(Uri.parse(remoteFileUri));
       if (httpResponse.statusCode == 200) {
         // If the server did return a 200 OK response,
         // then parse the JSON.
-        remoteConnection
-            .addConnection(ConnectionData.fromJson(httpResponse.bodyBytes));
+        remoteConnection.addConnection(ConnectionData.fromJson(json.decode(
+            decryptWithKey(
+                httpResponse.body, Utils.cutToLength(serverCode, 32))!)));
+        return true;
       } else {
         // If the server did not return a 200 OK response,
         // then throw an exception.
