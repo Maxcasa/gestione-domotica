@@ -96,6 +96,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
       } else if (remoteConnection!.remoteUser != null) {
         remoteServer = remoteConnection!.remoteServerName;
         mqttUser = remoteConnection!.remoteUser!;
+        mqttPW = remoteConnection!.remotePassword!;
         remote = true;
       } else {
         _remoteNull();
@@ -149,11 +150,15 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
       SecurityContext securityContext = SecurityContext.defaultContext;
       if (remoteConnection!.caFile != null) {}
       //securityContext.setClientAuthorities (remoteConnection.caFile)
-      if (remoteConnection!.keyFile != null) {
-        securityContext.usePrivateKey(remoteConnection!.keyFile!);
+      if (remoteConnection!.keyFile != null &&
+          remoteConnection!.certDirBase != null) {
+        securityContext.usePrivateKey(
+            remoteConnection!.certDirBase! + remoteConnection!.keyFile!);
       }
-      if (remoteConnection!.certFile != null) {
-        securityContext.setClientAuthorities(remoteConnection!.certFile!);
+      if (remoteConnection!.certFile != null &&
+          remoteConnection!.certDirBase != null) {
+        securityContext.setClientAuthorities(
+            remoteConnection!.certDirBase! + remoteConnection!.certFile!);
       }
       client!.securityContext = securityContext;
     }

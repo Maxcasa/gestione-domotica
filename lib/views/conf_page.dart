@@ -18,6 +18,7 @@ import 'package:gestione_domotica/widget/connection_icon.dart';
 //import 'package:gestione_domotica/widget/icons_indicator.dart';
 import 'package:gestione_domotica/widget/remote_device_manager.dart';
 import 'package:gestione_domotica/widget/rf_manager_button.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 
@@ -587,14 +588,17 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
       if (httpResponse.statusCode == 200) {
         // If the server did return a 200 OK response,
         // then parse the JSON.
-        remoteConnection.addConnection(ConnectionData.fromJson(json.decode(
+        ConnectionData connectionData = ConnectionData.fromJson(json.decode(
             decryptWithKey(
-                httpResponse.body, Utils.cutToLength(serverCode, 32))!)));
+                httpResponse.body, Utils.cutToLength(serverCode, 32))!));
+        connectionData.certDirBase =
+            (await getApplicationDocumentsDirectory()).path + '/';
+        remoteConnection.addConnection(connectionData);
         return true;
       } else {
         // If the server did not return a 200 OK response,
         // then throw an exception.
-        //throw Exception('Failed to load album');
+        throw Exception('RemoteConnectionError');
       }
       //_serverCodeController = serverCodeController;
 //       if (widget.mqttClientWrapper!.connectionState ==
