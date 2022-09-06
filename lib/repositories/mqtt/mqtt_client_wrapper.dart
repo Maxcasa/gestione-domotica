@@ -150,14 +150,15 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
       SecurityContext securityContext = SecurityContext.defaultContext;
       if (remoteConnection!.caFile != null &&
           remoteConnection!.certDirBase != null) {
-        securityContext.setClientAuthorities(
-            remoteConnection!.certDirBase! + remoteConnection!.caFile!);
+        securityContext.setClientAuthorities(remoteConnection!.certDirBase! +
+            remoteConnection!.caFile! +
+            '.pem');
       }
       if (remoteConnection!.keyFile != null &&
           remoteConnection!.certDirBase != null) {
         securityContext.usePrivateKey(remoteConnection!.certDirBase! +
             remoteConnection!.keyFile! +
-            '.pem');
+            '.key');
       }
       if (remoteConnection!.certFile != null &&
           remoteConnection!.certDirBase != null) {
