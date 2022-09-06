@@ -88,15 +88,15 @@ class SchemaRepository extends ChangeNotifier {
               '${directory.path}/domo_${remoteConnection!.connectionName}.jpg');
           if (remoteConnection!.caFile != null) {
             await _getFileFromRemote(
-                'caFile', '${directory.path}/${remoteConnection!.caFile}');
+                'caFile', '${directory.path}/${remoteConnection!.caFile}.pem');
           }
           if (remoteConnection!.certFile != null) {
-            await _getFileFromRemote(
-                'certFile', '${directory.path}/${remoteConnection!.certFile}');
+            await _getFileFromRemote('certFile',
+                '${directory.path}/${remoteConnection!.certFile}.pem');
           }
           if (remoteConnection!.keyFile != null) {
-            await _getFileFromRemote(
-                'keyFile', '${directory.path}/${remoteConnection!.keyFile}');
+            await _getFileFromRemote('keyFile',
+                '${directory.path}/${remoteConnection!.keyFile}.pem');
           }
         } else if (!kIsWeb) {
           schemaTree = await _getJsonFromLocal(

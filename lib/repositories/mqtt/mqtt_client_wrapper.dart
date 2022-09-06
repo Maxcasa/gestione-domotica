@@ -155,13 +155,15 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
       }
       if (remoteConnection!.keyFile != null &&
           remoteConnection!.certDirBase != null) {
-        securityContext.usePrivateKey(
-            remoteConnection!.certDirBase! + remoteConnection!.keyFile!);
+        securityContext.usePrivateKey(remoteConnection!.certDirBase! +
+            remoteConnection!.keyFile! +
+            '.pem');
       }
       if (remoteConnection!.certFile != null &&
           remoteConnection!.certDirBase != null) {
-        securityContext.setClientAuthorities(
-            remoteConnection!.certDirBase! + remoteConnection!.certFile!);
+        securityContext.setClientAuthorities(remoteConnection!.certDirBase! +
+            remoteConnection!.certFile! +
+            '.pem');
       }
       client!.securityContext = securityContext;
     }
