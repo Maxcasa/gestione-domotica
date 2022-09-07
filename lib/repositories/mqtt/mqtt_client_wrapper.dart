@@ -7,6 +7,7 @@ import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'dart:math';
+import 'package:flutter/services.dart' show rootBundle;
 import './mqtt_client_web.dart'
     if (dart.library.io) './mqtt_client_server.dart';
 
@@ -135,7 +136,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     remote = false;
   }
 
-  void _setupMqttClient() {
+  void _setupMqttClient() async {
     // client = MqttServerClient.withPort(serverUri, '#', port);
     Random random = Random();
     String cliendId = 'mqtt_domo' + random.nextInt(1000000).toString();
@@ -147,25 +148,29 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
       client!.secure = true;
 
       /// Security context
-      SecurityContext securityContext = SecurityContext.defaultContext;
-      if (remoteConnection!.caFile != null &&
-          remoteConnection!.certDirBase != null) {
-        securityContext.setClientAuthorities(remoteConnection!.certDirBase! +
-            remoteConnection!.caFile! +
-            '.pem');
-      }
-      if (remoteConnection!.keyFile != null &&
-          remoteConnection!.certDirBase != null) {
-        securityContext.usePrivateKey(remoteConnection!.certDirBase! +
-            remoteConnection!.keyFile! +
-            '.key');
-      }
-      if (remoteConnection!.certFile != null &&
-          remoteConnection!.certDirBase != null) {
-        securityContext.setClientAuthorities(remoteConnection!.certDirBase! +
-            remoteConnection!.certFile! +
-            '.pem');
-      }
+      SecurityContext securityContext =
+          SecurityContext(withTrustedRoots: false);
+      //SecurityContext securityContext = SecurityContext.defaultContext;
+      // if (remoteConnection!.caFile != null &&
+      //     remoteConnection!.certDirBase != null) {
+      //   securityContext.setClientAuthorities(remoteConnection!.certDirBase! +
+      //       remoteConnection!.caFile! +
+      //       '.pem');
+      // }
+      final sslCert = await rootBundle.load('assets/certs/client/client.pem');
+      securityContext.setTrustedCertificatesBytes(sslCert.buffer.asInt8List());
+      // if (remoteConnection!.keyFile != null &&
+      //     remoteConnection!.certDirBase != null) {
+      //   securityContext.usePrivateKey(remoteConnection!.certDirBase! +
+      //       remoteConnection!.keyFile! +
+      //       '.key');
+      // }
+      // if (remoteConnection!.certFile != null &&
+      //     remoteConnection!.certDirBase != null) {
+      //   securityContext.setClientAuthorities(remoteConnection!.certDirBase! +
+      //       remoteConnection!.certFile! +
+      //       '.pem');
+      // }
       client!.securityContext = securityContext;
     }
     client!.logging(on: false);
