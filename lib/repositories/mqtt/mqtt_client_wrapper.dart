@@ -104,7 +104,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
         notifyListeners('connectionState.disconnected');
       }
       if (remoteServer != null) {
-        _setupMqttClient();
+        await _setupMqttClient();
         await _connectClient();
         _listenClient();
       }
@@ -136,7 +136,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     remote = false;
   }
 
-  void _setupMqttClient() async {
+  Future<void> _setupMqttClient() async {
     // client = MqttServerClient.withPort(serverUri, '#', port);
     Random random = Random();
     String cliendId = 'mqtt_domo' + random.nextInt(1000000).toString();
@@ -146,19 +146,66 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     } else if (remote) {
       print('MQTTClientWrapper::Secure activated');
       client!.secure = true;
+      //client!.onBadCertificate = (X509Certificate cert) => false;
 
       /// Security context
       SecurityContext securityContext =
           SecurityContext(withTrustedRoots: false);
       //SecurityContext securityContext = SecurityContext.defaultContext;
-      // if (remoteConnection!.caFile != null &&
-      //     remoteConnection!.certDirBase != null) {
-      //   securityContext.setClientAuthorities(remoteConnection!.certDirBase! +
-      //       remoteConnection!.caFile! +
-      //       '.pem');
-      // }
-      final sslCert = await rootBundle.load('assets/certs/client/client.pem');
-      securityContext.setTrustedCertificatesBytes(sslCert.buffer.asInt8List());
+      //if (remoteConnection!.caFile != null &&
+      //    remoteConnection!.certDirBase != null) {
+      if (remoteConnection!.caFile != null &&
+          remoteConnection!.certDirBase != null) {
+        try {
+          final sslCa = await rootBundle.load(
+              '${remoteConnection!.certDirBase}/${remoteConnection!.caFile}.pfx');
+          securityContext.setTrustedCertificatesBytes(sslCa.buffer.asInt8List(),
+              password: 'test');
+
+          // securityContext.setClientAuthoritiesBytes(sslCa.buffer.asInt8List(),
+          //     password: 'test');
+        } on Exception catch (e) {
+          print('MQTTClientWrapper::client exception - $e');
+          connectionState = MqttCurrentConnectionState.ERROR_WHEN_CONNECTING;
+          notifyListeners('connectionState.error');
+          // client!.disconnect();
+        }
+      }
+      if (remoteConnection!.certFile != null &&
+          remoteConnection!.certDirBase != null) {
+        //       remoteConnection!.caFile! +
+        //       '.pem');
+        //}
+        try {
+          final sslCert = await rootBundle.load(
+              '${remoteConnection!.certDirBase}/${remoteConnection!.certDirBase}.pfx');
+          securityContext.useCertificateChainBytes(sslCert.buffer.asInt8List());
+          //    password: 'HostPass997');
+          // securityContext
+          //     .setTrustedCertificatesBytes(sslCert.buffer.asInt8List());
+          //, password: 'HostPass997');
+        } on Exception catch (e) {
+          print('MQTTClientWrapper::client exception - $e');
+          connectionState = MqttCurrentConnectionState.ERROR_WHEN_CONNECTING;
+          notifyListeners('connectionState.error');
+          // client!.disconnect();
+        }
+      }
+
+      if (remoteConnection!.keyFile != null &&
+          remoteConnection!.certDirBase != null) {
+        try {
+          final sslKey = await rootBundle.load(
+              '${remoteConnection!.certDirBase}/${remoteConnection!.keyFile}.key');
+          securityContext.usePrivateKeyBytes(sslKey.buffer.asInt8List());
+          //, password: 'HostPass997');
+        } on Exception catch (e) {
+          print('MQTTClientWrapper::client exception - $e');
+          connectionState = MqttCurrentConnectionState.ERROR_WHEN_CONNECTING;
+          notifyListeners('connectionState.error');
+          // client!.disconnect();
+        }
+      }
       // if (remoteConnection!.keyFile != null &&
       //     remoteConnection!.certDirBase != null) {
       //   securityContext.usePrivateKey(remoteConnection!.certDirBase! +
@@ -174,6 +221,9 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
       client!.securityContext = securityContext;
     }
     client!.logging(on: false);
+    client!.useWebSocket = false;
+    //client!.setProtocolV311();
+    client!.badCertificateResult = true;
     client!.keepAlivePeriod = 60;
     client!.autoReconnect = true;
     client!.onDisconnected = _onDisconnected;

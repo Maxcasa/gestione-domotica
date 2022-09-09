@@ -19,12 +19,20 @@ class MqttDomoClient extends MqttBrowserClient {
             maxConnectionAttempts: maxConnectionAttempts) {
     String serverLog = remote ? 'wss://$server' : 'ws://$server';
     print(
-        'MQTTClientWrapper::$serverLog:${remote ? 443 : 8080} client connecting....');
+        'MQTTClientWrapper:WEB:$serverLog:${remote ? 443 : 8080} client connecting....');
   }
+
+  set useWebSocket(webSocket) {}
 
   set secure(secure) {}
 
+  set badCertificateResult(bool bedCert) {}
+
   set securityContext(securityContext) {
     //super.securityContext = securityContext;
+  }
+
+  set onBadCertificate(dynamic callBack) {
+    // super.onBadCertificate = callBack;
   }
 }
