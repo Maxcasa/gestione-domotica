@@ -85,24 +85,24 @@ class SchemaRepository extends ChangeNotifier {
           schemaTree = await _getJsonFromRemote('domo_json',
               '${directory.path}/domo_${remoteConnection!.connectionName}.json');
           _sensoriBack = await _getImageFromRemote('domo_image',
-              '${directory.path}/domo_${remoteConnection!.connectionName}.jpg');
+              '${remoteConnection!.certDirBase}domo_${remoteConnection!.connectionName}.jpg');
           if (remoteConnection!.caFile != null) {
-            await _getFileFromRemote(
-                'caFile', '${directory.path}/${remoteConnection!.caFile}.pem');
+            await _getFileFromRemote('caFile',
+                '${remoteConnection!.certDirBase}/${remoteConnection!.caFile}.pfx');
           }
           if (remoteConnection!.certFile != null) {
             await _getFileFromRemote('certFile',
-                '${directory.path}/${remoteConnection!.certFile}.pem');
+                '${remoteConnection!.certDirBase}${remoteConnection!.certFile}.pfx');
           }
           if (remoteConnection!.keyFile != null) {
             await _getFileFromRemote('keyFile',
-                '${directory.path}/${remoteConnection!.keyFile}.pem');
+                '${remoteConnection!.certDirBase}${remoteConnection!.keyFile}.key');
           }
         } else if (!kIsWeb) {
           schemaTree = await _getJsonFromLocal(
-              '${directory.path}/domo_${remoteConnection!.connectionName}.json');
+              '${remoteConnection!.certDirBase}domo_${remoteConnection!.connectionName}.json');
           _sensoriBack = await _getImageFromLocal(
-              '${directory.path}/domo_${remoteConnection!.connectionName}.jpg');
+              '${remoteConnection!.certDirBase}domo_${remoteConnection!.connectionName}.jpg');
         }
       }
       reload = false;

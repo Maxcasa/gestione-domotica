@@ -158,7 +158,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
           remoteConnection!.certDirBase != null) {
         try {
           final sslCa = await rootBundle.load(
-              '${remoteConnection!.certDirBase}/${remoteConnection!.caFile}.pfx');
+              '${remoteConnection!.certDirBase}${remoteConnection!.caFile}.pfx');
           securityContext.setTrustedCertificatesBytes(sslCa.buffer.asInt8List(),
               password: 'test');
 
@@ -178,7 +178,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
         //}
         try {
           final sslCert = await rootBundle.load(
-              '${remoteConnection!.certDirBase}/${remoteConnection!.certDirBase}.pfx');
+              '${remoteConnection!.certDirBase}${remoteConnection!.certDirBase}.pfx');
           securityContext.useCertificateChainBytes(sslCert.buffer.asInt8List());
           //    password: 'HostPass997');
           // securityContext
@@ -196,7 +196,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
           remoteConnection!.certDirBase != null) {
         try {
           final sslKey = await rootBundle.load(
-              '${remoteConnection!.certDirBase}/${remoteConnection!.keyFile}.key');
+              '${remoteConnection!.certDirBase}${remoteConnection!.keyFile}.key');
           securityContext.usePrivateKeyBytes(sslKey.buffer.asInt8List());
           //, password: 'HostPass997');
         } on Exception catch (e) {
