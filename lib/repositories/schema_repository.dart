@@ -88,7 +88,7 @@ class SchemaRepository extends ChangeNotifier {
               '${remoteConnection!.certDirBase}domo_${remoteConnection!.connectionName}.jpg');
           if (remoteConnection!.caFile != null) {
             await _getFileFromRemote('caFile',
-                '${remoteConnection!.certDirBase}/${remoteConnection!.caFile}.pfx');
+                '${remoteConnection!.certDirBase}${remoteConnection!.caFile}.pfx');
           }
           if (remoteConnection!.certFile != null) {
             await _getFileFromRemote('certFile',

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:gestione_domotica/models/configurazioni/remote_connection.dart';
+import 'package:http/http.dart';
 //import 'package:mqtt_client/mqtt_browser_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
@@ -157,14 +158,15 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
       if (remoteConnection!.caFile != null &&
           remoteConnection!.certDirBase != null) {
         try {
-          final sslCa = await rootBundle.load(
-              '${remoteConnection!.certDirBase}${remoteConnection!.caFile}.pfx');
+          final sslCa = await File(
+                  '${remoteConnection!.certDirBase}${remoteConnection!.caFile}.pfx')
+              .readAsBytes();
           securityContext.setTrustedCertificatesBytes(sslCa.buffer.asInt8List(),
               password: 'test');
 
           // securityContext.setClientAuthoritiesBytes(sslCa.buffer.asInt8List(),
           //     password: 'test');
-        } on Exception catch (e) {
+        } catch (e) {
           print('MQTTClientWrapper::client exception - $e');
           connectionState = MqttCurrentConnectionState.ERROR_WHEN_CONNECTING;
           notifyListeners('connectionState.error');
@@ -177,14 +179,15 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
         //       '.pem');
         //}
         try {
-          final sslCert = await rootBundle.load(
-              '${remoteConnection!.certDirBase}${remoteConnection!.certDirBase}.pfx');
+          final sslCert = await File(
+                  '${remoteConnection!.certDirBase}${remoteConnection!.certFile}.pfx')
+              .readAsBytes();
           securityContext.useCertificateChainBytes(sslCert.buffer.asInt8List());
           //    password: 'HostPass997');
           // securityContext
           //     .setTrustedCertificatesBytes(sslCert.buffer.asInt8List());
           //, password: 'HostPass997');
-        } on Exception catch (e) {
+        } catch (e) {
           print('MQTTClientWrapper::client exception - $e');
           connectionState = MqttCurrentConnectionState.ERROR_WHEN_CONNECTING;
           notifyListeners('connectionState.error');
@@ -195,11 +198,12 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
       if (remoteConnection!.keyFile != null &&
           remoteConnection!.certDirBase != null) {
         try {
-          final sslKey = await rootBundle.load(
-              '${remoteConnection!.certDirBase}${remoteConnection!.keyFile}.key');
+          final sslKey = await File(
+                  '${remoteConnection!.certDirBase}${remoteConnection!.keyFile}.key')
+              .readAsBytes();
           securityContext.usePrivateKeyBytes(sslKey.buffer.asInt8List());
           //, password: 'HostPass997');
-        } on Exception catch (e) {
+        } catch (e) {
           print('MQTTClientWrapper::client exception - $e');
           connectionState = MqttCurrentConnectionState.ERROR_WHEN_CONNECTING;
           notifyListeners('connectionState.error');
