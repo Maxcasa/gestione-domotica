@@ -8,7 +8,9 @@
         "remotePassword": "[REDACTED]",
         "remoteDomain": "Massimo",
         "localWiFiConnectionName": "TIM-29622213",
-        "serverCodeController": "[REDACTED]"
+        "serverCodeController": "[REDACTED]",
+        "intervalKeepAlive": 1,
+        "modeKeepAlive": 0
     },
     {
         "id": 1,
@@ -18,6 +20,8 @@
         "remoteUser": "[REDACTED]",
         "remoteDomain": "Valeria",
         "localWiFiConnectionName": "test",
-        "serverCodeController": "[REDACTED]"
+        "serverCodeController": "[REDACTED]",
+        "intervalKeepAlive": 1,
+        "modeKeepAlive": 1
     }
 ]

@@ -16,7 +16,8 @@ import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:gestione_domotica/repositories/encrypt_data.dart';
-import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
+
+//import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
 //import 'package:gestione_domotica/models/remote_conf/connection_data.dart';
 // import 'package:wifi_iot/wifi_iot.dart';
 
@@ -95,6 +96,15 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
       nameList.add(element.connectionName);
     }
     return nameList;
+  }
+
+  ConnectionData? get activeConnectionData {
+    if (connectionDataList.length > localData.activeIndex &&
+        localData.activeIndex >= 0) {
+      return connectionDataList[localData.activeIndex];
+    } else {
+      return null;
+    }
   }
 
   String? get localServerName {

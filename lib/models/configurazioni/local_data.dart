@@ -22,7 +22,7 @@ class LocalData {
     Map<String, dynamic> result = {
       'activeIndex': activeIndex,
       'sensoriVisibili': sensoriVisibili,
-      'token': token
+      'token': token,
     };
     return result;
   }

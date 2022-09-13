@@ -14,6 +14,8 @@ class ConnectionData {
     required this.keyFile,
     required this.remoteDomain,
     required this.localWiFiConnectionName,
+    required this.intervalKeepAlive,
+    required this.modeKeepAlive,
   });
 
   // variabili
@@ -29,6 +31,8 @@ class ConnectionData {
   String keyFile;
   String remoteDomain;
   String localWiFiConnectionName;
+  int intervalKeepAlive;
+  int modeKeepAlive;
 
   // conversione Json
   ConnectionData.fromJson(Map<String, dynamic> json)
@@ -43,7 +47,9 @@ class ConnectionData {
         certFile = json['certFile'] ?? '',
         keyFile = json['keyFile'] ?? '',
         remoteDomain = json['remoteDomain'] ?? '',
-        localWiFiConnectionName = json['localWiFiConnectionName'] ?? '';
+        localWiFiConnectionName = json['localWiFiConnectionName'] ?? '',
+        intervalKeepAlive = json['intervalKeepAlive'] ?? 1,
+        modeKeepAlive = json['modeKeepAlive'] ?? 0;
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> result = {
@@ -59,6 +65,8 @@ class ConnectionData {
       'keyFile': keyFile,
       'remoteDomain': remoteDomain,
       'localWiFiConnectionName': localWiFiConnectionName,
+      'intervalKeepAlive': intervalKeepAlive,
+      'modeKeepAlive': modeKeepAlive,
     };
     return result;
   }

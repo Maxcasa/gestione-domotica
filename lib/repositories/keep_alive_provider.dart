@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/material.dart';
-import 'package:gestione_domotica/models/sensori/sensore_model.dart';
+import 'package:gestione_domotica/models/configurazioni/remote_layer.dart';
 import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
 
@@ -28,6 +27,7 @@ class KeepAliveProvider extends PropertyChangeNotifier<String> {
   Map<String, List<dynamic>> mappaValori = {};
   MQTTClientWrapper? mqttClientWrapper;
   bool _isAlive = true;
+  int settingKeepAlive = 1;
   Timer? timer;
 
   void _mqttClientListener() {
@@ -36,7 +36,12 @@ class KeepAliveProvider extends PropertyChangeNotifier<String> {
       mqttClientWrapper!.subscribeToTopic(
           topicSurName: 'request/get',
           onDataReceived: (messageData) => _keepAlive(messageData));
-      setTimer();
+      if ((mqttClientWrapper!
+                  .remoteConnection!.activeConnectionData?.modeKeepAlive ??
+              0) >
+          0) {
+        setTimer();
+      }
     } else {
       mqttClientWrapper!.unsubscribeToTopic(topicSurName: 'request/get');
       timer?.cancel();
@@ -57,7 +62,12 @@ class KeepAliveProvider extends PropertyChangeNotifier<String> {
       if (jsonData['keepalive'] != 'OK') {
         impostaMappaValori('Timers', jsonData['keepalive']);
       }
-      setTimer();
+      if ((mqttClientWrapper!
+                  .remoteConnection!.activeConnectionData?.modeKeepAlive ??
+              0) >
+          0) {
+        setTimer();
+      }
     }
     if (jsonData.containsKey('TeH')) {
       impostaMappaValori('TeH', jsonData['TeH']);
@@ -71,7 +81,11 @@ class KeepAliveProvider extends PropertyChangeNotifier<String> {
 
   void setTimer() {
     timer?.cancel();
-    timer = Timer.periodic(Duration(minutes: 1), (Timer t) {
+    timer = Timer.periodic(
+        Duration(
+            minutes: mqttClientWrapper!.remoteConnection!.activeConnectionData
+                    ?.intervalKeepAlive ??
+                1), (Timer t) {
       // se non è vivo disconnetto
       if (_isAlive) {
         _isAlive = false;
