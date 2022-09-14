@@ -107,8 +107,14 @@ class _ConnectionIconState extends State<ConnectionIcon> {
           // keepAliveProvider!.addListener(
           //     _keepAlive, ['connectionIcon']);
           // invio la richiesta di keep alive e attivo i timer per verificare la risposta
-          mqttClientWrapper!.publishMessage(
-              topicSurName: 'request/set', messageData: '{"keepalive": "OK"}');
+          if ((mqttClientWrapper!
+                      .remoteConnection!.activeConnectionData?.modeKeepAlive ??
+                  0) >
+              0) {
+            mqttClientWrapper!.publishMessage(
+                topicSurName: 'request/set',
+                messageData: '{"keepalive": "OK"}');
+          }
           MultiMessageProvider multiMessageProvider = MultiMessageProvider();
           multiMessageProvider.addMessage(
               'request/set', "{\"status\": \"stati\"}", ['stati/get']);

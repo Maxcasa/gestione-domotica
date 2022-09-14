@@ -177,7 +177,7 @@ class _StatoPageState extends State<StatoPage> {
         if (sensore is SensorePresenza) {
           isSensorePresenza = true;
           if (sensore.attiva & attivazione == 0) {
-            isSensoreInfissoAttivo = false;
+            isSensorePresenzaAttivo = false;
           }
         }
       }
@@ -212,7 +212,7 @@ class _StatoPageState extends State<StatoPage> {
                         (isSensorePresenzaAttivo) ? Colors.red : Colors.black),
                 onPressed: () {
                   stati.attivaSensori('SensorePresenza',
-                      isSensoreInfissoAttivo ? -attivazione : attivazione);
+                      isSensorePresenzaAttivo ? -attivazione : attivazione);
                 })
             : const SizedBox.shrink(),
       ]);
