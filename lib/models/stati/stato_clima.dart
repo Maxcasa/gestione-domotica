@@ -60,6 +60,7 @@ class StatoClima extends StatoModel {
   // KeepAliveProvider? keepAliveProvider;
 
   //metodi
+  @override
   set valore(int valore) {
     valoreInt = valore;
     switch (valoreInt) {
@@ -84,7 +85,7 @@ class StatoClima extends StatoModel {
     // }
   }
 
-  int get valore => valoreInt;
+  //int get valore => valoreInt;
 
   // funzione invocata dall'interfaccia quando si cambia il valore
   @override

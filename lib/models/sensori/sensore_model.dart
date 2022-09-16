@@ -2,9 +2,16 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:gestione_domotica/models/attivazioni/attivazioni_layer.dart';
 // import 'package:universal_html/html.dart';
 import 'package:gestione_domotica/models/sensori/sensori_layer.dart';
 import 'package:gestione_domotica/models/hex_color.dart';
+
+final factories = <String, Object Function(int id)>{
+  'Attivazione': (id) => AttivazioneModel(id: id),
+  'Allarme': (id) => AttivazioneAllarme(id: id),
+  'Notifica': (id) => AttivazioneNotifica(id: id),
+};
 
 /// Classe che definisce il generico sensore
 class SensoreModel {
@@ -29,7 +36,7 @@ class SensoreModel {
   double posLeft = 0;
   double posTop = 0;
   bool abilitato = true;
-  int attiva = 0;
+  List<AttivazioneModel> attivazioni = [];
   void Function(int, AzioneSensore, String)? azioneSensoreCallBack;
 
   int zIndex = 0;
@@ -69,8 +76,31 @@ class SensoreModel {
             : Icons.crop_square_outlined,
         posLeft = double.parse(json['posLeft'] ?? '0'),
         posTop = double.parse(json['posTop'] ?? '0'),
-        abilitato = json['abilitato'] ?? true,
-        attiva = json['attiva'] ?? 0;
+        abilitato = json['abilitato'] ?? true {
+    if (json.containsKey('attiva') && json['attiva'] is List) {
+      _getAttivazione(json['attiva']);
+    }
+  }
+
+  void _getAttivazione(List arrayAttivazioni) {
+    attivazioni = [];
+    for (var element in arrayAttivazioni) {
+      String tipo = element['nome'] ?? 'Attivazione';
+      //int id = element['id'];
+      if (factories.containsKey(tipo)) {
+        if (tipo == 'Attivazione') {
+          attivazioni.add(AttivazioneModel.fromJson(element));
+        } else if (tipo == 'Allarme') {
+          attivazioni.add(AttivazioneAllarme.fromJson(element));
+        } else if (tipo == 'Notifica') {
+          attivazioni.add(AttivazioneNotifica.fromJson(element));
+        }
+        // attivazioni.last
+        //     .setAzioneAttivazioneListener(callback: azioneAttivazione);
+      }
+    }
+    //_consumeWaitingSensore();
+  }
 
   void setAzioneSensoreListener(
       {Function(int, AzioneSensore, String)? callback}) {
@@ -86,6 +116,21 @@ class SensoreModel {
     }
   }
 
+  @override
+  int get hashCode {
+    int tmpHash = valoreInt;
+    for (int i = 0; i < attivazioni.length; i++) {
+      tmpHash += 8 * i * attivazioni[i].hashCode;
+    }
+    return tmpHash;
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is SensoreModel &&
+      other.runtimeType == runtimeType &&
+      other.hashCode == hashCode;
+
   Map<String, dynamic> toJson() {
     Map<String, dynamic> result = {
       'id': id,
@@ -95,7 +140,9 @@ class SensoreModel {
       //'colore': colore,
       'size': size,
       'abilitato': abilitato,
-      'attiva': attiva,
+      'attiva': attivazioni
+          .map<Map<String, dynamic>>((attivazione) => attivazione.toJson())
+          .toList(),
       'icona': {'codePoint': icona.codePoint, 'fontFamily': icona.fontFamily}
     };
     return result;

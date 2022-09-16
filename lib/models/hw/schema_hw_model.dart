@@ -58,11 +58,11 @@ class SchemaHwModel with ChangeNotifier {
   // variabili
   int id;
   String nome;
-  List<HwModel> stati = [];
+  List<HwModel> hw = [];
   MQTTClientWrapper? mqttClientWrapper;
   SchemaRepository? schemaRepository;
   // String _nome = '';
-  List<Map<String, dynamic>> waitingStatoStato = [];
+  List<Map<String, dynamic>> waitingHwStato = [];
 
   // final log = logger(SchemaStatiModel);
 
@@ -79,7 +79,7 @@ class SchemaHwModel with ChangeNotifier {
     //   }
     // }
     try {
-      return stati.firstWhere((stato) => stato.id == id);
+      return hw.firstWhere((stato) => stato.id == id);
     } on Exception catch (e) {
       return null;
     }
@@ -87,7 +87,7 @@ class SchemaHwModel with ChangeNotifier {
 
   List<HwModel> getModel(String tipoStato) {
     List<HwModel> tmpStatiList = [];
-    for (dynamic stato in stati) {
+    for (dynamic stato in hw) {
       if ((stato).toString() == "Instance of '$tipoStato'") {
         tmpStatiList.add(stato);
       }
@@ -108,7 +108,7 @@ class SchemaHwModel with ChangeNotifier {
 
   Future<void> _getSchemaHw() async {
     Map<String, dynamic> tmpSchema = await schemaRepository!.schema;
-    stati = [];
+    hw = [];
     if (tmpSchema.containsKey(topicSurName)) {
       List listStati = tmpSchema[topicSurName];
       if (listStati.isNotEmpty) {
@@ -116,13 +116,13 @@ class SchemaHwModel with ChangeNotifier {
           String tipo = element['tipo'] ?? 'Hw';
           if (factories.containsKey(tipo)) {
             if (tipo == 'Hw') {
-              stati.add(HwModel.fromJson(element));
+              hw.add(HwModel.fromJson(element));
             } else if (tipo == 'Semaforo') {
-              stati.add(HwModel.fromJson(element));
+              hw.add(HwModel.fromJson(element));
             } else if (tipo == 'ReceiverHF') {
-              stati.add(HwModel.fromJson(element));
+              hw.add(HwModel.fromJson(element));
             }
-            stati.last.setAzioneHwListener(callback: azioneHw);
+            hw.last.setAzioneHwListener(callback: azioneHw);
           }
         }
         // mqttClientWrapper!.publishMessage(
@@ -138,7 +138,7 @@ class SchemaHwModel with ChangeNotifier {
   }
 
   void _consumeWaitingStato() {
-    for (var element in waitingStatoStato) {
+    for (var element in waitingHwStato) {
       _onStatoChanged(jsonEncode(element));
     }
   }
@@ -166,7 +166,7 @@ class SchemaHwModel with ChangeNotifier {
     if (jsonData.containsKey('stato')) {
       List<HwModel> localStati = [];
       if (jsonData['id'] == "*") {
-        localStati.addAll(stati);
+        localStati.addAll(hw);
       } else if (int.tryParse(jsonData['id']) != null) {
         // se passo un id intero
         if (getStato(int.parse(jsonData['id'])) != null) {
@@ -174,21 +174,21 @@ class SchemaHwModel with ChangeNotifier {
           localStati.add(getStato(int.parse(jsonData['id']))!);
         } else {
           // se l'id non è registrato metto il comando in attesa
-          int findIndex = waitingStatoStato
+          int findIndex = waitingHwStato
               .indexWhere((element) => element['id'] == jsonData['id']);
           if (findIndex >= 0) {
-            waitingStatoStato[findIndex]['stato'] = jsonData['stato'];
+            waitingHwStato[findIndex]['stato'] = jsonData['stato'];
           } else {
-            waitingStatoStato.add(jsonData);
+            waitingHwStato.add(jsonData);
           }
         }
       }
       for (HwModel localSensore in localStati) {
         localSensore.valore = int.parse(jsonData['stato']);
-        int findIndex = waitingStatoStato
+        int findIndex = waitingHwStato
             .indexWhere((element) => element['id'] == jsonData['id']);
         if (findIndex >= 0) {
-          waitingStatoStato.removeAt(findIndex);
+          waitingHwStato.removeAt(findIndex);
         }
         notifyListeners();
       }

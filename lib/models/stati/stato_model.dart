@@ -47,6 +47,7 @@ class StatoModel {
   int valoreInt = 0;
   Color colore;
   bool abilitato = true;
+  List<int> operatori = [0, 0];
   TimerAttivazioni? timers;
   void Function(int, AzioneStato, String)? azioneStatoCallBack;
   // SchemaRepository? schemaRepository;
@@ -101,6 +102,8 @@ class StatoModel {
         colore = json['colore'] != null
             ? HexColor.fromHex(json['colore'])
             : Colors.black,
+        operatori = json['oper'] ?? [0, 0],
+        abilitato = json['abilitato'] ?? 0,
         timers = json.containsKey('timers')
             ? TimerAttivazioni.fromJson(json)
             : TimerAttivazioni();
@@ -114,6 +117,7 @@ class StatoModel {
       //'colore': colore,
       // 'size': size,
       'abilitato': abilitato,
+      'oper': operatori,
       'icona': {'codePoint': icona.codePoint, 'fontFamily': icona.fontFamily}
     };
     return result;

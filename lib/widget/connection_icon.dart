@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:gestione_domotica/models/sensori/schema_sensori_model.dart';
 import 'package:gestione_domotica/repositories/keep_alive_provider.dart';
 import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
 import 'package:gestione_domotica/repositories/mqtt/multi_message_provider.dart';
@@ -116,11 +117,14 @@ class _ConnectionIconState extends State<ConnectionIcon> {
                 messageData: '{"keepalive": "OK"}');
           }
           MultiMessageProvider multiMessageProvider = MultiMessageProvider();
+          SchemaSensoriModel schemaSensoriModel = SchemaSensoriModel();
+
           multiMessageProvider.addMessage(
               'request/set', "{\"status\": \"stati\"}", ['stati/get']);
           multiMessageProvider.addMessage(
-              'request/set', "{\"status\": \"sensori\"}", ['sensori/get']);
-
+              'request/set',
+              "{\"status\": \"sensori\", \"hash\": ${schemaSensoriModel.hashCode}}",
+              ['sensori/get']);
           break;
         case MqttCurrentConnectionState.DISCONNECTED:
           // _iconaConn =

@@ -12,7 +12,8 @@ import 'package:provider/provider.dart';
 import 'main_drawer.dart';
 //import '../widget/AzioneForm.dart';
 
-/// Classe WIDGET che contiene la gestione degli allarmi
+/// Classe WIDGET che contiene la gestione degli stati, con tipoStato decido
+/// che tipo di stato voglio visualizzare
 class StatoPage extends StatefulWidget {
   StatoPage({Key? key, String? tipoStato})
       : tipoStato = tipoStato ?? "Stato",
@@ -42,20 +43,21 @@ class _StatoPageState extends State<StatoPage> {
         builder: (BuildContext context, SchemaStatiModel stati, Widget? child) {
       List<StatoModel> statiLista = stati.getModel(widget.tipoStato);
       if (statiLista.length > 0) {
-        StatoModel stato = statiLista[0];
+        int indexStato = 0;
+        StatoModel stato = statiLista[indexStato];
         int num_timers = stato.timers?.timers.length ?? 0;
         return Stack(children: [
           Positioned(
             top: 20.0,
             left: 20.0,
             child:
-                visualizzaAttiviAllarme(stati, context, 1, Icons.alarm_rounded),
+                visualizzaAttiviAllarme(stati, context,indexStato, 1, Icons.alarm_rounded),
           ),
           Positioned(
             top: 20.0,
             right: 80.0,
             child: visualizzaAttiviAllarme(
-                stati, context, 2, Icons.notifications_on_rounded),
+                stati, context,indexStato, 2, Icons.notifications_on_rounded),
           ),
           Center(
             child: visalizzaAllarme(stato),
@@ -160,7 +162,7 @@ class _StatoPageState extends State<StatoPage> {
   }
 
   Widget visualizzaAttiviAllarme(SchemaStatiModel stati, BuildContext context,
-      int attivazione, IconData icona) {
+      int indexStato, int attivazione, IconData icona) {
     return Consumer<SchemaSensoriModel>(builder: (BuildContext context,
         SchemaSensoriModel schemaSensori, Widget? child) {
       bool isSensoreInfisso = false;
@@ -201,6 +203,14 @@ class _StatoPageState extends State<StatoPage> {
                         (isSensoreInfissoAttivo) ? Colors.red : Colors.black),
                 onPressed: () {
                   stati.attivaSensori('SensoreInfisso',
+                      isSensoreInfissoAttivo ? -attivazione : attivazione);
+                })
+            : const SizedBox.shrink(),
+        (isSensoreInfisso && isSensorePresenza)
+                    ? TextButton( 
+                      child: Text(stati.stati[indexStato].operatori[0] == 0 ? '&&' : '||'),
+                onPressed: () {
+                  stati.toggleOperatore(indexStato, attivazione
                       isSensoreInfissoAttivo ? -attivazione : attivazione);
                 })
             : const SizedBox.shrink(),

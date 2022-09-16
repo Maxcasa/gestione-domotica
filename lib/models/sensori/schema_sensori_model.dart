@@ -8,7 +8,9 @@ import 'dart:convert';
 
 import 'package:gestione_domotica/models/sensori/sensori_layer.dart';
 import 'package:gestione_domotica/models/model_data.dart';
+import 'package:gestione_domotica/models/attivazioni/attivazioni_layer.dart';
 import 'package:gestione_domotica/repositories/keep_alive_provider.dart';
+import 'package:gestione_domotica/repositories/mqtt/multi_message_provider.dart';
 import 'package:gestione_domotica/repositories/schema_repository.dart';
 import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
 //import 'package:property_change_notifier/property_change_notifier.dart';
@@ -19,7 +21,7 @@ const String topicSurName = "sensori";
 // const String localStorage = "sensori";
 
 final factories = <String, Object Function(int id)>{
-  'Sensore': (id) => SensoreModel(id: id),
+  'Atti': (id) => SensoreModel(id: id),
   'SensoreLuce': (id) => SensoreLuce(id: id),
   'SensoreInfisso': (id) => SensoreInfisso(id: id),
   'SensoreTeH': (id) => SensoreTeH(id: id),
@@ -50,6 +52,7 @@ class SchemaSensoriModel with ChangeNotifier {
     _setupMqtt();
     keepAliveProvider = KeepAliveProvider();
     keepAliveProvider?.addListener(setTeH, ['TeH']);
+    //multiMessageProvider = MultiMessageProvider();
   }
 
   // SchemaSensoriModel.fromListSensori(
@@ -71,6 +74,7 @@ class SchemaSensoriModel with ChangeNotifier {
   String _nome = '';
   List<Map<String, dynamic>> waitingSensoreStato = [];
   KeepAliveProvider? keepAliveProvider;
+  MultiMessageProvider multiMessageProvider = MultiMessageProvider();
 
   // getter e setter
   SensoreModel? getSensore(id) {
@@ -112,7 +116,7 @@ class SchemaSensoriModel with ChangeNotifier {
       if (listSensori.isNotEmpty) {
         for (var element in listSensori) {
           String tipo = element['tipo'] ?? 'Sensore';
-          int id = element['id'];
+          //int id = element['id'];
           if (factories.containsKey(tipo)) {
             if (tipo == 'Sensore') {
               sensori.add(SensoreModel.fromJson(element));
@@ -138,6 +142,21 @@ class SchemaSensoriModel with ChangeNotifier {
     }
     _consumeWaitingSensore();
   }
+
+  @override
+  int get hashCode {
+    int tmpHash = 0;
+    for (int i = 0; i < sensori.length; i++) {
+      tmpHash += 64 * i * sensori[i].hashCode;
+    }
+    return tmpHash;
+  }
+
+  @override
+  bool operator ==(Object other) =>
+      other is SchemaSensoriModel &&
+      other.runtimeType == runtimeType &&
+      other.hashCode == hashCode;
 
   //metodi
   Future<void> _getSensoriBack() async {
@@ -171,37 +190,74 @@ class SchemaSensoriModel with ChangeNotifier {
 
   _onSensorChanged(String messageData) {
     Map<String, dynamic> jsonData = jsonDecode(messageData);
-    if (jsonData.containsKey('stato')) {
-      List<SensoreModel> localSensori = [];
-      if (jsonData['id'] == "*") {
-        localSensori.addAll(sensori);
-      } else if (int.tryParse(jsonData['id']) != null) {
-        // se passo un id intero
-        if (getSensore(int.parse(jsonData['id'])) != null) {
-          // se è l'id è quello di un sensore registrato
-          localSensori.add(getSensore(int.parse(jsonData['id']))!);
-        } else {
-          // se l'id non è registrato metto il comando in attesa
-          int findIndex = waitingSensoreStato
-              .indexWhere((element) => element['id'] == jsonData['id']);
-          if (findIndex >= 0) {
-            waitingSensoreStato[findIndex]['stato'] = jsonData['stato'];
-          } else {
-            waitingSensoreStato.add(jsonData);
-          }
-        }
-      }
-      for (SensoreModel localSensore in localSensori) {
-        localSensore.valore = int.parse(jsonData['stato']);
-        if (localSensore is SensoreSirena && jsonData.containsKey('azion')) {
-          localSensore.azionamenti = int.parse(jsonData['azion']);
-        }
+    List<SensoreModel> localSensori = [];
+    if (jsonData['id'] == "*") {
+      localSensori.addAll(sensori);
+    } else if (int.tryParse(jsonData['id']) != null) {
+      // se passo un id intero
+      if (getSensore(int.parse(jsonData['id'])) != null) {
+        // se è l'id è quello di un sensore registrato
+        localSensori.add(getSensore(int.parse(jsonData['id']))!);
+      } else {
+        // se l'id non è registrato metto il comando in attesa
         int findIndex = waitingSensoreStato
             .indexWhere((element) => element['id'] == jsonData['id']);
         if (findIndex >= 0) {
-          waitingSensoreStato.removeAt(findIndex);
+          if (jsonData.containsKey('stato')) {
+            waitingSensoreStato[findIndex]['stato'] = jsonData['stato'];
+          }
+        } else {
+          waitingSensoreStato.add(jsonData);
+        }
+      }
+    }
+    if (localSensori.isNotEmpty) {
+      if (jsonData.containsKey('stato')) {
+        for (SensoreModel localSensore in localSensori) {
+          localSensore.valore = int.parse(jsonData['stato']);
+          if (localSensore is SensoreSirena && jsonData.containsKey('azion')) {
+            localSensore.azionamenti = int.parse(jsonData['azion']);
+          }
+          int findIndex = waitingSensoreStato
+              .indexWhere((element) => element['id'] == jsonData['id']);
+          if (findIndex >= 0) {
+            waitingSensoreStato.removeAt(findIndex);
+          }
         }
         notifyListeners();
+      }
+      if (jsonData.containsKey('attiva')) {
+        for (SensoreModel localSensore in localSensori) {
+          localSensore.attivazioni = jsonData['attiva'];
+          if (localSensore is SensoreSirena && jsonData.containsKey('azion')) {
+            localSensore.azionamenti = int.parse(jsonData['azion']);
+          }
+          int findIndex = waitingSensoreStato
+              .indexWhere((element) => element['id'] == jsonData['id']);
+          if (findIndex >= 0) {
+            waitingSensoreStato.removeAt(findIndex);
+          }
+        }
+        notifyListeners();
+      }
+      if (jsonData.containsKey('com')) {
+        Map<String, dynamic> messageJson = {};
+        if (jsonData['com'] == 'hash') {
+          messageJson['status'] = 'sensori';
+          List listSensorHash = [];
+          for (SensoreModel localSensore in localSensori) {
+            Map<String, dynamic> sensorHash = {
+              'id': localSensore.id,
+              'hash': localSensore.hashCode
+            };
+            listSensorHash.add(sensorHash);
+          }
+          if (listSensorHash.isNotEmpty) {
+            messageJson['hash'] = listSensorHash;
+            multiMessageProvider.addMessage(
+                'request/set', json.encode(messageJson), ['sensori/get']);
+          }
+        }
       }
     }
     // if (jsonData.containsKey('set')) {
@@ -261,25 +317,25 @@ class SchemaSensoriModel with ChangeNotifier {
   // }
 
   void _attivaSensori(String messageData) {
-    Map<String, dynamic> jsonData = jsonDecode(messageData);
-    // se risponde che il join è permesso
-    if (jsonData.containsKey('attiva')) {
-      for (var element in sensori) {
-        int valoreDaAttivare = int.parse(jsonData['attiva']);
-        if (valoreDaAttivare > 0) {
-          valoreDaAttivare = element.attiva | valoreDaAttivare;
-        } else {
-          valoreDaAttivare = element.attiva & ~(-valoreDaAttivare);
-        }
-        if (jsonData['tipo'] == 'SensoreInfisso' && element is SensoreInfisso) {
-          element.attiva = valoreDaAttivare;
-        } else if (jsonData['tipo'] == 'SensorePresenza' &&
-            element is SensorePresenza) {
-          element.attiva = valoreDaAttivare;
-        }
-      }
-      notifyListeners();
-    }
+    // Map<String, dynamic> jsonData = jsonDecode(messageData);
+    // // se risponde che il join è permesso
+    // if (jsonData.containsKey('attiva')) {
+    //   for (var element in sensori) {
+    //     int valoreDaAttivare = int.parse(jsonData['attiva']);
+    //     if (valoreDaAttivare > 0) {
+    //       valoreDaAttivare = element.attiva | valoreDaAttivare;
+    //     } else {
+    //       valoreDaAttivare = element.attiva & ~(-valoreDaAttivare);
+    //     }
+    //     if (jsonData['tipo'] == 'SensoreInfisso' && element is SensoreInfisso) {
+    //       element.attivazioni = valoreDaAttivare;
+    //     } else if (jsonData['tipo'] == 'SensorePresenza' &&
+    //         element is SensorePresenza) {
+    //       element.attivazioni = valoreDaAttivare;
+    //     }
+    //   }
+    //   notifyListeners();
+    // }
   }
 
   // conversione Json
@@ -295,6 +351,7 @@ class SchemaSensoriModel with ChangeNotifier {
     return {
       'id': id,
       'name': nome,
+      'hash': hashCode,
       'sensori': sensori
           .map<Map<String, dynamic>>((sensore) => sensore.toJson())
           .toList(),
