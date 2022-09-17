@@ -85,7 +85,7 @@ class StatoModel {
   // funzione invocata dall'interfaccia quando si cambia il valore
   void cambiaStato(int valore) {
     //Se c'è un callback da chiamare lo chiamo
-    String messaggio = json.encode({'id': id, 'stato': valore});
+    String messaggio = json.encode({'id': id, 'valore': valore});
     if (azioneStatoCallBack != null) {
       azioneStatoCallBack!(id, AzioneStato.imposta, messaggio);
     }
@@ -165,8 +165,8 @@ class StatoModel {
 
   // cambiaStato(String messageData) {
   //   Map<String, dynamic> jsonData = jsonDecode(messageData);
-  //   if (jsonData.containsKey('stato')) {
-  //     switch (jsonData['stato']) {
+  //   if (jsonData.containsKey('valore')) {
+  //     switch (jsonData['valore']) {
   //       case "2":
   //         colore = Colors.yellow;
   //         icona = Icons.home_outlined;

@@ -108,9 +108,9 @@ class SensoreModel {
   }
 
   // funzione invocata dall'interfaccia quando si cambia il valore
-  void cambiaStato(int valore) {
+  void cambiaValore(int valore) {
     //Se c'è un callback da chiamare lo chiamo
-    String messaggio = json.encode({'id': id, 'stato': valore});
+    String messaggio = json.encode({'id': id, 'valore': valore});
     if (azioneSensoreCallBack != null) {
       azioneSensoreCallBack!(id, AzioneSensore.imposta, messaggio);
     }
@@ -150,7 +150,7 @@ class SensoreModel {
 
   void rimuovi() {
     if (azioneSensoreCallBack != null) {
-      String messaggio = json.encode({'id': id, 'stato': 'rimuovi'});
+      String messaggio = json.encode({'id': id, 'com': 'rimuovi'});
       azioneSensoreCallBack!(id, AzioneSensore.rimuovi, messaggio);
     }
   }
@@ -158,7 +158,7 @@ class SensoreModel {
   void disabilita() {
     abilitato = false;
     if (azioneSensoreCallBack != null) {
-      String messaggio = json.encode({'id': id, 'stato': 'disabilita'});
+      String messaggio = json.encode({'id': id, 'com': 'disabilita'});
       azioneSensoreCallBack!(id, AzioneSensore.disabilita, messaggio);
     }
   }
@@ -166,7 +166,7 @@ class SensoreModel {
   void abilita() {
     abilitato = true;
     if (azioneSensoreCallBack != null) {
-      String messaggio = json.encode({'id': id, 'stato': 'abilita'});
+      String messaggio = json.encode({'id': id, 'com': 'abilita'});
       azioneSensoreCallBack!(id, AzioneSensore.abilita, messaggio);
     }
   }
