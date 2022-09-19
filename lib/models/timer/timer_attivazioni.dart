@@ -88,6 +88,15 @@ class TimerAttivazioni with ChangeNotifier {
     };
   }
 
+  Map<String, dynamic> toShortJson() {
+    return {
+      'act': isActivated,
+      'hash': hashCode,
+      'timers':
+          timers.map<Map<String, dynamic>>((timer) => timer.toJson()).toList(),
+    };
+  }
+
   // void saveTimers() async {
   //   if (!kIsWeb) {
   //     final directory = await getApplicationDocumentsDirectory();

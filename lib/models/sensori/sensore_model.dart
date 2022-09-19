@@ -148,6 +148,18 @@ class SensoreModel {
     return result;
   }
 
+  Map<String, dynamic> toShortJson() {
+    Map<String, dynamic> result = {
+      'valore': valoreInt,
+      // 'abilitato': abilitato,
+      'attiva': attivazioni
+          .map<Map<String, dynamic>>((attivazione) => attivazione.toShortJson())
+          .toList()
+    };
+    return result;
+  }
+
+
   void rimuovi() {
     if (azioneSensoreCallBack != null) {
       String messaggio = json.encode({'id': id, 'stato': 'rimuovi'});

@@ -264,6 +264,15 @@ class SchemaStatiModel with ChangeNotifier {
         .publishMessage(topicSurName: 'request/set', messageData: messageData);
   }
 
+  Map<String, dynamic> toShortJson() {
+    return {
+      'id': id,
+      'shortJ': stati
+          .map<Map<String, dynamic>>((stato) => stato.toShortJson())
+          .toList(),
+    };
+  }
+
   // _onStatoChanged(String messageData) {
   //   Map<String, dynamic> jsonData = jsonDecode(messageData);
   //   if (jsonData.containsKey('stato')) {

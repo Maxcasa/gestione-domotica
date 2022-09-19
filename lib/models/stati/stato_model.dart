@@ -118,7 +118,17 @@ class StatoModel {
       // 'size': size,
       'abilitato': abilitato,
       'oper': operatori,
+      'timers': timers?.toShortJson(),
       'icona': {'codePoint': icona.codePoint, 'fontFamily': icona.fontFamily}
+    };
+    return result;
+  }
+
+  Map<String, dynamic> toShortJson() {
+    Map<String, dynamic> result = {
+      'valore': valoreInt,
+      // 'abilitato': abilitato,
+      'timers': timers?.toShortJson()
     };
     return result;
   }

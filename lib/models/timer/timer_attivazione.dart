@@ -59,4 +59,14 @@ class TimerAttivazione {
       'time': timerInit
     };
   }
+
+  Map<String, dynamic> toShortJson() {
+    return {
+      'id': id,
+      'act': isActivated,
+      'valore': valore,
+      'max': maxTimers,
+      'time': timerInit
+    };
+  }
 }

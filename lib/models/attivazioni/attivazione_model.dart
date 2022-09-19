@@ -96,4 +96,12 @@ class AttivazioneModel {
     };
     return result;
   }
+
+  Map<String, dynamic> toShortJson() {
+    Map<String, dynamic> result = {
+      'valore': valoreInt
+      // 'abilitato': abilitato,
+    };
+    return result;
+  }
 }

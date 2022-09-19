@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/sensori/schema_sensori_model.dart';
+import 'package:gestione_domotica/models/stati/schema_stati_model.dart';
 import 'package:gestione_domotica/repositories/keep_alive_provider.dart';
 import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
 import 'package:gestione_domotica/repositories/mqtt/multi_message_provider.dart';
@@ -118,12 +119,13 @@ class _ConnectionIconState extends State<ConnectionIcon> {
           }
           MultiMessageProvider multiMessageProvider = MultiMessageProvider();
           SchemaSensoriModel schemaSensoriModel = SchemaSensoriModel();
+          SchemaStatiModel schemaStatiModel = SchemaStatiModel(id: 0);
 
           multiMessageProvider.addMessage(
-              'request/set', "{\"status\": \"stati\"}", ['stati/get']);
+              'request/set', json.encode(schemaStatiModel.toShortJson()), ['stati/get']);
           multiMessageProvider.addMessage(
               'request/set',
-              "{\"status\": \"sensori\", \"hash\": ${schemaSensoriModel.hashCode}}",
+              json.encode(schemaSensoriModel.toShortJson()),
               ['sensori/get']);
           break;
         case MqttCurrentConnectionState.DISCONNECTED:
