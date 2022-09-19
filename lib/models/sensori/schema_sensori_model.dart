@@ -203,8 +203,8 @@ class SchemaSensoriModel with ChangeNotifier {
         int findIndex = waitingSensoreStato
             .indexWhere((element) => element['id'] == jsonData['id']);
         if (findIndex >= 0) {
-          if (jsonData.containsKey('stato')) {
-            waitingSensoreStato[findIndex]['stato'] = jsonData['stato'];
+          if (jsonData.containsKey('valore')) {
+            waitingSensoreStato[findIndex]['valore'] = jsonData['valore'];
           }
           if (jsonData.containsKey('attiva')) {
             waitingSensoreStato[findIndex]['attiva'] = jsonData['attiva'];
@@ -219,8 +219,8 @@ class SchemaSensoriModel with ChangeNotifier {
     }
     if (localSensori.isNotEmpty) {
       for (SensoreModel localSensore in localSensori) {
-        if (jsonData.containsKey('stato')) {
-          localSensore.valore = int.parse(jsonData['stato']);
+        if (jsonData.containsKey('valore')) {
+          localSensore.valore = int.parse(jsonData['valore']);
         }
         if (jsonData.containsKey('attiva')) {
           localSensore.attivazioni = jsonData['attiva'];

@@ -56,14 +56,14 @@ class SensoreLuce extends SensoreModel {
 
   // funzione invocata dall'interfaccia quando si cambia il valore
   @override
-  void cambiaStato(int valore) {
+  void cambiaValore(int valore) {
     int locValore;
     if (valore > 0) {
       locValore = (valoreInt + 1) % 2;
     } else {
       locValore = valore;
     }
-    super.cambiaStato(locValore);
+    super.cambiaValore(locValore);
     // return jsonEncode({'id': _id, 'set': -1});
   }
 }

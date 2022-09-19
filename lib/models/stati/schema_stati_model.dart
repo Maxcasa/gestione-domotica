@@ -226,7 +226,7 @@ class SchemaStatiModel with ChangeNotifier {
 
   _onStatoChanged(String messageData) {
     Map<String, dynamic> jsonData = jsonDecode(messageData);
-    if (jsonData.containsKey('stato')) {
+    if (jsonData.containsKey('valore')) {
       List<StatoModel> localStati = [];
       if (jsonData['id'] == "*") {
         localStati.addAll(stati);
@@ -240,14 +240,14 @@ class SchemaStatiModel with ChangeNotifier {
           int findIndex = waitingStatoStato
               .indexWhere((element) => element['id'] == jsonData['id']);
           if (findIndex >= 0) {
-            waitingStatoStato[findIndex]['stato'] = jsonData['stato'];
+            waitingStatoStato[findIndex]['valore'] = jsonData['valore'];
           } else {
             waitingStatoStato.add(jsonData);
           }
         }
       }
       for (StatoModel localSensore in localStati) {
-        localSensore.valore = int.parse(jsonData['stato']);
+        localSensore.valore = int.parse(jsonData['valore']);
         int findIndex = waitingStatoStato
             .indexWhere((element) => element['id'] == jsonData['id']);
         if (findIndex >= 0) {
@@ -275,8 +275,8 @@ class SchemaStatiModel with ChangeNotifier {
 
   // _onStatoChanged(String messageData) {
   //   Map<String, dynamic> jsonData = jsonDecode(messageData);
-  //   if (jsonData.containsKey('stato')) {
-  //     switch (jsonData['stato']) {
+  //   if (jsonData.containsKey('valore')) {
+  //     switch (jsonData['valore']) {
   //       case "2":
   //         colore = Colors.yellow;
   //         icona = Icons.home_outlined;

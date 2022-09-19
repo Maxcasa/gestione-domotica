@@ -32,7 +32,7 @@ class Sensore extends StatelessWidget {
               color: sensore.colore, size: sensore.visualSize.toDouble()),
           label: Text(sensore.text),
           onPressed: () {
-            sensore.cambiaStato(1);
+            sensore.cambiaValore(1);
           },
           onLongPress: () {
             _menuOverlay = _MenuOverlay();
@@ -76,9 +76,9 @@ class Sensore extends StatelessWidget {
                           icon: const Icon(Icons.highlight_rounded),
                           onPressed: () {
                             if (sensore.abilitato) {
-                              sensore.cambiaStato(-1);
+                              sensore.cambiaValore(-1);
                             } else {
-                              sensore.cambiaStato(-1);
+                              sensore.cambiaValore(-1);
                             }
                           },
                         ),
@@ -86,9 +86,9 @@ class Sensore extends StatelessWidget {
                           icon: const Icon(Icons.handyman_rounded),
                           onPressed: () {
                             if (sensore.abilitato) {
-                              sensore.cambiaStato(-2);
+                              sensore.cambiaValore(-2);
                             } else {
-                              sensore.cambiaStato(-2);
+                              sensore.cambiaValore(-2);
                             }
                           },
                         ),
