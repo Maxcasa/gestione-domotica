@@ -3,6 +3,7 @@ import 'dart:convert';
 
 //import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:gestione_domotica/models/attivazioni/attivazione_model.dart';
 import 'package:gestione_domotica/models/sensori/sensori_layer.dart';
 import 'package:gestione_domotica/models/stati/stati_layer.dart';
 import 'package:gestione_domotica/models/timer/timer_attivazioni.dart';
@@ -50,14 +51,14 @@ class _StatoPageState extends State<StatoPage> {
           Positioned(
             top: 20.0,
             left: 20.0,
-            child:
-                visualizzaAttiviAllarme(stati, context,indexStato, 1, Icons.alarm_rounded),
+            child: visualizzaAttiviAllarme(
+                stati, context, indexStato, 0, Icons.alarm_rounded),
           ),
           Positioned(
             top: 20.0,
             right: 80.0,
             child: visualizzaAttiviAllarme(
-                stati, context,indexStato, 2, Icons.notifications_on_rounded),
+                stati, context, indexStato, 1, Icons.notifications_on_rounded),
           ),
           Center(
             child: visalizzaAllarme(stato),
@@ -169,20 +170,40 @@ class _StatoPageState extends State<StatoPage> {
       bool isSensoreInfissoAttivo = true;
       bool isSensorePresenza = false;
       bool isSensorePresenzaAttivo = true;
-      for (var sensore in schemaSensori.sensori) {
+      for (SensoreModel sensore in schemaSensori.sensori) {
         if (sensore is SensoreInfisso) {
-          isSensoreInfisso = true;
-          if (sensore.attiva & attivazione == 0) {
-            isSensoreInfissoAttivo = false;
+          if (sensore.attivazioni.isNotEmpty) {
+            isSensoreInfisso = true;
+            for (AttivazioneModel attivazioneModel in sensore.attivazioni) {
+              if (attivazioneModel.id == attivazione &&
+                  attivazioneModel.valore > 0) {
+                isSensoreInfissoAttivo = true;
+              }
+            }
+            // AttivazioneModel sensore.attivazioni.
+            // isSensoreInfissoAttivo = false;
           }
         }
         if (sensore is SensorePresenza) {
-          isSensorePresenza = true;
-          if (sensore.attiva & attivazione == 0) {
-            isSensorePresenzaAttivo = false;
+          if (sensore.attivazioni.isNotEmpty) {
+            isSensorePresenza = true;
+            for (AttivazioneModel attivazioneModel in sensore.attivazioni) {
+              if (attivazioneModel.id == attivazione &&
+                  attivazioneModel.valore > 0) {
+                isSensorePresenzaAttivo = true;
+              }
+            }
+            // AttivazioneModel sensore.attivazioni.
+            // isSensoreInfissoAttivo = false;
           }
         }
       }
+      // if (sensore is SensorePresenza) {
+      //   isSensorePresenza = true;
+      //   if (sensore.attiva & attivazione == 0) {
+      //     isSensorePresenzaAttivo = false;
+      //   }
+      // }
       return
           // RefreshIndicator(
           //     // reload page
@@ -206,14 +227,14 @@ class _StatoPageState extends State<StatoPage> {
                       isSensoreInfissoAttivo ? -attivazione : attivazione);
                 })
             : const SizedBox.shrink(),
-        (isSensoreInfisso && isSensorePresenza)
-                    ? TextButton( 
-                      child: Text(stati.stati[indexStato].operatori[0] == 0 ? '&&' : '||'),
-                onPressed: () {
-                  stati.toggleOperatore(indexStato, attivazione
-                      isSensoreInfissoAttivo ? -attivazione : attivazione);
-                })
-            : const SizedBox.shrink(),
+        // (isSensoreInfisso && isSensorePresenza)
+        //             ? TextButton(
+        //               child: Text(stati.stati[indexStato].operatori[0] == 0 ? '&&' : '||'),
+        //         onPressed: () {
+        //           stati.toggleOperatore(indexStato, attivazione
+        //               isSensoreInfissoAttivo ? -attivazione : attivazione);
+        //         })
+        //     : const SizedBox.shrink(),
         isSensorePresenza
             ? IconButton(
                 icon: Icon(Icons.directions_walk_rounded,

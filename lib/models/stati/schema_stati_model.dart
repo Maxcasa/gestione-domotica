@@ -266,8 +266,8 @@ class SchemaStatiModel with ChangeNotifier {
 
   Map<String, dynamic> toShortJson() {
     return {
-      'id': id,
-      'shortJ': stati
+      'i': id,
+      's': stati
           .map<Map<String, dynamic>>((stato) => stato.toShortJson())
           .toList(),
     };

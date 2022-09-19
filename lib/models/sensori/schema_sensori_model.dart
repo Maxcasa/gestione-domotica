@@ -356,8 +356,8 @@ class SchemaSensoriModel with ChangeNotifier {
 
   Map<String, dynamic> toShortJson() {
     return {
-      'id': id,
-      'shortJ': sensori
+      'i': id,
+      's': sensori
           .map<Map<String, dynamic>>((sensore) => sensore.toShortJson())
           .toList(),
     };

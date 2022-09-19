@@ -122,10 +122,12 @@ class _ConnectionIconState extends State<ConnectionIcon> {
           SchemaStatiModel schemaStatiModel = SchemaStatiModel(id: 0);
 
           multiMessageProvider.addMessage(
-              'request/set', json.encode(schemaStatiModel.toShortJson()), ['stati/get']);
+              'request/set',
+              '{"hj": ${json.encode(schemaStatiModel.toShortJson())}}',
+              ['stati/get']);
           multiMessageProvider.addMessage(
               'request/set',
-              json.encode(schemaSensoriModel.toShortJson()),
+              '{"hj": ${json.encode(schemaSensoriModel.toShortJson())}}',
               ['sensori/get']);
           break;
         case MqttCurrentConnectionState.DISCONNECTED:

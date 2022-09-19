@@ -150,15 +150,14 @@ class SensoreModel {
 
   Map<String, dynamic> toShortJson() {
     Map<String, dynamic> result = {
-      'valore': valoreInt,
+      'v': valoreInt,
       // 'abilitato': abilitato,
-      'attiva': attivazioni
-          .map<Map<String, dynamic>>((attivazione) => attivazione.toShortJson())
+      'a': attivazioni
+          .map<int>((attivazione) => attivazione.toShortJson())
           .toList()
     };
     return result;
   }
-
 
   void rimuovi() {
     if (azioneSensoreCallBack != null) {
