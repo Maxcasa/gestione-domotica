@@ -126,9 +126,9 @@ class StatoModel {
 
   Map<String, dynamic> toShortJson() {
     Map<String, dynamic> result = {
-      'valore': valoreInt,
+      'v': valoreInt,
       // 'abilitato': abilitato,
-      'timers': timers?.toShortJson()
+      't': timers?.toShortJson()
     };
     return result;
   }

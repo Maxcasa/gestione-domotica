@@ -60,13 +60,20 @@ class TimerAttivazione {
     };
   }
 
-  Map<String, dynamic> toShortJson() {
-    return {
-      'id': id,
-      'act': isActivated,
-      'valore': valore,
-      'max': maxTimers,
-      'time': timerInit
-    };
+  List<dynamic> toShortJson() {
+    return (isActivated ? timerInit : invertiLista(timerInit));
+  }
+
+  List<dynamic> invertiLista(elementi) {
+    if (elementi is List) {
+      for (dynamic element in elementi) {
+        if (element is int) {
+          element *= -1;
+        } else if (element is List) {
+          invertiLista(elementi);
+        }
+      }
+    }
+    return elementi;
   }
 }

@@ -88,13 +88,10 @@ class TimerAttivazioni with ChangeNotifier {
     };
   }
 
-  Map<String, dynamic> toShortJson() {
-    return {
-      'act': isActivated,
-      'hash': hashCode,
-      'timers':
-          timers.map<Map<String, dynamic>>((timer) => timer.toJson()).toList(),
-    };
+  List<dynamic> toShortJson() {
+    List<dynamic> shortJson = [isActivated];
+    shortJson.addAll(timers.map((timer) => timer.toShortJson()).toList());
+    return shortJson;
   }
 
   // void saveTimers() async {
