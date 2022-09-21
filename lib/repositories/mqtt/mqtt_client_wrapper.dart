@@ -155,15 +155,13 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
       //SecurityContext securityContext = SecurityContext.defaultContext;
       //if (remoteConnection!.caFile != null &&
       //    remoteConnection!.certDirBase != null) {
+      dynamic sslCa;
       if (remoteConnection!.caFile != null &&
           remoteConnection!.certDirBase != null) {
         try {
-          final sslCa = await File(
+          sslCa = await File(
                   '${remoteConnection!.certDirBase}${remoteConnection!.caFile}.pfx')
               .readAsBytes();
-          securityContext.setTrustedCertificatesBytes(sslCa.buffer.asInt8List(),
-              password: 'test');
-
           // securityContext.setClientAuthoritiesBytes(sslCa.buffer.asInt8List(),
           //     password: 'test');
         } catch (e) {
@@ -172,16 +170,41 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
           notifyListeners('connectionState.error');
           // client!.disconnect();
         }
+      } else {
+        sslCa = await rootBundle.load('assets/certs/ca/ca.pfx');
       }
+      if (sslCa != null) {
+        try {
+          securityContext.setTrustedCertificatesBytes(sslCa.buffer.asInt8List(),
+              password: 'test');
+        } catch (e) {
+          print('MQTTClientWrapper::client exception - $e');
+          connectionState = MqttCurrentConnectionState.ERROR_WHEN_CONNECTING;
+          notifyListeners('connectionState.error');
+          // client!.disconnect();
+        }
+      }
+      dynamic sslCert;
       if (remoteConnection!.certFile != null &&
           remoteConnection!.certDirBase != null) {
         //       remoteConnection!.caFile! +
         //       '.pem');
         //}
         try {
-          final sslCert = await File(
+          sslCert = await File(
                   '${remoteConnection!.certDirBase}${remoteConnection!.certFile}.pfx')
               .readAsBytes();
+        } catch (e) {
+          print('MQTTClientWrapper::client exception - $e');
+          connectionState = MqttCurrentConnectionState.ERROR_WHEN_CONNECTING;
+          notifyListeners('connectionState.error');
+          // client!.disconnect();
+        }
+      } else {
+        sslCert = await rootBundle.load('assets/certs/client/client.pfx');
+      }
+      if (sslCert != null) {
+        try {
           securityContext.useCertificateChainBytes(sslCert.buffer.asInt8List());
           //    password: 'HostPass997');
           // securityContext
@@ -194,14 +217,30 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
           // client!.disconnect();
         }
       }
-
+      dynamic sslKey;
       if (remoteConnection!.keyFile != null &&
           remoteConnection!.certDirBase != null) {
         try {
-          final sslKey = await File(
+          sslKey = await File(
                   '${remoteConnection!.certDirBase}${remoteConnection!.keyFile}.key')
               .readAsBytes();
+
+          //, password: 'HostPass997');
+        } catch (e) {
+          print('MQTTClientWrapper::client exception - $e');
+          connectionState = MqttCurrentConnectionState.ERROR_WHEN_CONNECTING;
+          notifyListeners('connectionState.error');
+          // client!.disconnect();
+        }
+      } else {
+        sslKey = await rootBundle.load('assets/certs/client/client.key');
+      }
+      if (sslKey != null) {
+        try {
           securityContext.usePrivateKeyBytes(sslKey.buffer.asInt8List());
+          //    password: 'HostPass997');
+          // securityContext
+          //     .setTrustedCertificatesBytes(sslCert.buffer.asInt8List());
           //, password: 'HostPass997');
         } catch (e) {
           print('MQTTClientWrapper::client exception - $e');

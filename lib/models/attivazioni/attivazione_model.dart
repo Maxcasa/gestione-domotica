@@ -72,7 +72,7 @@ class AttivazioneModel {
   // conversione Json
   AttivazioneModel.fromJson(Map<String, dynamic> json)
       : id = json['id'],
-        nome = json['nome'],
+        nome = json['nome'] ?? 'Generico',
         valoreInt = json['valore'] ?? 0,
         icona = json['icona'] != null
             ? IconData(json['icona']['codePoint'],

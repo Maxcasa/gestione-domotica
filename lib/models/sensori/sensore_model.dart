@@ -8,9 +8,9 @@ import 'package:gestione_domotica/models/sensori/sensori_layer.dart';
 import 'package:gestione_domotica/models/hex_color.dart';
 
 final factories = <String, Object Function(int id)>{
-  'Attivazione': (id) => AttivazioneModel(id: id),
-  'Allarme': (id) => AttivazioneAllarme(id: id),
-  'Notifica': (id) => AttivazioneNotifica(id: id),
+  '-1': (id) => AttivazioneModel(id: id),
+  '0': (id) => AttivazioneAllarme(id: id),
+  '1': (id) => AttivazioneNotifica(id: id),
 };
 
 /// Classe che definisce il generico sensore
@@ -85,14 +85,14 @@ class SensoreModel {
   void _getAttivazione(List arrayAttivazioni) {
     attivazioni = [];
     for (var element in arrayAttivazioni) {
-      String tipo = element['nome'] ?? 'Attivazione';
+      int id = element['id'] ?? 0;
       //int id = element['id'];
-      if (factories.containsKey(tipo)) {
-        if (tipo == 'Attivazione') {
+      if (factories.containsKey(id.toString())) {
+        if (id == -1) {
           attivazioni.add(AttivazioneModel.fromJson(element));
-        } else if (tipo == 'Allarme') {
+        } else if (id == 0) {
           attivazioni.add(AttivazioneAllarme.fromJson(element));
-        } else if (tipo == 'Notifica') {
+        } else if (id == 1) {
           attivazioni.add(AttivazioneNotifica.fromJson(element));
         }
         // attivazioni.last

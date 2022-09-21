@@ -122,11 +122,11 @@ class _ConnectionIconState extends State<ConnectionIcon> {
           SchemaStatiModel schemaStatiModel = SchemaStatiModel(id: 0);
 
           multiMessageProvider.addMessage(
-              'request/set',
+              'stati/set',
               '{"hj": ${json.encode(schemaStatiModel.toShortJson())}}',
               ['stati/get']);
           multiMessageProvider.addMessage(
-              'request/set',
+              'sensori/set',
               '{"hj": ${json.encode(schemaSensoriModel.toShortJson())}}',
               ['sensori/get']);
           break;

@@ -99,10 +99,14 @@ class SchemaRepository extends ChangeNotifier {
                 '${remoteConnection!.certDirBase}${remoteConnection!.keyFile}.key');
           }
         } else if (!kIsWeb) {
-          schemaTree = await _getJsonFromLocal(
-              '${remoteConnection!.certDirBase}domo_${remoteConnection!.connectionName}.json');
-          _sensoriBack = await _getImageFromLocal(
-              '${remoteConnection!.certDirBase}domo_${remoteConnection!.connectionName}.jpg');
+          String stringSchemaTree =
+              await rootBundle.loadString('assets/json/domo_conf.json');
+          schemaTree = json.decode(stringSchemaTree);
+          _sensoriBack = Image.asset('assets/images/domo_conf.jpg');
+          // schemaTree = await _getJsonFromLocal(
+          //     '${remoteConnection!.certDirBase}domo_${remoteConnection!.connectionName}.json');
+          // _sensoriBack = await _getImageFromLocal(
+          //     '${remoteConnection!.certDirBase}domo_${remoteConnection!.connectionName}.jpg');
         }
       }
       reload = false;
