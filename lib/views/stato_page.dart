@@ -167,9 +167,9 @@ class _StatoPageState extends State<StatoPage> {
     return Consumer<SchemaSensoriModel>(builder: (BuildContext context,
         SchemaSensoriModel schemaSensori, Widget? child) {
       bool isSensoreInfisso = false;
-      bool isSensoreInfissoAttivo = true;
+      bool isSensoreInfissoAttivo = false;
       bool isSensorePresenza = false;
-      bool isSensorePresenzaAttivo = true;
+      bool isSensorePresenzaAttivo = false;
       for (SensoreModel sensore in schemaSensori.sensori) {
         if (sensore is SensoreInfisso) {
           if (sensore.attivazioni.isNotEmpty) {
@@ -223,8 +223,8 @@ class _StatoPageState extends State<StatoPage> {
                     color:
                         (isSensoreInfissoAttivo) ? Colors.red : Colors.black),
                 onPressed: () {
-                  stati.attivaSensori('SensoreInfisso',
-                      isSensoreInfissoAttivo ? -attivazione : attivazione);
+                  stati.attivaSensori(
+                      'SensoreInfisso', attivazione, !isSensoreInfissoAttivo);
                 })
             : const SizedBox.shrink(),
         // (isSensoreInfisso && isSensorePresenza)
@@ -242,8 +242,8 @@ class _StatoPageState extends State<StatoPage> {
                     color:
                         (isSensorePresenzaAttivo) ? Colors.red : Colors.black),
                 onPressed: () {
-                  stati.attivaSensori('SensorePresenza',
-                      isSensorePresenzaAttivo ? -attivazione : attivazione);
+                  stati.attivaSensori(
+                      'SensorePresenza', attivazione, !isSensorePresenzaAttivo);
                 })
             : const SizedBox.shrink(),
       ]);

@@ -191,70 +191,79 @@ class SchemaSensoriModel with ChangeNotifier {
   _onSensorChanged(String messageData) {
     Map<String, dynamic> jsonData = jsonDecode(messageData);
     List<SensoreModel> localSensori = [];
-    if (jsonData['id'] == "*") {
-      localSensori.addAll(sensori);
-    } else if (int.tryParse(jsonData['id']) != null) {
-      // se passo un id intero
-      if (getSensore(int.parse(jsonData['id'])) != null) {
-        // se è l'id è quello di un sensore registrato
-        localSensori.add(getSensore(int.parse(jsonData['id']))!);
+    if (jsonData.containsKey('id')) {
+      if (jsonData['id'] == "*") {
+        localSensori.addAll(sensori);
       } else {
-        // se l'id non è registrato metto il comando in attesa
-        int findIndex = waitingSensoreStato
-            .indexWhere((element) => element['id'] == jsonData['id']);
-        if (findIndex >= 0) {
+        if (jsonData['id'] is String) {
+          jsonData['id'] = int.parse(jsonData['id']);
+        }
+        // se passo un id intero
+        if (getSensore(jsonData['id']) != null) {
+          // se è l'id è quello di un sensore registrato
+          localSensori.add(getSensore(jsonData['id'])!);
+        } else {
+          // se l'id non è registrato metto il comando in attesa
+          int findIndex = waitingSensoreStato
+              .indexWhere((element) => element['id'] == jsonData['id']);
+          if (findIndex >= 0) {
+            if (jsonData.containsKey('valore')) {
+              waitingSensoreStato[findIndex]['valore'] = jsonData['valore'];
+            }
+            if (jsonData.containsKey('attiva')) {
+              waitingSensoreStato[findIndex]['attiva'] = jsonData['attiva'];
+            }
+            if (jsonData.containsKey('com')) {
+              waitingSensoreStato[findIndex]['com'] = jsonData['com'];
+            }
+          } else {
+            waitingSensoreStato.add(jsonData);
+          }
+        }
+      }
+      if (localSensori.isNotEmpty) {
+        for (SensoreModel localSensore in localSensori) {
           if (jsonData.containsKey('valore')) {
-            waitingSensoreStato[findIndex]['valore'] = jsonData['valore'];
+            try {
+              localSensore.valore = jsonData['valore'];
+            } catch (e) {
+              localSensore.valore = int.parse(jsonData['valore']);
+            }
           }
           if (jsonData.containsKey('attiva')) {
-            waitingSensoreStato[findIndex]['attiva'] = jsonData['attiva'];
+            _onAttivazioneChange(localSensore, jsonData['attiva']);
           }
           if (jsonData.containsKey('com')) {
-            waitingSensoreStato[findIndex]['com'] = jsonData['com'];
+            // Map<String, dynamic> messageJson = {};
+            // if (jsonData['com'] == 'shotrJ') {
+            //     messageJson['status'] = 'sensori';
+            //     List listSensorHash = [];
+            //     for (SensoreModel localSensore in localSensori) {
+            //       Map<String, dynamic> sensorHash = {
+            //         'id': localSensore.id,
+            //         'hash': localSensore.hashCode
+            //       };
+            //       listSensorHash.add(sensorHash);
+            //     }
+            //     if (listSensorHash.isNotEmpty) {
+            //       messageJson['hash'] = listSensorHash;
+            //       multiMessageProvider.addMessage(
+            //           'request/set', json.encode(messageJson), ['sensori/get']);
+            //     }
+            //   }
           }
-        } else {
-          waitingSensoreStato.add(jsonData);
-        }
-      }
-    }
-    if (localSensori.isNotEmpty) {
-      for (SensoreModel localSensore in localSensori) {
-        if (jsonData.containsKey('valore')) {
-          localSensore.valore = int.parse(jsonData['valore']);
-        }
-        if (jsonData.containsKey('attiva')) {
-          localSensore.attivazioni = jsonData['attiva'];
-        }
-        if (jsonData.containsKey('com')) {
-          // Map<String, dynamic> messageJson = {};
-          // if (jsonData['com'] == 'shotrJ') {
-          //     messageJson['status'] = 'sensori';
-          //     List listSensorHash = [];
-          //     for (SensoreModel localSensore in localSensori) {
-          //       Map<String, dynamic> sensorHash = {
-          //         'id': localSensore.id,
-          //         'hash': localSensore.hashCode
-          //       };
-          //       listSensorHash.add(sensorHash);
-          //     }
-          //     if (listSensorHash.isNotEmpty) {
-          //       messageJson['hash'] = listSensorHash;
-          //       multiMessageProvider.addMessage(
-          //           'request/set', json.encode(messageJson), ['sensori/get']);
-          //     }
-          //   }
-        }
 
-        // if (localSensore is SensoreSirena && jsonData.containsKey('azion')) {
-        //   localSensore.azionamenti = int.parse(jsonData['azion']);
-        // }
-        int findIndex = waitingSensoreStato
-            .indexWhere((element) => element['id'] == jsonData['id']);
-        if (findIndex >= 0) {
-          waitingSensoreStato.removeAt(findIndex);
+          // if (localSensore is SensoreSirena && jsonData.containsKey('azion')) {
+          //   localSensore.azionamenti = int.parse(jsonData['azion']);
+          // }
+          int findIndex = waitingSensoreStato
+              .indexWhere((element) => element['id'] == jsonData['id']);
+          if (findIndex >= 0) {
+            waitingSensoreStato.removeAt(findIndex);
+          }
         }
+        notifyListeners();
       }
-      notifyListeners();
     }
     // if (jsonData.containsKey('set')) {
     //   getSensore(jsonData['id']).valore = jsonData['set'];
@@ -269,6 +278,24 @@ class SchemaSensoriModel with ChangeNotifier {
     //   saveSchemaSensori();
     //   notifyListeners();
     // }
+  }
+
+  void _onAttivazioneChange(SensoreModel sensore, dynamic jsonData,
+      {int index = 0}) {
+    if (jsonData is List) {
+      for (int i = 0; i < jsonData.length; i++) {
+        _onAttivazioneChange(sensore, jsonData[i], index: i);
+      }
+    } else if (jsonData is Map) {
+      int findIndex = sensore.attivazioni
+          .indexWhere((element) => element.id == jsonData['id']);
+      if (findIndex >= 0) {
+        sensore.attivazioni[findIndex]
+            .setFromJson(jsonData as Map<String, dynamic>);
+      }
+    } else if (jsonData is int) {
+      sensore.attivazioni[index].valoreInt = jsonData;
+    }
   }
 
   void azioneSensore(int id, AzioneSensore azione, String messageData) {

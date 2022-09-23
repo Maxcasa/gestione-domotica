@@ -29,7 +29,14 @@ final factories = <String, Object Function(int id)>{
 // ignore: mixin_inherits_from_not_object
 class SchemaStatiModel with ChangeNotifier {
   // costruttori
-  SchemaStatiModel({required this.id})
+  static final SchemaStatiModel _instance = SchemaStatiModel._internal();
+
+  factory SchemaStatiModel() {
+    return _instance;
+  }
+
+  // costruttori
+  SchemaStatiModel._internal({this.id = 0})
       : this.nome = topicSurName,
         super() {
     _setupMqtt();
@@ -258,10 +265,13 @@ class SchemaStatiModel with ChangeNotifier {
     }
   }
 
-  void attivaSensori(String tipoSensore, int attivazione) {
-    String messageData = '{"attiva": "$attivazione", "tipo": "$tipoSensore"}';
-    mqttClientWrapper!
-        .publishMessage(topicSurName: 'request/set', messageData: messageData);
+  void attivaSensori(String tipoSensore, int attivazione, bool stato) {
+    String messageData =
+        '{"id": $tipoSensore, "attiva": [$attivazione, $stato]}';
+    mqttClientWrapper!.publishMessage(
+        topicSurName: '${topicSurName}/set', messageData: messageData);
+    // mqttClientWrapper!
+    //     .publishMessage(topicSurName: 'request/set', messageData: messageData);
   }
 
   Map<String, dynamic> toShortJson() {

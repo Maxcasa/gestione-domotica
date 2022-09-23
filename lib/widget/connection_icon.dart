@@ -119,7 +119,7 @@ class _ConnectionIconState extends State<ConnectionIcon> {
           }
           MultiMessageProvider multiMessageProvider = MultiMessageProvider();
           SchemaSensoriModel schemaSensoriModel = SchemaSensoriModel();
-          SchemaStatiModel schemaStatiModel = SchemaStatiModel(id: 0);
+          SchemaStatiModel schemaStatiModel = SchemaStatiModel();
 
           multiMessageProvider.addMessage(
               'stati/set',

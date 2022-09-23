@@ -2,9 +2,9 @@
     "sensori": [
         {
             "id": 0,
-            "in": "0x00124b0022680676",
+            "in": "0x00124b002265b3c1",
             "out": "s_0",
-            "nome": "Camera Letto",
+            "nome": "TEST",
             "valore": 0,
             "tipo": "SensoreInfisso",
             "posLeft": "280",
@@ -23,95 +23,11 @@
         },
         {
             "id": 1,
-            "in": "0x00124b002265a833",
-            "out": "s_1",
-            "nome": "Cameretta",
-            "valore": 0,
-            "tipo": "SensoreInfisso",
-            "posLeft": "280",
-            "posTop": "190",
-            "abilitato": true,
-            "attiva": [
-                {
-                    "id": 0,
-                    "valore": 0
-                },
-                {
-                    "id": 1,
-                    "valore": 0
-                }
-            ]
-        },
-        {
-            "id": 2,
-            "in": "0x00124b00226be2ea",
-            "out": "s_2",
-            "nome": "Cucina",
-            "valore": 0,
-            "tipo": "SensoreInfisso",
-            "posLeft": "280",
-            "posTop": "275",
-            "abilitato": true,
-            "attiva": [
-                {
-                    "id": 0,
-                    "valore": 0
-                },
-                {
-                    "id": 1,
-                    "valore": 0
-                }
-            ]
-        },
-        {
-            "id": 3,
-            "in": "0x00124b00226bd08a",
-            "out": "s_3",
-            "nome": "Soggiorno Porta",
-            "valore": 0,
-            "tipo": "SensoreInfisso",
-            "posLeft": "210",
-            "posTop": "400",
-            "abilitato": true,
-            "attiva": [
-                {
-                    "id": 0,
-                    "valore": 0
-                },
-                {
-                    "id": 1,
-                    "valore": 0
-                }
-            ]
-        },
-        {
-            "id": 4,
-            "in": "0x00124b002241aa07",
-            "out": "s_4",
-            "nome": "Soggiorno Finestra",
-            "valore": 0,
-            "tipo": "SensoreInfisso",
-            "posLeft": "150",
-            "posTop": "460",
-            "abilitato": true,
-            "attiva": [
-                {
-                    "id": 0,
-                    "valore": 0
-                },
-                {
-                    "id": 1,
-                    "valore": 0
-                }
-            ]
-        },
-        {
-            "id": 5,
             "in": "0x00124b0023ae48e4",
-            "out": "sirena_0",
-            "nome": "Sirena esterna",
+            "out": "sirena_1",
+            "nome": "Sirena TEST",
             "valore": 0,
-            "tipo": "Sirena",
+            "tipo": "Sirena_2",
             "posLeft": "290",
             "posTop": "245",
             "abilitato": true,
@@ -127,35 +43,14 @@
             ]
         },
         {
-            "id": 6,
-            "in": "0x00124b00226bde22",
-            "out": "s_5",
-            "nome": "Bagno",
+            "id": 2,
+            "in": "0x00124b00226af069",
+            "out": "presenza_1",
+            "nome": "Sensore presenza",
             "valore": 0,
-            "tipo": "SensoreInfisso",
-            "posLeft": "280",
-            "posTop": "135",
-            "abilitato": true,
-            "attiva": [
-                {
-                    "id": 0,
-                    "valore": 0
-                },
-                {
-                    "id": 1,
-                    "valore": 0
-                }
-            ]
-        },
-        {
-            "id": 7,
-            "in": "0x00124b002265b3c1",
-            "out": "s_6",
-            "nome": "Test",
-            "valore": 0,
-            "tipo": "SensoreInfisso",
-            "posLeft": "10",
-            "posTop": "10",
+            "tipo": "SensorePresenza",
+            "posLeft": "150",
+            "posTop": "150",
             "abilitato": true,
             "attiva": [
                 {
@@ -196,23 +91,11 @@
             "in": "a_in",
             "out": "a_out",
             "nome": "Allarme",
-            "valore": 0,
+            "valore": 1,
+            "tipo": "StatoAllarme",
             "abilitato": true,
-            "oper": [
-                0,
-                0
-            ],
-            "hash": 0,
-            "timers": [
-                {
-                    "id": 0,
-                    "act": false,
-                    "valore": 1,
-                    "start": 10,
-                    "end": 50
-                }
-            ],
-            "rf_code": []
+            "act": true,
+            "hash": 0
         }
     ]
 }

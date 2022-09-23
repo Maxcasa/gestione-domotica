@@ -82,6 +82,16 @@ class AttivazioneModel {
             ? HexColor.fromHex(json['colore'])
             : Colors.black;
 
+  setFromJson(Map<String, dynamic> json) {
+    nome = json['nome'] ?? nome;
+    valoreInt = json['valore'] ?? valoreInt;
+    icona = json['icona'] != null
+        ? IconData(json['icona']['codePoint'],
+            fontFamily: json['icona']['fontFamily'])
+        : icona;
+    colore = json['colore'] != null ? HexColor.fromHex(json['colore']) : colore;
+  }
+
   Map<String, dynamic> toJson() {
     Map<String, dynamic> result = {
       'id': id,

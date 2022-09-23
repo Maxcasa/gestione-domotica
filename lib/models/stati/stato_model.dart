@@ -128,8 +128,11 @@ class StatoModel {
     Map<String, dynamic> result = {
       'v': valoreInt,
       // 'abilitato': abilitato,
-      't': timers?.toShortJson()
+      //'t': timers?.toShortJson()
     };
+    if (timers != null && timers!.timers.isNotEmpty) {
+      result['t'] = timers?.toShortJson();
+    }
     return result;
   }
 

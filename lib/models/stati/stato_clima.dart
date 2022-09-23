@@ -96,7 +96,7 @@ class StatoClima extends StatoModel {
       locValore += valore;
       locValore = locValore > 2 ? 0 : locValore;
     }
-    String messaggio = json.encode({'id': id, 'stato': locValore});
+    String messaggio = json.encode({'id': id, 'valore': locValore});
     if (azioneStatoCallBack != null) {
       azioneStatoCallBack!(id, AzioneStato.imposta, messaggio);
     }

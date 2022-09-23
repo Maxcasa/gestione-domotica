@@ -98,7 +98,7 @@ Future<void> main() async {
   //SchemaSensori(id: 0);
   runApp(MultiProvider(providers: [
     ChangeNotifierProvider<SchemaStatiModel>(
-      create: (context) => SchemaStatiModel(id: 0),
+      create: (context) => SchemaStatiModel(),
     ),
     ChangeNotifierProvider<MainDrawerProvider>(
       create: (context) => MainDrawerProvider('assets/json/drawer_list.json'),
