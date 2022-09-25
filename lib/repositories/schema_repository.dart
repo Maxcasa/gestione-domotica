@@ -78,6 +78,21 @@ class SchemaRepository extends ChangeNotifier {
         schemaTree = {};
         _sensoriBack = null;
         final directory = await getApplicationDocumentsDirectory();
+        // carico il dato local se c'è
+        if (!kIsWeb) {
+          schemaTree = await _getJsonFromLocal(
+              '${remoteConnection!.certDirBase}domo_${remoteConnection!.connectionName}.json');
+          _sensoriBack = await _getImageFromLocal(
+              '${remoteConnection!.certDirBase}domo_${remoteConnection!.connectionName}.jpg');
+          if (schemaTree == {}) {
+            String stringSchemaTree =
+                await rootBundle.loadString('assets/json/domo_conf.json');
+            schemaTree = json.decode(stringSchemaTree);
+          }
+          _sensoriBack ??= Image.asset('assets/images/domo_conf.jpg');
+        }
+        notifyListeners();
+        // se c'è il remote carico anche da li
         if (await remoteConnection!.checkLocal()) {
           // String? localWiFi = await remoteConnection!.getWifiName();
           // //  await info.getWifiName();
@@ -98,19 +113,10 @@ class SchemaRepository extends ChangeNotifier {
             await _getFileFromRemote('keyFile',
                 '${remoteConnection!.certDirBase}${remoteConnection!.keyFile}.key');
           }
-        } else if (!kIsWeb) {
-          String stringSchemaTree =
-              await rootBundle.loadString('assets/json/domo_conf.json');
-          schemaTree = json.decode(stringSchemaTree);
-          _sensoriBack = Image.asset('assets/images/domo_conf.jpg');
-          // schemaTree = await _getJsonFromLocal(
-          //     '${remoteConnection!.certDirBase}domo_${remoteConnection!.connectionName}.json');
-          // _sensoriBack = await _getImageFromLocal(
-          //     '${remoteConnection!.certDirBase}domo_${remoteConnection!.connectionName}.jpg');
+          notifyListeners();
         }
+        reload = false;
       }
-      reload = false;
-      notifyListeners();
     }
   }
 
