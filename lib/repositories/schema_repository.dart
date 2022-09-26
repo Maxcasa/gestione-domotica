@@ -206,8 +206,9 @@ class SchemaRepository extends ChangeNotifier {
     }
   }
 
-  Future<void> saveSchema() async {
+  Future<void> saveSchema(Map<String, dynamic> schemaToMerge) async {
     final directory = await getApplicationDocumentsDirectory();
+    schemaTree = {...schemaTree, ...schemaToMerge};
     await saveJson(json.encode(schemaTree),
         '${directory.path}/domo_${remoteConnection!.connectionName}.json');
   }
@@ -220,11 +221,11 @@ class SchemaRepository extends ChangeNotifier {
     }
   }
 
-  Future<void> saveBackImage() async {
-    final directory = await getApplicationDocumentsDirectory();
-    await saveFile(_sensoriBack,
-        '${remoteConnection!.certDirBase}domo_${remoteConnection!.connectionName}.jpg');
-  }
+  // Future<void> saveBackImage() async {
+  //   final directory = await getApplicationDocumentsDirectory();
+  //   await saveFile(_sensoriBack,
+  //       '${remoteConnection!.certDirBase}domo_${remoteConnection!.connectionName}.jpg');
+  // }
 
   Future<void> saveFile(imageData, String fileName) async {
     if (!kIsWeb) {

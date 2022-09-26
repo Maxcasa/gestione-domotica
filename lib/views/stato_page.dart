@@ -223,7 +223,7 @@ class _StatoPageState extends State<StatoPage> {
                     color:
                         (isSensoreInfissoAttivo) ? Colors.red : Colors.black),
                 onPressed: () {
-                  stati.attivaSensori(
+                  schemaSensori.attivaSensori(
                       'SensoreInfisso', attivazione, !isSensoreInfissoAttivo);
                 })
             : const SizedBox.shrink(),
@@ -242,7 +242,7 @@ class _StatoPageState extends State<StatoPage> {
                     color:
                         (isSensorePresenzaAttivo) ? Colors.red : Colors.black),
                 onPressed: () {
-                  stati.attivaSensori(
+                  schemaSensori.attivaSensori(
                       'SensorePresenza', attivazione, !isSensorePresenzaAttivo);
                 })
             : const SizedBox.shrink(),

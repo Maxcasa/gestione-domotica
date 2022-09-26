@@ -244,15 +244,18 @@ class SchemaStatiModel with ChangeNotifier {
 
   _onStatoChanged(String messageData) {
     Map<String, dynamic> jsonData = jsonDecode(messageData);
-    if (jsonData.containsKey('valore')) {
+    if (jsonData.containsKey('id')) {
       List<StatoModel> localStati = [];
       if (jsonData['id'] == "*") {
         localStati.addAll(stati);
-      } else if (int.tryParse(jsonData['id']) != null) {
+      } else {
+        if (jsonData['id'] is String) {
+          jsonData['id'] = int.parse(jsonData['id']);
+        }
         // se passo un id intero
-        if (getStato(int.parse(jsonData['id'])) != null) {
+        if (getStato(jsonData['id']) != null) {
           // se è l'id è quello di un sensore registrato
-          localStati.add(getStato(int.parse(jsonData['id']))!);
+          localStati.add(getStato(jsonData['id'])!);
         } else {
           // se l'id non è registrato metto il comando in attesa
           int findIndex = waitingStatoStato
@@ -264,30 +267,33 @@ class SchemaStatiModel with ChangeNotifier {
           }
         }
       }
-      for (StatoModel localSensore in localStati) {
-        localSensore.valore = int.parse(jsonData['valore']);
-        int findIndex = waitingStatoStato
-            .indexWhere((element) => element['id'] == jsonData['id']);
-        if (findIndex >= 0) {
-          waitingStatoStato.removeAt(findIndex);
+      if (localStati.isNotEmpty) {
+        for (StatoModel localStati in localStati) {
+          if (jsonData.containsKey('valore')) {
+            try {
+              localStati.valore = jsonData['valore'];
+            } catch (e) {
+              localStati.valore = int.parse(jsonData['valore']);
+            }
+          }
+          int findIndex = waitingStatoStato
+              .indexWhere((element) => element['id'] == jsonData['id']);
+          if (findIndex >= 0) {
+            waitingStatoStato.removeAt(findIndex);
+          }
         }
         notifyListeners();
       }
     }
   }
 
-  void attivaSensori(String tipoSensore, int attivazione, bool stato) {
-    String messageData =
-        '{"id": $tipoSensore, "attiva": [$attivazione, $stato]}';
-    mqttClientWrapper!.publishMessage(
-        topicSurName: '${topicSurName}/set', messageData: messageData);
-    // mqttClientWrapper!
-    //     .publishMessage(topicSurName: 'request/set', messageData: messageData);
-  }
-
   //funzione per salvare lo schema
   void saveSchema() {
-    schemaRepository?.saveSchema();
+    schemaRepository?.saveSchema({
+      topicSurName: stati
+          .map<Map<String, dynamic>>((stato) => stato.toShortJson())
+          .toList()
+    });
   }
 
   Map<String, dynamic> toShortJson() {

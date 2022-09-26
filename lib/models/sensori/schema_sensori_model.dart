@@ -309,6 +309,15 @@ class SchemaSensoriModel with ChangeNotifier {
         topicSurName: '${topicSurName}/set', messageData: messageData);
   }
 
+  void attivaSensori(String tipoSensore, int attivazione, bool stato) {
+    String messageData =
+        '{"id": "$tipoSensore", "attiva": [$attivazione, $stato]}';
+    mqttClientWrapper!.publishMessage(
+        topicSurName: '${topicSurName}/set', messageData: messageData);
+    // mqttClientWrapper!
+    //     .publishMessage(topicSurName: 'request/set', messageData: messageData);
+  }
+
   int getMaxIdSensore() {
     // final ids = _storage.keys.toList()..sort();
     // final id = (ids.length == 0) ? 1 : ids.last + 1;
@@ -379,8 +388,12 @@ class SchemaSensoriModel with ChangeNotifier {
 
   //funzione per salvare lo schema
   void saveSchema() {
-    schemaRepository?.saveSchema();
-    schemaRepository?.saveBackImage();
+    schemaRepository?.saveSchema({
+      topicSurName: sensori
+          .map<Map<String, dynamic>>((stato) => stato.toShortJson())
+          .toList()
+    });
+    //schemaRepository?.saveBackImage();
   }
 
   // conversione Json

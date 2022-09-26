@@ -79,6 +79,8 @@ class SensoreModel {
         abilitato = json['abilitato'] ?? true {
     if (json.containsKey('attiva') && json['attiva'] is List) {
       _getAttivazione(json['attiva']);
+    } else if (json.containsKey('attivazione') && json['attivazione'] is List) {
+      _getAttivazione(json['attivazione']);
     }
   }
 
