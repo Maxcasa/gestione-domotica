@@ -75,6 +75,7 @@ class SchemaSensoriModel with ChangeNotifier {
   List<Map<String, dynamic>> waitingSensoreStato = [];
   KeepAliveProvider? keepAliveProvider;
   MultiMessageProvider multiMessageProvider = MultiMessageProvider();
+  bool statusRequested = false;
 
   // getter e setter
   SensoreModel? getSensore(id) {
@@ -138,6 +139,11 @@ class SchemaSensoriModel with ChangeNotifier {
         }
         // mqttClientWrapper!.publishMessage(
         //     topicSurName: topicSurName, messageData: 'get/status');
+        print('SchemaSensoriModel:: sensori caricati');
+        // Se è il caso richiedo lo stato
+        if (statusRequested) {
+          requestStatus();
+        }
       }
     }
     _consumeWaitingSensore();
@@ -359,6 +365,22 @@ class SchemaSensoriModel with ChangeNotifier {
     //   }
     //   notifyListeners();
     // }
+  }
+
+  void requestStatus() {
+    if (sensori.isNotEmpty) {
+      multiMessageProvider.addMessage('sensori/set',
+          '{"hj": ${json.encode(toShortJson())}}', ['sensori/get']);
+      statusRequested = false;
+    } else {
+      statusRequested = true;
+    }
+  }
+
+  //funzione per salvare lo schema
+  void saveSchema() {
+    schemaRepository?.saveSchema();
+    schemaRepository?.saveBackImage();
   }
 
   // conversione Json

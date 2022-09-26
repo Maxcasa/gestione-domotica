@@ -206,12 +206,24 @@ class SchemaRepository extends ChangeNotifier {
     }
   }
 
+  Future<void> saveSchema() async {
+    final directory = await getApplicationDocumentsDirectory();
+    await saveJson(json.encode(schemaTree),
+        '${directory.path}/domo_${remoteConnection!.connectionName}.json');
+  }
+
   Future<void> saveJson(schemaData, String fileName) async {
     if (!kIsWeb) {
       final File file = File(fileName);
       String stringToWrite = schemaData;
       await file.writeAsString(stringToWrite);
     }
+  }
+
+  Future<void> saveBackImage() async {
+    final directory = await getApplicationDocumentsDirectory();
+    await saveFile(_sensoriBack,
+        '${remoteConnection!.certDirBase}domo_${remoteConnection!.connectionName}.jpg');
   }
 
   Future<void> saveFile(imageData, String fileName) async {

@@ -6,6 +6,7 @@ import 'package:gestione_domotica/models/timer/timer_attivazioni.dart';
 import 'package:gestione_domotica/repositories/keep_alive_provider.dart';
 import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
 import 'package:flutter/material.dart';
+import 'package:gestione_domotica/repositories/mqtt/multi_message_provider.dart';
 //import 'package:gestione_domotica/repositories/multi_message_provider.dart';
 import 'package:gestione_domotica/repositories/schema_repository.dart';
 import 'package:gestione_domotica/models/hex_color.dart';
@@ -46,7 +47,7 @@ class SchemaStatiModel with ChangeNotifier {
     if (schemaRepository != null) {
       _getDati();
     }
-    getStatus();
+    //getStatus();
     // timerRepository = TimersRepository();
     // timerRepository!.addListener(_getTimer);
     // if (timerRepository != null) {
@@ -76,6 +77,8 @@ class SchemaStatiModel with ChangeNotifier {
   String _nome = '';
   List<Map<String, dynamic>> waitingStatoStato = [];
   KeepAliveProvider? keepAliveProvider;
+  MultiMessageProvider multiMessageProvider = MultiMessageProvider();
+  bool statusRequested = false;
 
   // final log = logger(SchemaStatiModel);
 
@@ -112,11 +115,14 @@ class SchemaStatiModel with ChangeNotifier {
   //   timer = timerRepository!.getTimers('stati');
   // }
 
-  void getStatus() {
-    // MultiMessageProvider multiMessageProvider = MultiMessageProvider();
-    // log.v("Creo lo Stato");
-    // multiMessageProvider
-    //     .addMessage('request/set', "{\"status\": \"stati\"}", ['stati/get']);
+  void requestStatus() {
+    if (stati.isNotEmpty) {
+      multiMessageProvider.addMessage(
+          'stati/set', '{"hj": ${json.encode(toShortJson())}}', ['stati/get']);
+      statusRequested = false;
+    } else {
+      statusRequested = true;
+    }
   }
 
   // Future<void> _getSchemaAllarme() async {
@@ -168,6 +174,11 @@ class SchemaStatiModel with ChangeNotifier {
         }
         // mqttClientWrapper!.publishMessage(
         //     topicSurName: topicSurName, messageData: 'get/status');
+      }
+      print('SchemaStatiModel:: stati caricati');
+      // Se è il caso richiedo lo stato
+      if (statusRequested) {
+        requestStatus();
       }
     }
     _consumeWaitingStato();
@@ -272,6 +283,11 @@ class SchemaStatiModel with ChangeNotifier {
         topicSurName: '${topicSurName}/set', messageData: messageData);
     // mqttClientWrapper!
     //     .publishMessage(topicSurName: 'request/set', messageData: messageData);
+  }
+
+  //funzione per salvare lo schema
+  void saveSchema() {
+    schemaRepository?.saveSchema();
   }
 
   Map<String, dynamic> toShortJson() {

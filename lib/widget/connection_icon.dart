@@ -117,18 +117,11 @@ class _ConnectionIconState extends State<ConnectionIcon> {
                 topicSurName: 'request/set',
                 messageData: '{"keepalive": "OK"}');
           }
-          MultiMessageProvider multiMessageProvider = MultiMessageProvider();
+
           SchemaSensoriModel schemaSensoriModel = SchemaSensoriModel();
           SchemaStatiModel schemaStatiModel = SchemaStatiModel();
-
-          multiMessageProvider.addMessage(
-              'stati/set',
-              '{"hj": ${json.encode(schemaStatiModel.toShortJson())}}',
-              ['stati/get']);
-          multiMessageProvider.addMessage(
-              'sensori/set',
-              '{"hj": ${json.encode(schemaSensoriModel.toShortJson())}}',
-              ['sensori/get']);
+          schemaSensoriModel.requestStatus();
+          schemaStatiModel.requestStatus();
           break;
         case MqttCurrentConnectionState.DISCONNECTED:
           // _iconaConn =

@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:gestione_domotica/models/sensori/schema_sensori_model.dart';
 import 'package:gestione_domotica/models/stati/stati_layer.dart';
 import 'package:gestione_domotica/repositories/firebase/notification_sender.dart';
 import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
@@ -70,21 +71,31 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         print("app in inactive");
         widget.mqttClientWrapper!.wrapperState = MqttWrapperState.INACTIVE;
         widget._disconnect();
+        saveSchema();
         break;
       case AppLifecycleState.paused:
         print("app in paused");
         widget.mqttClientWrapper!.wrapperState = MqttWrapperState.INACTIVE;
         widget._disconnect();
+        saveSchema();
         break;
       case AppLifecycleState.detached:
         print("app in detached");
         widget.mqttClientWrapper!.wrapperState = MqttWrapperState.INACTIVE;
         widget._disconnect();
+        saveSchema();
         break;
     }
     // setState(() {
     //   _notification = state;
     // });
+  }
+
+  void saveSchema() {
+    SchemaSensoriModel schemaSensoriModel = SchemaSensoriModel();
+    SchemaStatiModel schemaStatiModel = SchemaStatiModel();
+    schemaSensoriModel.saveSchema();
+    schemaStatiModel.saveSchema();
   }
 
   @override
