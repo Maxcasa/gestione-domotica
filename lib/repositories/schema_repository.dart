@@ -84,7 +84,7 @@ class SchemaRepository extends ChangeNotifier {
               '${remoteConnection!.certDirBase}domo_${remoteConnection!.connectionName}.json');
           _sensoriBack = await _getImageFromLocal(
               '${remoteConnection!.certDirBase}domo_${remoteConnection!.connectionName}.jpg');
-          if (schemaTree == {}) {
+          if (schemaTree.isEmpty) {
             String stringSchemaTree =
                 await rootBundle.loadString('assets/json/domo_conf.json');
             schemaTree = json.decode(stringSchemaTree);
