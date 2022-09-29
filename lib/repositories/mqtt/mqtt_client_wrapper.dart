@@ -5,6 +5,7 @@ import 'package:gestione_domotica/models/configurazioni/remote_connection.dart';
 import 'package:http/http.dart';
 //import 'package:mqtt_client/mqtt_browser_client.dart';
 import 'package:mqtt_client/mqtt_server_client.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:mqtt_client/mqtt_client.dart';
 import 'dart:math';
@@ -145,6 +146,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     if (kIsWeb) {
       client!.websocketProtocols = ['mqtt'];
     } else if (remote) {
+      final directory = await getApplicationDocumentsDirectory();
       print('MQTTClientWrapper::Secure activated');
       client!.secure = true;
       //client!.onBadCertificate = (X509Certificate cert) => false;
@@ -160,7 +162,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
           remoteConnection!.certDirBase != null) {
         try {
           sslCa = await File(
-                  '${remoteConnection!.certDirBase}${remoteConnection!.caFile}.pfx')
+                  '${directory.path}/${remoteConnection!.connectionName}${remoteConnection!.caFile}.pfx')
               .readAsBytes();
           // securityContext.setClientAuthoritiesBytes(sslCa.buffer.asInt8List(),
           //     password: 'test');
@@ -192,7 +194,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
         //}
         try {
           sslCert = await File(
-                  '${remoteConnection!.certDirBase}${remoteConnection!.certFile}.pfx')
+                  '${directory.path}/${remoteConnection!.connectionName}${remoteConnection!.certFile}.pfx')
               .readAsBytes();
         } catch (e) {
           print('MQTTClientWrapper::client exception - $e');
@@ -222,7 +224,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
           remoteConnection!.certDirBase != null) {
         try {
           sslKey = await File(
-                  '${remoteConnection!.certDirBase}${remoteConnection!.keyFile}.key')
+                  '${directory.path}/${remoteConnection!.connectionName}${remoteConnection!.keyFile}.key')
               .readAsBytes();
 
           //, password: 'HostPass997');

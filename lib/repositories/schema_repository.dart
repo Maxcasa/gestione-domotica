@@ -81,17 +81,17 @@ class SchemaRepository extends ChangeNotifier {
         // carico il dato local se c'è
         if (!kIsWeb) {
           schemaTree = await _getJsonFromLocal(
-              '${remoteConnection!.certDirBase}domo_${remoteConnection!.connectionName}.json');
+              '${directory.path}/domo_${remoteConnection!.connectionName}.json');
           _sensoriBack = await _getImageFromLocal(
-              '${remoteConnection!.certDirBase}domo_${remoteConnection!.connectionName}.jpg');
-          if (schemaTree.isEmpty) {
-            String stringSchemaTree =
-                await rootBundle.loadString('assets/json/domo_conf.json');
-            schemaTree = json.decode(stringSchemaTree);
-          }
-          _sensoriBack ??= Image.asset('assets/images/domo_conf.jpg');
+              '${directory.path}/domo_${remoteConnection!.connectionName}.jpg');
+          // if (schemaTree.isEmpty) {
+          //   String stringSchemaTree =
+          //       await rootBundle.loadString('assets/json/domo_conf.json');
+          //   schemaTree = json.decode(stringSchemaTree);
+          // }
+          // _sensoriBack ??= Image.asset('assets/images/domo_conf.jpg');
+          notifyListeners();
         }
-        notifyListeners();
         // se c'è il remote carico anche da li
         if (await remoteConnection!.checkLocal()) {
           // String? localWiFi = await remoteConnection!.getWifiName();
@@ -100,18 +100,18 @@ class SchemaRepository extends ChangeNotifier {
           schemaTree = await _getJsonFromRemote('domo_json',
               '${directory.path}/domo_${remoteConnection!.connectionName}.json');
           _sensoriBack = await _getImageFromRemote('domo_image',
-              '${remoteConnection!.certDirBase}domo_${remoteConnection!.connectionName}.jpg');
+              '${directory.path}/domo_${remoteConnection!.connectionName}.jpg');
           if (remoteConnection!.caFile != null) {
             await _getFileFromRemote('caFile',
-                '${remoteConnection!.certDirBase}${remoteConnection!.caFile}.pfx');
+                '${directory.path}/${remoteConnection!.connectionName}${remoteConnection!.caFile}.pfx');
           }
           if (remoteConnection!.certFile != null) {
             await _getFileFromRemote('certFile',
-                '${remoteConnection!.certDirBase}${remoteConnection!.certFile}.pfx');
+                '${directory.path}/${remoteConnection!.connectionName}${remoteConnection!.certFile}.pfx');
           }
           if (remoteConnection!.keyFile != null) {
             await _getFileFromRemote('keyFile',
-                '${remoteConnection!.certDirBase}${remoteConnection!.keyFile}.key');
+                '${directory.path}/${remoteConnection!.connectionName}${remoteConnection!.keyFile}.key');
           }
           notifyListeners();
         }

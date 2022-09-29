@@ -290,9 +290,8 @@ class SchemaStatiModel with ChangeNotifier {
   //funzione per salvare lo schema
   void saveSchema() {
     schemaRepository?.saveSchema({
-      topicSurName: stati
-          .map<Map<String, dynamic>>((stato) => stato.toShortJson())
-          .toList()
+      topicSurName:
+          stati.map<Map<String, dynamic>>((stato) => stato.toJson()).toList()
     });
   }
 

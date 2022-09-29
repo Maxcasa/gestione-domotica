@@ -389,9 +389,8 @@ class SchemaSensoriModel with ChangeNotifier {
   //funzione per salvare lo schema
   void saveSchema() {
     schemaRepository?.saveSchema({
-      topicSurName: sensori
-          .map<Map<String, dynamic>>((stato) => stato.toShortJson())
-          .toList()
+      topicSurName:
+          sensori.map<Map<String, dynamic>>((stato) => stato.toJson()).toList()
     });
     //schemaRepository?.saveBackImage();
   }
