@@ -28,6 +28,8 @@ class SensoreModel {
 
   // variabili
   int id;
+  String inUrl = '';
+  String outUrl = '';
   String nome;
   IconData icona;
   Color colore;
@@ -64,6 +66,8 @@ class SensoreModel {
   // conversione Json
   SensoreModel.fromJson(Map<String, dynamic> json)
       : id = json['id'],
+        inUrl = json['in'] ?? '',
+        outUrl = json['out'] ?? '',
         nome = json['nome'],
         valoreInt = json['valore'] ?? 0,
         colore = json['colore'] != null
@@ -136,9 +140,13 @@ class SensoreModel {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> result = {
       'id': id,
+      'in': inUrl,
+      'out': outUrl,
       'nome': nome,
       'valore': valoreInt,
       'tipo': runtimeType.toString(),
+      'posLeft': posLeft,
+      'posTop': posTop,
       //'colore': colore,
       'size': size,
       'abilitato': abilitato,

@@ -42,6 +42,8 @@ class StatoModel {
 
   // variabili
   int id;
+  String inUrl = '';
+  String outUrl = '';
   String nome = "";
   IconData icona;
   int valoreInt = 0;
@@ -94,6 +96,8 @@ class StatoModel {
   // conversione Json
   StatoModel.fromJson(Map<String, dynamic> json)
       : id = json['id'],
+        inUrl = json['in'] ?? '',
+        outUrl = json['out'] ?? '',
         nome = json['nome'],
         icona = json['icona'] != null
             ? IconData(json['icona']['codePoint'],
@@ -111,6 +115,8 @@ class StatoModel {
   Map<String, dynamic> toJson() {
     Map<String, dynamic> result = {
       'id': id,
+      'in': inUrl,
+      'out': outUrl,
       'nome': nome,
       'valore': valoreInt,
       'tipo': runtimeType.toString(),
