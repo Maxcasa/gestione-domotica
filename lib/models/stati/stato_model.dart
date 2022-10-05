@@ -46,7 +46,7 @@ class StatoModel {
   String outUrl = '';
   String nome = "";
   IconData icona;
-  int valoreInt = 0;
+  List<int> valoreInt = [];
   Color colore;
   bool abilitato = true;
   List<int> operatori = [0, 0];
@@ -61,11 +61,27 @@ class StatoModel {
   // getter & setter
   String get tipo => runtimeType.toString();
 
-  set valore(int valore) {
-    valoreInt = valore;
+  set valore(List<dynamic> valore) {
+    for (int i = 0; i < valore.length; i++) {
+      if (valore[i] is int) {
+        valoreInt[i] = valore[i];
+      } else if (valore[i] is String) {
+        valoreInt[i] = int.parse(valore[i]);
+      }
+    }
   }
 
-  int get valore => valoreInt;
+  void setValore(int valore, int pos) {
+    List<int> locValore = valoreInt;
+    locValore[pos] = valore;
+    this.valore = locValore;
+  }
+
+  int getValore(int pos) {
+    return valoreInt[pos];
+  }
+
+  List<int> get valore => valoreInt;
 
   void setAzioneStatoListener({Function(int, AzioneStato, String)? callback}) {
     azioneStatoCallBack = callback;
@@ -85,9 +101,11 @@ class StatoModel {
   // }
 
   // funzione invocata dall'interfaccia quando si cambia il valore
-  void cambiaStato(int valore) {
+  void cambiaStato(int valore, int pos) {
+    List<int> locValore = valoreInt;
+    locValore[pos] = valore;
     //Se c'è un callback da chiamare lo chiamo
-    String messaggio = json.encode({'id': id, 'valore': valore});
+    String messaggio = json.encode({'id': id, 'valore': locValore});
     if (azioneStatoCallBack != null) {
       azioneStatoCallBack!(id, AzioneStato.imposta, messaggio);
     }
@@ -99,6 +117,7 @@ class StatoModel {
         inUrl = json['in'] ?? '',
         outUrl = json['out'] ?? '',
         nome = json['nome'],
+        valoreInt = json['valore'] ?? 0,
         icona = json['icona'] != null
             ? IconData(json['icona']['codePoint'],
                 fontFamily: json['icona']['fontFamily'])

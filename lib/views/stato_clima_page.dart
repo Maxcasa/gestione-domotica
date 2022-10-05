@@ -121,7 +121,7 @@ class _StatoClimaPageState extends State<StatoClimaPage> {
                   child: InkWell(
                     splashColor: Colors.green[50],
                     onTap: () {
-                      stato.cambiaStato(1);
+                      stato.cambiaStato(-1, 0);
                     },
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -140,7 +140,7 @@ class _StatoClimaPageState extends State<StatoClimaPage> {
             child: IconButton(
               icon: Icon(stato.icona, color: stato.colore, size: 200.0),
               onPressed: () {
-                stato.cambiaStato(1);
+                stato.cambiaStato(-1, 0);
               },
             ),
           );

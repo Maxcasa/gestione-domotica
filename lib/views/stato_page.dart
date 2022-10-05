@@ -52,13 +52,13 @@ class _StatoPageState extends State<StatoPage> {
             top: 20.0,
             left: 20.0,
             child: visualizzaAttiviAllarme(
-                stati, context, indexStato, 0, Icons.alarm_rounded),
+                stato, context, indexStato, 0, Icons.alarm_rounded),
           ),
           Positioned(
             top: 20.0,
             right: 80.0,
             child: visualizzaAttiviAllarme(
-                stati, context, indexStato, 1, Icons.notifications_on_rounded),
+                stato, context, indexStato, 1, Icons.notifications_on_rounded),
           ),
           Center(
             child: visalizzaAllarme(stato),
@@ -137,7 +137,7 @@ class _StatoPageState extends State<StatoPage> {
                   child: InkWell(
                     splashColor: Colors.green[50],
                     onTap: () {
-                      stato.cambiaStato(1);
+                      stato.cambiaStato(-1, 0);
                     },
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -156,13 +156,13 @@ class _StatoPageState extends State<StatoPage> {
             child: IconButton(
               icon: Icon(stato.icona, color: stato.colore, size: 200.0),
               onPressed: () {
-                stato.cambiaStato(1);
+                stato.cambiaStato(-1, 0);
               },
             ),
           );
   }
 
-  Widget visualizzaAttiviAllarme(SchemaStatiModel stati, BuildContext context,
+  Widget visualizzaAttiviAllarme(StatoModel stato, BuildContext context,
       int indexStato, int attivazione, IconData icona) {
     return Consumer<SchemaSensoriModel>(builder: (BuildContext context,
         SchemaSensoriModel schemaSensori, Widget? child) {
@@ -214,7 +214,11 @@ class _StatoPageState extends State<StatoPage> {
           //         child:
           Row(children: [
         (isSensoreInfisso || isSensorePresenza)
-            ? Icon(icona, size: 20, color: Colors.black)
+            ? IconButton(
+                icon: Icon(icona, size: 20, color: stato.colore),
+                onPressed: () {
+                  stato.cambiaStato(-1, attivazione);
+                })
             : const SizedBox.shrink(),
         isSensoreInfisso
             ? IconButton(

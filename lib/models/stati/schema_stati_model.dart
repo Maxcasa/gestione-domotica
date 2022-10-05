@@ -270,11 +270,7 @@ class SchemaStatiModel with ChangeNotifier {
       if (localStati.isNotEmpty) {
         for (StatoModel localStati in localStati) {
           if (jsonData.containsKey('valore')) {
-            try {
-              localStati.valore = jsonData['valore'];
-            } catch (e) {
-              localStati.valore = int.parse(jsonData['valore']);
-            }
+            localStati.valore = jsonData['valore'];
           }
           int findIndex = waitingStatoStato
               .indexWhere((element) => element['id'] == jsonData['id']);
