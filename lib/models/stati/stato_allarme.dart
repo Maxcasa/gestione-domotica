@@ -60,24 +60,26 @@ class StatoAllarme extends StatoModel {
 
   //metodi
   @override
-  set valore(List<dynamic> valore) {
+  set valore(Map<String, dynamic> valore) {
     super.valore = valore;
-    if (valoreInt.length > 0) {
-      switch (valoreInt[0]) {
-        case 2:
-          colore = Colors.yellow;
-          icona = Icons.home_outlined;
-          break;
-        case 1:
-          colore = Colors.red;
-          icona = Icons.power_settings_new_outlined;
-          break;
-        case 0:
-          colore = Colors.black;
-          icona = Icons.power_settings_new_outlined;
-          break;
+    valoreInt.forEach((key, value) {
+      if (key == '0') {
+        switch (value) {
+          case 2:
+            colore = Colors.yellow;
+            icona = Icons.home_outlined;
+            break;
+          case 1:
+            colore = Colors.red;
+            icona = Icons.power_settings_new_outlined;
+            break;
+          case 0:
+            colore = Colors.black;
+            icona = Icons.power_settings_new_outlined;
+            break;
+        }
       }
-    }
+    });
 
     //}
     // if (jsonData.containsKey('timers')) {
@@ -90,19 +92,19 @@ class StatoAllarme extends StatoModel {
   //int get valore => valoreInt;
 
   // funzione invocata dall'interfaccia quando si cambia il valore
-  @override
-  void cambiaStato(int valore, int pos) {
-    //Se c'è un callback da chiamare lo chiamo
-    List<int> locValore = valoreInt;
-    if (valore > 0) {
-      locValore[pos] += valore;
-      locValore[pos] = locValore[pos] > 2 ? 0 : locValore[pos];
-    }
-    String messaggio = json.encode({'id': id, 'valore': locValore});
-    if (azioneStatoCallBack != null) {
-      azioneStatoCallBack!(id, AzioneStato.imposta, messaggio);
-    }
-  }
+  // @override
+  // void cambiaStato(int valore, int pos) {
+  //   //Se c'è un callback da chiamare lo chiamo
+  //   List<int> locValore = valoreInt;
+  //   if (valore > 0) {
+  //     locValore[pos] += valore;
+  //     locValore[pos] = locValore[pos] > 2 ? 0 : locValore[pos];
+  //   }
+  //   String messaggio = json.encode({'id': id, 'valore': locValore});
+  //   if (azioneStatoCallBack != null) {
+  //     azioneStatoCallBack!(id, AzioneStato.imposta, messaggio);
+  //   }
+  // }
 
   StatoAllarme.fromJson(Map<String, dynamic> json)
       :

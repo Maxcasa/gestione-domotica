@@ -18,6 +18,7 @@ class AttivazioneModel {
   String nome = "";
   IconData icona;
   int valoreInt = 0;
+  int max = 0;
   Color colore;
   bool abilitato = true;
 
@@ -74,6 +75,7 @@ class AttivazioneModel {
       : id = json['id'],
         nome = json['nome'] ?? 'Generico',
         valoreInt = json['valore'] ?? 0,
+        max = json['max'] ?? 0,
         icona = json['icona'] != null
             ? IconData(json['icona']['codePoint'],
                 fontFamily: json['icona']['fontFamily'])
@@ -85,6 +87,7 @@ class AttivazioneModel {
   setFromJson(Map<String, dynamic> json) {
     nome = json['nome'] ?? nome;
     valoreInt = json['valore'] ?? valoreInt;
+    max = json['max'] ?? 0;
     icona = json['icona'] != null
         ? IconData(json['icona']['codePoint'],
             fontFamily: json['icona']['fontFamily'])
@@ -97,6 +100,7 @@ class AttivazioneModel {
       'id': id,
       'nome': nome,
       'valore': valoreInt,
+      'max': max,
       'tipo': runtimeType.toString(),
       //'colore': colore,
       // 'size': size,

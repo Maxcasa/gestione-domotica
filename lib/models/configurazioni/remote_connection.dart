@@ -547,6 +547,14 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
     }
   }
 
+  void connectionState(bool connectionState) {
+    if (connectionState) {
+      notifyListeners('connectionActive');
+    } else {
+      notifyListeners('connectionInactive');
+    }
+  }
+
   // final key = Key.fromUtf8('chiveDiMassimoCasarin1371Domotic'); //32 chars
   // final iv = IV.fromUtf8('MassimoDomotic13'); //16 chars
 

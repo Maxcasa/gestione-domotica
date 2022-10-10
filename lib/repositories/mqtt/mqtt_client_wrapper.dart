@@ -499,6 +499,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
       connectMqttClient();
     } else {
       notifyListeners('connectionState.disconnected');
+      remoteConnection!.connectionState(false);
     }
 
     // if (reconnect) {
@@ -520,6 +521,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
       isTokenToSend = false;
     }
     notifyListeners('connectionState.connected');
+    remoteConnection!.connectionState(true);
   }
 
   void _onAutoReconnect() async {

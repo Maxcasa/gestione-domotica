@@ -61,24 +61,24 @@ class StatoClima extends StatoModel {
 
   //metodi
   @override
-  set valore(List<dynamic> valore) {
+  set valore(Map<String, dynamic> valore) {
     super.valore = valore;
-    if (valoreInt.isEmpty) {
-      switch (valoreInt[0]) {
+    valoreInt.forEach((key, value) {
+      switch (value) {
         case 2:
-          colore = Colors.blue;
-          icona = MdiIcons.snowflake;
+          colore = Colors.yellow;
+          icona = Icons.home_outlined;
           break;
         case 1:
           colore = Colors.red;
-          icona = MdiIcons.brightness5;
+          icona = Icons.power_settings_new_outlined;
           break;
         case 0:
           colore = Colors.black;
           icona = Icons.power_settings_new_outlined;
           break;
       }
-    }
+    });
     //}
     // if (jsonData.containsKey('timers')) {
     //   timers = TimerAttivazioni.fromJson(jsonData['timers']);
@@ -90,19 +90,19 @@ class StatoClima extends StatoModel {
   //int get valore => valoreInt;
 
   // funzione invocata dall'interfaccia quando si cambia il valore
-  @override
-  void cambiaStato(int valore, int pos) {
-    //Se c'è un callback da chiamare lo chiamo
-    List<int> locValore = valoreInt;
-    if (valore > 0) {
-      locValore[pos] += valore;
-      locValore[pos] = locValore[pos] > 2 ? 0 : locValore[pos];
-    }
-    String messaggio = json.encode({'id': id, 'valore': locValore});
-    if (azioneStatoCallBack != null) {
-      azioneStatoCallBack!(id, AzioneStato.imposta, messaggio);
-    }
-  }
+  // @override
+  // void cambiaStato(int valore, int pos) {
+  //   //Se c'è un callback da chiamare lo chiamo
+  //   List<int> locValore = valoreInt;
+  //   if (valore > 0) {
+  //     locValore[pos] += valore;
+  //     locValore[pos] = locValore[pos] > 2 ? 0 : locValore[pos];
+  //   }
+  //   String messaggio = json.encode({'id': id, 'valore': locValore});
+  //   if (azioneStatoCallBack != null) {
+  //     azioneStatoCallBack!(id, AzioneStato.imposta, messaggio);
+  //   }
+  // }
 
   StatoClima.fromJson(Map<String, dynamic> json)
       :

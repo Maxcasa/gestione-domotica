@@ -31,7 +31,13 @@ class SchemaRepository extends ChangeNotifier {
     remoteConnection!.addListener(() async {
       reload = true;
       await lock.synchronized(_getInfo);
-    }, ['activeIndex', 'connectivity', 'connectionInfo', 'connectionConf']);
+    }, [
+      'activeIndex',
+      'connectivity',
+      'connectionInfo',
+      'connectionConf',
+      'connectionActive'
+    ]);
     remoteConnection!.getConnectionInfo();
     print('Istanzio il getter dello schema');
   }

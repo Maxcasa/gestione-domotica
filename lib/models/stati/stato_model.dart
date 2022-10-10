@@ -46,7 +46,7 @@ class StatoModel {
   String outUrl = '';
   String nome = "";
   IconData icona;
-  List<int> valoreInt = [];
+  Map<String, int> valoreInt = {};
   Color colore;
   bool abilitato = true;
   List<int> operatori = [0, 0];
@@ -61,27 +61,32 @@ class StatoModel {
   // getter & setter
   String get tipo => runtimeType.toString();
 
-  set valore(List<dynamic> valore) {
-    for (int i = 0; i < valore.length; i++) {
-      if (valore[i] is int) {
-        valoreInt[i] = valore[i];
-      } else if (valore[i] is String) {
-        valoreInt[i] = int.parse(valore[i]);
+  set valore(Map<String, dynamic> valore) {
+    valore.forEach((key, value) {
+      if (value is int) {
+        valoreInt[key] = value;
+      } else if (value is String) {
+        valoreInt[key] = int.parse(value);
       }
-    }
+    });
   }
 
-  void setValore(int valore, int pos) {
-    List<int> locValore = valoreInt;
-    locValore[pos] = valore;
+  void setValore(int valore, String key) {
+    Map<String, int> locValore = valoreInt;
+    locValore[key] = valore;
     this.valore = locValore;
   }
 
-  int getValore(int pos) {
-    return valoreInt[pos];
+  int getValore(dynamic key) {
+    if (key is int) {
+      return valoreInt[key.toString()] ?? 0;
+    } else if (key is String) {
+      return valoreInt[key] ?? 0;
+    }
+    return 0;
   }
 
-  List<int> get valore => valoreInt;
+  Map<String, int> get valore => valoreInt;
 
   void setAzioneStatoListener({Function(int, AzioneStato, String)? callback}) {
     azioneStatoCallBack = callback;
@@ -101,9 +106,13 @@ class StatoModel {
   // }
 
   // funzione invocata dall'interfaccia quando si cambia il valore
-  void cambiaStato(int valore, int pos) {
-    List<int> locValore = valoreInt;
-    locValore[pos] = valore;
+  void cambiaStato(int valore, dynamic key) {
+    Map<String, int> locValore = valoreInt;
+    if (key is int) {
+      locValore[key.toString()] = valore;
+    } else if (key is String) {
+      locValore[key] = valore;
+    }
     //Se c'è un callback da chiamare lo chiamo
     String messaggio = json.encode({'id': id, 'valore': locValore});
     if (azioneStatoCallBack != null) {
@@ -117,7 +126,6 @@ class StatoModel {
         inUrl = json['in'] ?? '',
         outUrl = json['out'] ?? '',
         nome = json['nome'],
-        valoreInt = json['valore'] ?? 0,
         icona = json['icona'] != null
             ? IconData(json['icona']['codePoint'],
                 fontFamily: json['icona']['fontFamily'])
@@ -129,7 +137,9 @@ class StatoModel {
         abilitato = json['abilitato'] ?? 0,
         timers = json.containsKey('timers')
             ? TimerAttivazioni.fromJson(json)
-            : TimerAttivazioni();
+            : TimerAttivazioni() {
+    valore = (json['valore'] ?? {'0': 0});
+  }
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> result = {
