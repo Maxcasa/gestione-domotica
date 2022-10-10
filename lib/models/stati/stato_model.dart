@@ -22,8 +22,8 @@ class StatoModel {
   StatoModel(
       {required this.id,
       this.nome = "Stato generico",
-      this.icona = Icons.power_settings_new_outlined,
-      this.colore = Colors.black});
+      this.icona = const {'0': Icons.power_settings_new_outlined},
+      this.colore = const {'0': Colors.black}});
   // : super() {
   //   _setupMqtt();
   //   schemaRepository = SchemaRepository();
@@ -45,9 +45,9 @@ class StatoModel {
   String inUrl = '';
   String outUrl = '';
   String nome = "";
-  IconData icona;
+  Map<String, IconData> icona;
   Map<String, int> valoreInt = {};
-  Color colore;
+  Map<String, Color> colore;
   bool abilitato = true;
   List<int> operatori = [0, 0];
   TimerAttivazioni? timers;
@@ -127,12 +127,18 @@ class StatoModel {
         outUrl = json['out'] ?? '',
         nome = json['nome'],
         icona = json['icona'] != null
-            ? IconData(json['icona']['codePoint'],
-                fontFamily: json['icona']['fontFamily'])
-            : Icons.power_settings_new_outlined,
+            ? json['icona'].map((key, value) {
+                return MapEntry(
+                    key,
+                    IconData(value['codePoint'],
+                        fontFamily: json['icona']['fontFamily']));
+              })
+            : {'0': Icons.power_settings_new_outlined},
         colore = json['colore'] != null
-            ? HexColor.fromHex(json['colore'])
-            : Colors.black,
+            ? json['colore'].map((key, value) {
+                return MapEntry(key, HexColor.fromHex(value));
+              })
+            : {'0': Colors.black},
         operatori = json['oper'] ?? [0, 0],
         abilitato = json['abilitato'] ?? 0,
         timers = json.containsKey('timers')
@@ -154,7 +160,10 @@ class StatoModel {
       'abilitato': abilitato,
       'oper': operatori,
       'timers': timers?.toShortJson(),
-      'icona': {'codePoint': icona.codePoint, 'fontFamily': icona.fontFamily}
+      'icona': icona.map((key, value) {
+        return MapEntry(key,
+            {'codePoint': value.codePoint, 'fontFamily': value.fontFamily});
+      })
     };
     return result;
   }

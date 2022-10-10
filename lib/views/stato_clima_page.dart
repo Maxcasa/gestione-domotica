@@ -126,8 +126,8 @@ class _StatoClimaPageState extends State<StatoClimaPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Icon(stato.icona,
-                            color: stato.colore, size: 150.0) // <-- Icon
+                        Icon(stato.icona['10'],
+                            color: stato.colore['10'], size: 150.0) // <-- Icon
                       ],
                     ),
                   ),
@@ -138,7 +138,8 @@ class _StatoClimaPageState extends State<StatoClimaPage> {
             height: 200.0,
             width: 200.0,
             child: IconButton(
-              icon: Icon(stato.icona, color: stato.colore, size: 200.0),
+              icon: Icon(stato.icona['10'],
+                  color: stato.colore['10'], size: 200.0),
               onPressed: () {
                 stato.cambiaStato(-1, 0);
               },

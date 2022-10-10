@@ -23,7 +23,7 @@ class StatoAllarme extends StatoModel {
       : super(
             id: id,
             nome: nome ?? "Stato allarme",
-            icona: Icons.power_settings_new_outlined);
+            icona: {'0': Icons.power_settings_new_outlined});
 
   // this.icona = icona ?? Icons.power_settings_new_outlined,
   //   this.valore = valore ?? 0,
@@ -66,16 +66,28 @@ class StatoAllarme extends StatoModel {
       if (key == '0') {
         switch (value) {
           case 2:
-            colore = Colors.yellow;
-            icona = Icons.home_outlined;
+            colore[key] = Colors.yellow;
+            icona[key] = Icons.home_outlined;
             break;
           case 1:
-            colore = Colors.red;
-            icona = Icons.power_settings_new_outlined;
+            colore[key] = Colors.red;
+            icona[key] = Icons.power_settings_new_outlined;
             break;
           case 0:
-            colore = Colors.black;
-            icona = Icons.power_settings_new_outlined;
+            colore[key] = Colors.black;
+            icona[key] = Icons.power_settings_new_outlined;
+            break;
+        }
+      }
+      if (key == '1') {
+        switch (value) {
+          case 1:
+            colore[key] = Colors.red;
+            icona[key] = Icons.notifications_on_rounded;
+            break;
+          case 0:
+            colore[key] = Colors.black;
+            icona[key] = Icons.notifications_on_rounded;
             break;
         }
       }

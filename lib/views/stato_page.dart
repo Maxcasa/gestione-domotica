@@ -51,14 +51,14 @@ class _StatoPageState extends State<StatoPage> {
           Positioned(
             top: 20.0,
             left: 20.0,
-            child: visualizzaAttiviAllarme(
-                stato, context, indexStato, 0, Icons.alarm_rounded),
+            child: visualizzaAttiviAllarme(stato, context, indexStato, 0,
+                icona: Icons.alarm_rounded),
           ),
           Positioned(
             top: 20.0,
             right: 80.0,
-            child: visualizzaAttiviAllarme(
-                stato, context, indexStato, 1, Icons.notifications_on_rounded),
+            child: visualizzaAttiviAllarme(stato, context, indexStato, 1,
+                icona: Icons.notifications_on_rounded),
           ),
           Center(
             child: visalizzaAllarme(stato),
@@ -142,8 +142,8 @@ class _StatoPageState extends State<StatoPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
-                        Icon(stato.icona,
-                            color: stato.colore, size: 150.0) // <-- Icon
+                        Icon(stato.icona['0'],
+                            color: stato.colore['0'], size: 150.0) // <-- Icon
                       ],
                     ),
                   ),
@@ -154,7 +154,8 @@ class _StatoPageState extends State<StatoPage> {
             height: 200.0,
             width: 200.0,
             child: IconButton(
-              icon: Icon(stato.icona, color: stato.colore, size: 200.0),
+              icon:
+                  Icon(stato.icona['0'], color: stato.colore['0'], size: 200.0),
               onPressed: () {
                 stato.cambiaStato(-1, 0);
               },
@@ -162,8 +163,9 @@ class _StatoPageState extends State<StatoPage> {
           );
   }
 
-  Widget visualizzaAttiviAllarme(StatoModel stato, BuildContext context,
-      int indexStato, int attivazione, IconData icona) {
+  Widget visualizzaAttiviAllarme(
+      StatoModel stato, BuildContext context, int indexStato, int attivazione,
+      {IconData? icona}) {
     return Consumer<SchemaSensoriModel>(builder: (BuildContext context,
         SchemaSensoriModel schemaSensori, Widget? child) {
       bool isSensoreInfisso = false;
@@ -215,7 +217,8 @@ class _StatoPageState extends State<StatoPage> {
           Row(children: [
         (isSensoreInfisso || isSensorePresenza)
             ? IconButton(
-                icon: Icon(icona, size: 20, color: stato.colore),
+                icon: Icon(icona ?? stato.icona[attivazione.toString()],
+                    size: 20, color: stato.colore[attivazione.toString()]),
                 onPressed: () {
                   stato.cambiaStato(-1, attivazione);
                 })

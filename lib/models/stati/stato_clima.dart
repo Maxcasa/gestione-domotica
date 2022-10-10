@@ -24,7 +24,7 @@ class StatoClima extends StatoModel {
       : super(
             id: id,
             nome: nome ?? "Stato clima",
-            icona: Icons.power_settings_new_outlined);
+            icona: {'10': Icons.power_settings_new_outlined});
 
   // this.icona = icona ?? Icons.power_settings_new_outlined,
   //   this.valore = valore ?? 0,
@@ -66,16 +66,16 @@ class StatoClima extends StatoModel {
     valoreInt.forEach((key, value) {
       switch (value) {
         case 2:
-          colore = Colors.yellow;
-          icona = Icons.home_outlined;
+          colore[key] = Colors.yellow;
+          icona[key] = Icons.home_outlined;
           break;
         case 1:
-          colore = Colors.red;
-          icona = Icons.power_settings_new_outlined;
+          colore[key] = Colors.red;
+          icona[key] = Icons.power_settings_new_outlined;
           break;
         case 0:
-          colore = Colors.black;
-          icona = Icons.power_settings_new_outlined;
+          colore[key] = Colors.black;
+          icona[key] = Icons.power_settings_new_outlined;
           break;
       }
     });
