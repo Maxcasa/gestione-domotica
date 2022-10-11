@@ -51,6 +51,7 @@ class SchemaRepository extends ChangeNotifier {
   String? remoteBackUri;
   bool reload = true;
   var lock = Lock();
+  var lockJson = Lock();
 
   // Future<void> setRemoteVariables() async {
   //   if (remoteConnection != null) {
@@ -162,7 +163,7 @@ class SchemaRepository extends ChangeNotifier {
     if (httpResponse.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
-      saveJson(httpResponse.body, fileName);
+      await saveJson(httpResponse.body, fileName);
       return json.decode(httpResponse.body);
     } else {
       // If the server did not return a 200 OK response,
@@ -183,7 +184,7 @@ class SchemaRepository extends ChangeNotifier {
     if (httpResponse.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
-      saveFile(httpResponse.bodyBytes, fileName);
+      await saveFile(httpResponse.bodyBytes, fileName);
       return Image.memory(httpResponse.bodyBytes);
     } else {
       // If the server did not return a 200 OK response,
@@ -204,7 +205,7 @@ class SchemaRepository extends ChangeNotifier {
     if (httpResponse.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
-      saveFile(httpResponse.bodyBytes, fileName);
+      await saveFile(httpResponse.bodyBytes, fileName);
     } else {
       // If the server did not return a 200 OK response,
       // then throw an exception.
