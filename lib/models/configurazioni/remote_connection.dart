@@ -282,6 +282,7 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
         0) {
       connectionDataList.add(connectionData);
       resetId();
+      activeIndex = connectionDataList.length - 1;
       // localData.activeIndex = connectionDataList.length - 1;
       saveConnectionInfo();
     }

@@ -593,6 +593,7 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
                 httpResponse.body, Utils.cutToLength(serverCode, 32))!));
         connectionData.certDirBase =
             (await getApplicationDocumentsDirectory()).path + '/';
+        connectionData.id = -1;
         remoteConnection.addConnection(connectionData);
         return true;
       } else {
