@@ -44,7 +44,10 @@ class SchemaRepository extends ChangeNotifier {
 
   //variabili
   Map<String, dynamic> schemaTree = {};
+  Map<String, dynamic> _backSchemaTree = {};
   Image? _sensoriBack;
+  Image? _backSensoriBack;
+  var _imageBase64;
   final info = NetworkInfo();
   RemoteConnection? remoteConnection;
   String? remoteFileUri;
@@ -82,31 +85,25 @@ class SchemaRepository extends ChangeNotifier {
       if (remoteConnection != null &&
           !remoteConnection!.connectionDataNull &&
           remoteConnection!.connectionPresent) {
-        schemaTree = {};
-        _sensoriBack = null;
+        // schemaTree = {};
+        //_sensoriBack = null;
         final directory = await getApplicationDocumentsDirectory();
         // carico il dato local se c'è
         if (!kIsWeb) {
-          schemaTree = await _getJsonFromLocal(
+          _backSchemaTree = await _getJsonFromLocal(
               '${directory.path}/domo_${remoteConnection!.connectionName}.json');
-          _sensoriBack = await _getImageFromLocal(
+          _backSensoriBack = await _getImageFromLocal(
               '${directory.path}/domo_${remoteConnection!.connectionName}.jpg');
-          // if (schemaTree.isEmpty) {
-          //   String stringSchemaTree =
-          //       await rootBundle.loadString('assets/json/domo_conf.json');
-          //   schemaTree = json.decode(stringSchemaTree);
-          // }
-          // _sensoriBack ??= Image.asset('assets/images/domo_conf.jpg');
-          notifyListeners();
         }
         // se c'è il remote carico anche da li
         if (await remoteConnection!.checkLocal()) {
           // String? localWiFi = await remoteConnection!.getWifiName();
           // //  await info.getWifiName();
           // String? savedWiFi = remoteConnection!.localWiFiConnectionName;
-          schemaTree = await _getJsonFromRemote('domo_json',
+          Map<String, dynamic> _remoteSchemaTree = await _getJsonFromRemote(
+              'domo_json',
               '${directory.path}/domo_${remoteConnection!.connectionName}.json');
-          _sensoriBack = await _getImageFromRemote('domo_image',
+          Image? _remoteSensoriBack = await _getImageFromRemote('domo_image',
               '${directory.path}/domo_${remoteConnection!.connectionName}.jpg');
           if (remoteConnection!.caFile != null) {
             await _getFileFromRemote('caFile',
@@ -120,6 +117,25 @@ class SchemaRepository extends ChangeNotifier {
             await _getFileFromRemote('keyFile',
                 '${directory.path}/${remoteConnection!.connectionName}${remoteConnection!.keyFile}.key');
           }
+          if (_remoteSchemaTree != {} && _remoteSchemaTree != _backSchemaTree) {
+            _backSchemaTree = _remoteSchemaTree;
+          }
+          if (_remoteSensoriBack != {} &&
+              _remoteSensoriBack != _backSensoriBack) {
+            _backSensoriBack = _remoteSensoriBack;
+          }
+        }
+        if (schemaTree != _backSchemaTree || _sensoriBack != _backSensoriBack) {
+          schemaTree = _backSchemaTree;
+          _sensoriBack = _backSensoriBack;
+          if (!kIsWeb) {
+            saveJson(json.encode(schemaTree),
+                '${directory.path}/domo_${remoteConnection!.connectionName}.json');
+            if (_sensoriBack != _backSensoriBack) {
+              saveFile(_imageBase64,
+                  '${directory.path}/domo_${remoteConnection!.connectionName}.jpg');
+            }
+          }
           notifyListeners();
         }
         reload = false;
@@ -129,20 +145,31 @@ class SchemaRepository extends ChangeNotifier {
 
   Future<Map<String, dynamic>> _getJsonFromLocal(String fileName) async {
     final File file = File(fileName);
-    if (await file.exists()) {
-      String fileString = await file.readAsString();
-      return json.decode(fileString);
-    } else {
+    try {
+      if (await file.exists()) {
+        String fileString = await file.readAsString();
+        return json.decode(fileString);
+      } else {
+        return {};
+      }
+    } catch (e) {
+      print('Exception: $e');
       return {};
     }
+
     //notifyListeners();
   }
 
   Future<Image?> _getImageFromLocal(String fileName) async {
     final File file = File(fileName);
-    if (await file.exists()) {
-      return Image.file(file);
-    } else {
+    try {
+      if (await file.exists()) {
+        return Image.file(file);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      print('Exception: $e');
       return null;
     }
   }
@@ -163,7 +190,6 @@ class SchemaRepository extends ChangeNotifier {
     if (httpResponse.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
-      await saveJson(httpResponse.body, fileName);
       return json.decode(httpResponse.body);
     } else {
       // If the server did not return a 200 OK response,
@@ -184,7 +210,7 @@ class SchemaRepository extends ChangeNotifier {
     if (httpResponse.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
-      await saveFile(httpResponse.bodyBytes, fileName);
+      _imageBase64 = httpResponse.bodyBytes;
       return Image.memory(httpResponse.bodyBytes);
     } else {
       // If the server did not return a 200 OK response,
@@ -215,9 +241,14 @@ class SchemaRepository extends ChangeNotifier {
 
   Future<void> saveSchema(Map<String, dynamic> schemaToMerge) async {
     final directory = await getApplicationDocumentsDirectory();
-    schemaTree = {...schemaTree, ...schemaToMerge};
-    await saveJson(json.encode(schemaTree),
+    Map<String, dynamic> _localSchemaTree = {...schemaTree, ...schemaToMerge};
+    Map<String, dynamic> _loadedSchemaTree = await _getJsonFromLocal(
         '${directory.path}/domo_${remoteConnection!.connectionName}.json');
+    if (_loadedSchemaTree != _localSchemaTree) {
+      schemaTree = _localSchemaTree;
+      await saveJson(json.encode(_localSchemaTree),
+          '${directory.path}/domo_${remoteConnection!.connectionName}.json');
+    }
   }
 
   Future<void> saveJson(schemaData, String fileName) async {
