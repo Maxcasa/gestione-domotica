@@ -494,7 +494,8 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
     if (kIsWeb) {
       return await checkLocalName();
     } else if (connectivity == 2) {
-      return ((await checkLocalWiFi()) && (await checkLocalName()));
+      return await checkLocalName();
+      // return ((await checkLocalWiFi()) && (await checkLocalName()));
     } else {
       return false;
     }

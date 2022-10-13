@@ -40,7 +40,7 @@ dependencies:
   mqtt_client: ^9.6.3
   localstorage: ^4.0.0
   synchronized: ^3.0.0
-  permission_handler: ^9.2.0
+  permission_handler: any
   logger: ^1.0.2
   firebase_messaging: ^11.2.11
   material_design_icons_flutter: 5.0.6595
@@ -53,6 +53,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   firebase_core: ^1.13.1
   flutter_local_notifications: ^9.4.0
+  collection: any
 
 
 dev_dependencies:

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/configurazioni/remote_connection.dart';
@@ -116,13 +117,16 @@ class SchemaRepository extends ChangeNotifier {
               'domo_json',
               '${_directory.path}/domo_${remoteConnection!.connectionName}.json');
           if (_remoteSchemaTree != {} &&
-              _remoteSchemaTree != _localSchemaTree) {
+              !(const DeepCollectionEquality()
+                  .equals(_remoteSchemaTree, _localSchemaTree))) {
             _localSchemaTree = _remoteSchemaTree;
             saveJson(json.encode(_localSchemaTree),
                 '${_directory.path}/domo_${remoteConnection!.connectionName}.json');
           }
         }
-        if (_localSchemaTree != {} && _localSchemaTree != _schemaTree) {
+        if (_localSchemaTree != {} &&
+            !(const DeepCollectionEquality()
+                .equals(_localSchemaTree, _schemaTree))) {
           _schemaTree = _localSchemaTree;
           notifyListeners();
         }
@@ -285,14 +289,12 @@ class SchemaRepository extends ChangeNotifier {
   }
 
   Future<void> saveSchema(Map<String, dynamic> schemaToMerge) async {
-    final directory = await getApplicationDocumentsDirectory();
     Map<String, dynamic> _localSchemaTree = {..._schemaTree, ...schemaToMerge};
-    Map<String, dynamic> _loadedSchemaTree = await _getJsonFromLocal(
-        '${directory.path}/domo_${remoteConnection!.connectionName}.json');
-    if (_loadedSchemaTree != _localSchemaTree) {
+    if (!(const DeepCollectionEquality()
+        .equals(_schemaTree, _localSchemaTree))) {
       _schemaTree = _localSchemaTree;
       await saveJson(json.encode(_localSchemaTree),
-          '${directory.path}/domo_${remoteConnection!.connectionName}.json');
+          '${_directory.path}/domo_${remoteConnection!.connectionName}.json');
     }
   }
 
