@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter/cupertino.dart';
 
 class Utils {
@@ -28,4 +30,11 @@ class HexColor extends Color {
   }
 
   HexColor(final String hexColor) : super(_getColorFromHex(hexColor));
+}
+
+class DoubleImage {
+  DoubleImage(this.image, this.data);
+
+  Image? image;
+  Uint8List? data;
 }

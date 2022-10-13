@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/configurazioni/remote_connection.dart';
+import 'package:gestione_domotica/models/utils.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart' as io_client;
@@ -29,8 +30,10 @@ class SchemaRepository extends ChangeNotifier {
   SchemaRepository._internal() {
     remoteConnection = RemoteConnection();
     remoteConnection!.addListener(() async {
-      reload = true;
-      await lock.synchronized(_getInfo);
+      _reloadSchema = true;
+      await lock.synchronized(_getSchema);
+      _reloadBack = true;
+      await lock.synchronized(_getBack);
     }, [
       'activeIndex',
       'connectivity',
@@ -43,18 +46,24 @@ class SchemaRepository extends ChangeNotifier {
   }
 
   //variabili
-  Map<String, dynamic> schemaTree = {};
-  Map<String, dynamic> _backSchemaTree = {};
+  Map<String, dynamic> _schemaTree = {};
+  //Map<String, dynamic> _backSchemaTree = {};
+  bool _reloadSchema = true;
+
   Image? _sensoriBack;
-  Image? _backSensoriBack;
-  var _imageBase64;
+  //Image? _backSensoriBack;
+  bool _reloadBack = true;
+
   final info = NetworkInfo();
   RemoteConnection? remoteConnection;
   String? remoteFileUri;
   String? remoteBackUri;
-  bool reload = true;
+
+  late final _directory;
+  bool _isDirectoryInitialized = false;
+
   var lock = Lock();
-  var lockJson = Lock();
+  //var lockJson = Lock();
 
   // Future<void> setRemoteVariables() async {
   //   if (remoteConnection != null) {
@@ -70,30 +79,33 @@ class SchemaRepository extends ChangeNotifier {
   // }
 
   Future<Map<String, dynamic>> get schema async {
-    await lock.synchronized(_getInfo);
-    return schemaTree;
+    await lock.synchronized(_getSchema);
+    return _schemaTree;
   }
 
   Future<Image?> get sensoriBack async {
-    await lock.synchronized(_getInfo);
+    await lock.synchronized(_getBack);
     return _sensoriBack;
   }
 
   // prendo le info
-  Future<void> _getInfo() async {
-    if (reload) {
+  // prendo le info
+  Future<void> _getSchema() async {
+    if (_reloadSchema) {
       if (remoteConnection != null &&
           !remoteConnection!.connectionDataNull &&
           remoteConnection!.connectionPresent) {
         // schemaTree = {};
         //_sensoriBack = null;
-        final directory = await getApplicationDocumentsDirectory();
+        if (!_isDirectoryInitialized) {
+          _directory = await getApplicationDocumentsDirectory();
+          _isDirectoryInitialized = true;
+        }
         // carico il dato local se c'è
+        Map<String, dynamic> _localSchemaTree = {};
         if (!kIsWeb) {
-          _backSchemaTree = await _getJsonFromLocal(
-              '${directory.path}/domo_${remoteConnection!.connectionName}.json');
-          _backSensoriBack = await _getImageFromLocal(
-              '${directory.path}/domo_${remoteConnection!.connectionName}.jpg');
+          _localSchemaTree = await _getJsonFromLocal(
+              '${_directory.path}/domo_${remoteConnection!.connectionName}.json');
         }
         // se c'è il remote carico anche da li
         if (await remoteConnection!.checkLocal()) {
@@ -102,43 +114,74 @@ class SchemaRepository extends ChangeNotifier {
           // String? savedWiFi = remoteConnection!.localWiFiConnectionName;
           Map<String, dynamic> _remoteSchemaTree = await _getJsonFromRemote(
               'domo_json',
-              '${directory.path}/domo_${remoteConnection!.connectionName}.json');
-          Image? _remoteSensoriBack = await _getImageFromRemote('domo_image',
-              '${directory.path}/domo_${remoteConnection!.connectionName}.jpg');
-          if (remoteConnection!.caFile != null) {
-            await _getFileFromRemote('caFile',
-                '${directory.path}/${remoteConnection!.connectionName}${remoteConnection!.caFile}.pfx');
-          }
-          if (remoteConnection!.certFile != null) {
-            await _getFileFromRemote('certFile',
-                '${directory.path}/${remoteConnection!.connectionName}${remoteConnection!.certFile}.pfx');
-          }
-          if (remoteConnection!.keyFile != null) {
-            await _getFileFromRemote('keyFile',
-                '${directory.path}/${remoteConnection!.connectionName}${remoteConnection!.keyFile}.key');
-          }
-          if (_remoteSchemaTree != {} && _remoteSchemaTree != _backSchemaTree) {
-            _backSchemaTree = _remoteSchemaTree;
-          }
-          if (_remoteSensoriBack != {} &&
-              _remoteSensoriBack != _backSensoriBack) {
-            _backSensoriBack = _remoteSensoriBack;
+              '${_directory.path}/domo_${remoteConnection!.connectionName}.json');
+          if (_remoteSchemaTree != {} &&
+              _remoteSchemaTree != _localSchemaTree) {
+            _localSchemaTree = _remoteSchemaTree;
+            saveJson(json.encode(_localSchemaTree),
+                '${_directory.path}/domo_${remoteConnection!.connectionName}.json');
           }
         }
-        if (schemaTree != _backSchemaTree || _sensoriBack != _backSensoriBack) {
-          schemaTree = _backSchemaTree;
-          _sensoriBack = _backSensoriBack;
-          if (!kIsWeb) {
-            saveJson(json.encode(schemaTree),
-                '${directory.path}/domo_${remoteConnection!.connectionName}.json');
-            if (_sensoriBack != _backSensoriBack) {
-              saveFile(_imageBase64,
-                  '${directory.path}/domo_${remoteConnection!.connectionName}.jpg');
-            }
-          }
+        if (_localSchemaTree != {} && _localSchemaTree != _schemaTree) {
+          _schemaTree = _localSchemaTree;
           notifyListeners();
         }
-        reload = false;
+        _reloadSchema = false;
+      }
+    }
+  }
+
+  Future<void> _getBack() async {
+    if (_reloadBack) {
+      if (remoteConnection != null &&
+          !remoteConnection!.connectionDataNull &&
+          remoteConnection!.connectionPresent) {
+        // schemaTree = {};
+        //_sensoriBack = null;
+        if (!_isDirectoryInitialized) {
+          _directory = await getApplicationDocumentsDirectory();
+          _isDirectoryInitialized = true;
+        }
+        // carico il dato local se c'è
+        Image? _localSensoriBack;
+        if (!kIsWeb) {
+          _localSensoriBack = await _getImageFromLocal(
+              '${_directory.path}/domo_${remoteConnection!.connectionName}.jpg');
+        }
+        // se c'è il remote carico anche da li
+        if (await remoteConnection!.checkLocal()) {
+          // String? localWiFi = await remoteConnection!.getWifiName();
+          // //  await info.getWifiName();
+          // String? savedWiFi = remoteConnection!.localWiFiConnectionName;
+          DoubleImage _remoteSensoriBack = await _getImageFromRemote(
+              'domo_image',
+              '${_directory.path}/domo_${remoteConnection!.connectionName}.jpg');
+          if (_remoteSensoriBack.image != null &&
+              _remoteSensoriBack.image != _localSensoriBack) {
+            _localSensoriBack = _remoteSensoriBack.image;
+            if (!kIsWeb) {
+              saveFile(_remoteSensoriBack.data,
+                  '${_directory.path}/domo_${remoteConnection!.connectionName}.jpg');
+            }
+          }
+          if (remoteConnection!.caFile != null) {
+            _getAndSaveFileFromRemote('caFile',
+                '${_directory.path}/${remoteConnection!.connectionName}${remoteConnection!.caFile}.pfx');
+          }
+          if (remoteConnection!.certFile != null) {
+            _getAndSaveFileFromRemote('certFile',
+                '${_directory.path}/${remoteConnection!.connectionName}${remoteConnection!.certFile}.pfx');
+          }
+          if (remoteConnection!.keyFile != null) {
+            _getAndSaveFileFromRemote('keyFile',
+                '${_directory.path}/${remoteConnection!.connectionName}${remoteConnection!.keyFile}.key');
+          }
+        }
+        if (_localSensoriBack != null && _sensoriBack != _localSensoriBack) {
+          _sensoriBack = _localSensoriBack;
+          notifyListeners();
+        }
+        _reloadBack = false;
       }
     }
   }
@@ -199,7 +242,8 @@ class SchemaRepository extends ChangeNotifier {
     }
   }
 
-  Future<Image?> _getImageFromRemote(String urlName, String fileName) async {
+  Future<DoubleImage> _getImageFromRemote(
+      String urlName, String fileName) async {
     remoteBackUri =
         'http://${remoteConnection!.localServerName}:$port/get/${urlName}';
     // http.Response? httpResponse = await lock.synchronized(() async {
@@ -210,17 +254,18 @@ class SchemaRepository extends ChangeNotifier {
     if (httpResponse.statusCode == 200) {
       // If the server did return a 200 OK response,
       // then parse the JSON.
-      _imageBase64 = httpResponse.bodyBytes;
-      return Image.memory(httpResponse.bodyBytes);
+      Uint8List _imageBase64 = httpResponse.bodyBytes;
+      return DoubleImage(Image.memory(_imageBase64), _imageBase64);
     } else {
       // If the server did not return a 200 OK response,
       // then throw an exception.
       //throw Exception('Failed to load album');
-      return null;
+      return DoubleImage(null, null);
     }
   }
 
-  Future<void> _getFileFromRemote(String urlName, String fileName) async {
+  Future<void> _getAndSaveFileFromRemote(
+      String urlName, String fileName) async {
     remoteBackUri =
         'http://${remoteConnection!.localServerName}:$port/get/${urlName}';
     // http.Response? httpResponse = await lock.synchronized(() async {
@@ -241,11 +286,11 @@ class SchemaRepository extends ChangeNotifier {
 
   Future<void> saveSchema(Map<String, dynamic> schemaToMerge) async {
     final directory = await getApplicationDocumentsDirectory();
-    Map<String, dynamic> _localSchemaTree = {...schemaTree, ...schemaToMerge};
+    Map<String, dynamic> _localSchemaTree = {..._schemaTree, ...schemaToMerge};
     Map<String, dynamic> _loadedSchemaTree = await _getJsonFromLocal(
         '${directory.path}/domo_${remoteConnection!.connectionName}.json');
     if (_loadedSchemaTree != _localSchemaTree) {
-      schemaTree = _localSchemaTree;
+      _schemaTree = _localSchemaTree;
       await saveJson(json.encode(_localSchemaTree),
           '${directory.path}/domo_${remoteConnection!.connectionName}.json');
     }
