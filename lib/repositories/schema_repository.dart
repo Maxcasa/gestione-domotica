@@ -43,15 +43,17 @@ class SchemaRepository extends ChangeNotifier {
       'connectionActive'
     ]);
     remoteConnection!.getConnectionInfo();
-    print('Istanzio il getter dello schema');
+    if (kDebugMode) {
+      print('Istanzio il getter dello schema');
+    }
   }
 
   //variabili
-  Map<String, dynamic> _schemaTree = {};
+  Map<String, dynamic>? _schemaTree;
   //Map<String, dynamic> _backSchemaTree = {};
   bool _reloadSchema = true;
 
-  Image? _sensoriBack;
+  DoubleImage? _sensoriBack;
   //Image? _backSensoriBack;
   bool _reloadBack = true;
 
@@ -79,14 +81,18 @@ class SchemaRepository extends ChangeNotifier {
   //   }
   // }
 
-  Future<Map<String, dynamic>> get schema async {
+  Future<Map<String, dynamic>?> get schema async {
     await lock.synchronized(_getSchema);
     return _schemaTree;
   }
 
   Future<Image?> get sensoriBack async {
     await lock.synchronized(_getBack);
-    return _sensoriBack;
+    if (_sensoriBack == null) {
+      return null;
+    } else {
+      return _sensoriBack!.image;
+    }
   }
 
   // prendo le info
@@ -103,7 +109,7 @@ class SchemaRepository extends ChangeNotifier {
           _isDirectoryInitialized = true;
         }
         // carico il dato local se c'è
-        Map<String, dynamic> _localSchemaTree = {};
+        Map<String, dynamic>? _localSchemaTree;
         if (!kIsWeb) {
           _localSchemaTree = await _getJsonFromLocal(
               '${_directory.path}/domo_${remoteConnection!.connectionName}.json');
@@ -113,10 +119,10 @@ class SchemaRepository extends ChangeNotifier {
           // String? localWiFi = await remoteConnection!.getWifiName();
           // //  await info.getWifiName();
           // String? savedWiFi = remoteConnection!.localWiFiConnectionName;
-          Map<String, dynamic> _remoteSchemaTree = await _getJsonFromRemote(
+          Map<String, dynamic>? _remoteSchemaTree = await _getJsonFromRemote(
               'domo_json',
               '${_directory.path}/domo_${remoteConnection!.connectionName}.json');
-          if (_remoteSchemaTree != {} &&
+          if (_remoteSchemaTree != null &&
               !(const DeepCollectionEquality()
                   .equals(_remoteSchemaTree, _localSchemaTree))) {
             _localSchemaTree = _remoteSchemaTree;
@@ -124,7 +130,7 @@ class SchemaRepository extends ChangeNotifier {
                 '${_directory.path}/domo_${remoteConnection!.connectionName}.json');
           }
         }
-        if (_localSchemaTree != {} &&
+        if (_localSchemaTree != null &&
             !(const DeepCollectionEquality()
                 .equals(_localSchemaTree, _schemaTree))) {
           _schemaTree = _localSchemaTree;
@@ -147,7 +153,7 @@ class SchemaRepository extends ChangeNotifier {
           _isDirectoryInitialized = true;
         }
         // carico il dato local se c'è
-        Image? _localSensoriBack;
+        DoubleImage? _localSensoriBack;
         if (!kIsWeb) {
           _localSensoriBack = await _getImageFromLocal(
               '${_directory.path}/domo_${remoteConnection!.connectionName}.jpg');
@@ -157,12 +163,13 @@ class SchemaRepository extends ChangeNotifier {
           // String? localWiFi = await remoteConnection!.getWifiName();
           // //  await info.getWifiName();
           // String? savedWiFi = remoteConnection!.localWiFiConnectionName;
-          DoubleImage _remoteSensoriBack = await _getImageFromRemote(
+          DoubleImage? _remoteSensoriBack = await _getImageFromRemote(
               'domo_image',
               '${_directory.path}/domo_${remoteConnection!.connectionName}.jpg');
-          if (_remoteSensoriBack.image != null &&
-              _remoteSensoriBack.image != _localSensoriBack) {
-            _localSensoriBack = _remoteSensoriBack.image;
+          if (_remoteSensoriBack != null &&
+              (_localSensoriBack == null ||
+                  _remoteSensoriBack.data != _localSensoriBack.data)) {
+            _localSensoriBack = _remoteSensoriBack;
             if (!kIsWeb) {
               saveFile(_remoteSensoriBack.data,
                   '${_directory.path}/domo_${remoteConnection!.connectionName}.jpg');
@@ -181,7 +188,9 @@ class SchemaRepository extends ChangeNotifier {
                 '${_directory.path}/${remoteConnection!.connectionName}${remoteConnection!.keyFile}.key');
           }
         }
-        if (_localSensoriBack != null && _sensoriBack != _localSensoriBack) {
+        if (_localSensoriBack != null &&
+            (_sensoriBack == null ||
+                _sensoriBack!.data != _localSensoriBack.data)) {
           _sensoriBack = _localSensoriBack;
           notifyListeners();
         }
@@ -190,28 +199,12 @@ class SchemaRepository extends ChangeNotifier {
     }
   }
 
-  Future<Map<String, dynamic>> _getJsonFromLocal(String fileName) async {
+  Future<Map<String, dynamic>?> _getJsonFromLocal(String fileName) async {
     final File file = File(fileName);
     try {
       if (await file.exists()) {
         String fileString = await file.readAsString();
         return json.decode(fileString);
-      } else {
-        return {};
-      }
-    } catch (e) {
-      print('Exception: $e');
-      return {};
-    }
-
-    //notifyListeners();
-  }
-
-  Future<Image?> _getImageFromLocal(String fileName) async {
-    final File file = File(fileName);
-    try {
-      if (await file.exists()) {
-        return Image.file(file);
       } else {
         return null;
       }
@@ -219,9 +212,28 @@ class SchemaRepository extends ChangeNotifier {
       print('Exception: $e');
       return null;
     }
+
+    //notifyListeners();
   }
 
-  Future<Map<String, dynamic>> _getJsonFromRemote(
+  Future<DoubleImage?> _getImageFromLocal(String fileName) async {
+    final File file = File(fileName);
+    try {
+      if (await file.exists()) {
+        Uint8List _imageBase64 = await file.readAsBytes();
+        return DoubleImage(Image.memory(_imageBase64), _imageBase64);
+      } else {
+        return null;
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Exception: $e');
+      }
+      return null;
+    }
+  }
+
+  Future<Map<String, dynamic>?> _getJsonFromRemote(
       String urlName, String fileName) async {
     // HttpClient httpClient = HttpClient()
     //   ..badCertificateCallback =
@@ -242,11 +254,11 @@ class SchemaRepository extends ChangeNotifier {
       // If the server did not return a 200 OK response,
       // then throw an exception.
       //throw Exception('Failed to load album');
-      return {};
+      return null;
     }
   }
 
-  Future<DoubleImage> _getImageFromRemote(
+  Future<DoubleImage?> _getImageFromRemote(
       String urlName, String fileName) async {
     remoteBackUri =
         'http://${remoteConnection!.localServerName}:$port/get/${urlName}';
@@ -264,7 +276,7 @@ class SchemaRepository extends ChangeNotifier {
       // If the server did not return a 200 OK response,
       // then throw an exception.
       //throw Exception('Failed to load album');
-      return DoubleImage(null, null);
+      return null;
     }
   }
 
@@ -288,13 +300,18 @@ class SchemaRepository extends ChangeNotifier {
     }
   }
 
-  Future<void> saveSchema(Map<String, dynamic> schemaToMerge) async {
-    Map<String, dynamic> _localSchemaTree = {..._schemaTree, ...schemaToMerge};
-    if (!(const DeepCollectionEquality()
-        .equals(_schemaTree, _localSchemaTree))) {
-      _schemaTree = _localSchemaTree;
-      await saveJson(json.encode(_localSchemaTree),
-          '${_directory.path}/domo_${remoteConnection!.connectionName}.json');
+  Future<void> saveSchema(Map<String, dynamic>? schemaToMerge) async {
+    if (_schemaTree != null && schemaToMerge != null) {
+      Map<String, dynamic> _localSchemaTree = {
+        ..._schemaTree!,
+        ...schemaToMerge
+      };
+      if (!(const DeepCollectionEquality()
+          .equals(_schemaTree, _localSchemaTree))) {
+        _schemaTree = _localSchemaTree;
+        await saveJson(json.encode(_localSchemaTree),
+            '${_directory.path}/domo_${remoteConnection!.connectionName}.json');
+      }
     }
   }
 

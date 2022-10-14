@@ -20,9 +20,11 @@ class SchemaSensori extends StatelessWidget {
         RemoteConnection remoteConnection, Widget? child) {
       /// Lista dei sensori da visualizzare
       sensoreList = [];
-      for (var item in schemaSensoriModel.sensori) {
-        if (remoteConnection.sensoriVisibili || item.sensoreVisibile) {
-          sensoreList.add(Sensore(sensore: item));
+      if (schemaSensoriModel.sensori != null) {
+        for (var item in schemaSensoriModel.sensori!) {
+          if (remoteConnection.sensoriVisibili || item.sensoreVisibile) {
+            sensoreList.add(Sensore(sensore: item));
+          }
         }
       }
       reorderListaSensori();

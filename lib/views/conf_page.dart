@@ -359,8 +359,8 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
   Widget rfButton() {
     return Consumer<SchemaHwModel>(
         builder: (BuildContext context, SchemaHwModel hw, Widget? child) {
-      List<HwModel> hwLista = hw.getModel("ReceiverHF");
-      if (hwLista.length > 0) {
+      List<HwModel> hwLista = hw.getModel("ReceiverHF") ?? [];
+      if (hwLista.isNotEmpty) {
         return RfManagerButton();
       } else {
         return SizedBox.shrink();

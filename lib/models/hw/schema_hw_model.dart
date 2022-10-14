@@ -58,7 +58,7 @@ class SchemaHwModel with ChangeNotifier {
   // variabili
   int id;
   String nome;
-  List<HwModel> hw = [];
+  List<HwModel>? hw;
   MQTTClientWrapper? mqttClientWrapper;
   SchemaRepository? schemaRepository;
   // String _nome = '';
@@ -79,17 +79,24 @@ class SchemaHwModel with ChangeNotifier {
     //   }
     // }
     try {
-      return hw.firstWhere((stato) => stato.id == id);
+      if (hw != null) {
+        return hw!.firstWhere((stato) => stato.id == id);
+      } else {
+        return null;
+      }
     } on Exception catch (e) {
       return null;
     }
   }
 
-  List<HwModel> getModel(String tipoStato) {
-    List<HwModel> tmpStatiList = [];
-    for (dynamic stato in hw) {
-      if ((stato).toString() == "Instance of '$tipoStato'") {
-        tmpStatiList.add(stato);
+  List<HwModel>? getModel(String tipoStato) {
+    List<HwModel>? tmpStatiList;
+    if (hw != null) {
+      tmpStatiList = [];
+      for (dynamic stato in hw!) {
+        if ((stato).toString() == "Instance of '$tipoStato'") {
+          tmpStatiList.add(stato);
+        }
       }
     }
     return tmpStatiList;
@@ -107,22 +114,22 @@ class SchemaHwModel with ChangeNotifier {
   }
 
   Future<void> _getSchemaHw() async {
-    Map<String, dynamic> tmpSchema = await schemaRepository!.schema;
-    hw = [];
-    if (tmpSchema.containsKey(topicSurName)) {
+    Map<String, dynamic>? tmpSchema = await schemaRepository!.schema;
+    if (tmpSchema != null && tmpSchema.containsKey(topicSurName)) {
+      hw = [];
       List listStati = tmpSchema[topicSurName];
       if (listStati.isNotEmpty) {
         for (var element in listStati) {
           String tipo = element['tipo'] ?? 'Hw';
           if (factories.containsKey(tipo)) {
             if (tipo == 'Hw') {
-              hw.add(HwModel.fromJson(element));
+              hw!.add(HwModel.fromJson(element));
             } else if (tipo == 'Semaforo') {
-              hw.add(HwModel.fromJson(element));
+              hw!.add(HwModel.fromJson(element));
             } else if (tipo == 'ReceiverHF') {
-              hw.add(HwModel.fromJson(element));
+              hw!.add(HwModel.fromJson(element));
             }
-            hw.last.setAzioneHwListener(callback: azioneHw);
+            hw!.last.setAzioneHwListener(callback: azioneHw);
           }
         }
         // mqttClientWrapper!.publishMessage(
@@ -162,35 +169,37 @@ class SchemaHwModel with ChangeNotifier {
   }
 
   _onStatoChanged(String messageData) {
-    Map<String, dynamic> jsonData = jsonDecode(messageData);
-    if (jsonData.containsKey('stato')) {
-      List<HwModel> localStati = [];
-      if (jsonData['id'] == "*") {
-        localStati.addAll(hw);
-      } else if (int.tryParse(jsonData['id']) != null) {
-        // se passo un id intero
-        if (getStato(int.parse(jsonData['id'])) != null) {
-          // se è l'id è quello di un sensore registrato
-          localStati.add(getStato(int.parse(jsonData['id']))!);
-        } else {
-          // se l'id non è registrato metto il comando in attesa
+    if (hw != null) {
+      Map<String, dynamic> jsonData = jsonDecode(messageData);
+      if (jsonData.containsKey('stato')) {
+        List<HwModel> localStati = [];
+        if (jsonData['id'] == "*") {
+          localStati.addAll(hw!);
+        } else if (int.tryParse(jsonData['id']) != null) {
+          // se passo un id intero
+          if (getStato(int.parse(jsonData['id'])) != null) {
+            // se è l'id è quello di un sensore registrato
+            localStati.add(getStato(int.parse(jsonData['id']))!);
+          } else {
+            // se l'id non è registrato metto il comando in attesa
+            int findIndex = waitingHwStato
+                .indexWhere((element) => element['id'] == jsonData['id']);
+            if (findIndex >= 0) {
+              waitingHwStato[findIndex]['stato'] = jsonData['stato'];
+            } else {
+              waitingHwStato.add(jsonData);
+            }
+          }
+        }
+        for (HwModel localSensore in localStati) {
+          localSensore.valore = int.parse(jsonData['stato']);
           int findIndex = waitingHwStato
               .indexWhere((element) => element['id'] == jsonData['id']);
           if (findIndex >= 0) {
-            waitingHwStato[findIndex]['stato'] = jsonData['stato'];
-          } else {
-            waitingHwStato.add(jsonData);
+            waitingHwStato.removeAt(findIndex);
           }
+          notifyListeners();
         }
-      }
-      for (HwModel localSensore in localStati) {
-        localSensore.valore = int.parse(jsonData['stato']);
-        int findIndex = waitingHwStato
-            .indexWhere((element) => element['id'] == jsonData['id']);
-        if (findIndex >= 0) {
-          waitingHwStato.removeAt(findIndex);
-        }
-        notifyListeners();
       }
     }
   }

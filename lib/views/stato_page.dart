@@ -172,31 +172,33 @@ class _StatoPageState extends State<StatoPage> {
       bool isSensoreInfissoAttivo = false;
       bool isSensorePresenza = false;
       bool isSensorePresenzaAttivo = false;
-      for (SensoreModel sensore in schemaSensori.sensori) {
-        if (sensore is SensoreInfisso) {
-          if (sensore.attivazioni.isNotEmpty) {
-            isSensoreInfisso = true;
-            for (AttivazioneModel attivazioneModel in sensore.attivazioni) {
-              if (attivazioneModel.id == attivazione &&
-                  attivazioneModel.valore > 0) {
-                isSensoreInfissoAttivo = true;
+      if (schemaSensori.sensori != null) {
+        for (SensoreModel sensore in schemaSensori.sensori!) {
+          if (sensore is SensoreInfisso) {
+            if (sensore.attivazioni.isNotEmpty) {
+              isSensoreInfisso = true;
+              for (AttivazioneModel attivazioneModel in sensore.attivazioni) {
+                if (attivazioneModel.id == attivazione &&
+                    attivazioneModel.valore > 0) {
+                  isSensoreInfissoAttivo = true;
+                }
               }
+              // AttivazioneModel sensore.attivazioni.
+              // isSensoreInfissoAttivo = false;
             }
-            // AttivazioneModel sensore.attivazioni.
-            // isSensoreInfissoAttivo = false;
           }
-        }
-        if (sensore is SensorePresenza) {
-          if (sensore.attivazioni.isNotEmpty) {
-            isSensorePresenza = true;
-            for (AttivazioneModel attivazioneModel in sensore.attivazioni) {
-              if (attivazioneModel.id == attivazione &&
-                  attivazioneModel.valore > 0) {
-                isSensorePresenzaAttivo = true;
+          if (sensore is SensorePresenza) {
+            if (sensore.attivazioni.isNotEmpty) {
+              isSensorePresenza = true;
+              for (AttivazioneModel attivazioneModel in sensore.attivazioni) {
+                if (attivazioneModel.id == attivazione &&
+                    attivazioneModel.valore > 0) {
+                  isSensorePresenzaAttivo = true;
+                }
               }
+              // AttivazioneModel sensore.attivazioni.
+              // isSensoreInfissoAttivo = false;
             }
-            // AttivazioneModel sensore.attivazioni.
-            // isSensoreInfissoAttivo = false;
           }
         }
       }

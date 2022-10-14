@@ -1,6 +1,7 @@
 // import 'package:gestione_domotica/models/logging.dart';
 import 'dart:core';
 
+import 'package:flutter/foundation.dart';
 import 'package:gestione_domotica/models/stati/stati_layer.dart';
 import 'package:gestione_domotica/models/timer/timer_attivazioni.dart';
 import 'package:gestione_domotica/repositories/keep_alive_provider.dart';
@@ -70,7 +71,7 @@ class SchemaStatiModel with ChangeNotifier {
   // variabili
   int id;
   String nome;
-  List<StatoModel> stati = [];
+  List<StatoModel>? stati;
   Image? statiBack;
   MQTTClientWrapper? mqttClientWrapper;
   SchemaRepository? schemaRepository;
@@ -95,7 +96,11 @@ class SchemaStatiModel with ChangeNotifier {
     //   }
     // }
     try {
-      return stati.firstWhere((stato) => stato.id == id);
+      if (stati != null) {
+        return stati!.firstWhere((stato) => stato.id == id);
+      } else {
+        return null;
+      }
     } on Exception catch (e) {
       return null;
     }
@@ -103,9 +108,11 @@ class SchemaStatiModel with ChangeNotifier {
 
   List<StatoModel> getModel(String tipoStato) {
     List<StatoModel> tmpStatiList = [];
-    for (dynamic stato in stati) {
-      if ((stato).toString() == "Instance of '${tipoStato}'") {
-        tmpStatiList.add(stato);
+    if (stati != null) {
+      for (dynamic stato in stati!) {
+        if ((stato).toString() == "Instance of '${tipoStato}'") {
+          tmpStatiList.add(stato);
+        }
       }
     }
     return tmpStatiList;
@@ -116,7 +123,7 @@ class SchemaStatiModel with ChangeNotifier {
   // }
 
   void requestStatus() {
-    if (stati.isNotEmpty) {
+    if (stati != null && stati!.isNotEmpty) {
       multiMessageProvider.addMessage(
           'stati/set', '{"hj": ${json.encode(toShortJson())}}', ['stati/get']);
       statusRequested = false;
@@ -153,9 +160,9 @@ class SchemaStatiModel with ChangeNotifier {
   // }
 
   Future<void> _getSchemaStato() async {
-    Map<String, dynamic> tmpSchema = await schemaRepository!.schema;
-    stati = [];
-    if (tmpSchema.containsKey(topicSurName)) {
+    Map<String, dynamic>? tmpSchema = await schemaRepository!.schema;
+    if (tmpSchema != null && tmpSchema.containsKey(topicSurName)) {
+      stati = [];
       List listStati = tmpSchema[topicSurName];
       if (listStati.isNotEmpty) {
         for (var element in listStati) {
@@ -163,19 +170,21 @@ class SchemaStatiModel with ChangeNotifier {
           int id = element['id'];
           if (factories.containsKey(tipo)) {
             if (tipo == 'Stato') {
-              stati.add(StatoModel.fromJson(element));
+              stati!.add(StatoModel.fromJson(element));
             } else if (tipo == 'StatoAllarme') {
-              stati.add(StatoAllarme.fromJson(element));
+              stati!.add(StatoAllarme.fromJson(element));
             } else if (tipo == 'StatoClima') {
-              stati.add(StatoClima.fromJson(element));
+              stati!.add(StatoClima.fromJson(element));
             }
-            stati.last.setAzioneStatoListener(callback: azioneStato);
+            stati!.last.setAzioneStatoListener(callback: azioneStato);
           }
         }
         // mqttClientWrapper!.publishMessage(
         //     topicSurName: topicSurName, messageData: 'get/status');
       }
-      print('SchemaStatiModel:: stati caricati');
+      if (kDebugMode) {
+        print('SchemaStatiModel:: stati caricati');
+      }
       // Se è il caso richiedo lo stato
       if (statusRequested) {
         requestStatus();
@@ -196,18 +205,20 @@ class SchemaStatiModel with ChangeNotifier {
   }
 
   void getTimerFromRemote() {
-    if (keepAliveProvider!.mappaValori.containsKey('Timers')) {
-      keepAliveProvider?.mappaValori['Timers']!.forEach((mappaValore) {
-        StatoModel stato =
-            stati.firstWhere((stato) => mappaValore['id'] == stato.id);
-        if (stato.timers?.timers != null &&
-            stato.timers.hashCode != mappaValore['hash']) {
-          // richiedi il set del timer
-          String message = "{\"id\": ${stato.id}, \"timers\": \"get\"}";
-          mqttClientWrapper!.publishMessage(
-              topicSurName: '$topicSurName/set', messageData: message);
-        }
-      });
+    if (stati != null) {
+      if (keepAliveProvider!.mappaValori.containsKey('Timers')) {
+        keepAliveProvider?.mappaValori['Timers']!.forEach((mappaValore) {
+          StatoModel stato =
+              stati!.firstWhere((stato) => mappaValore['id'] == stato.id);
+          if (stato.timers?.timers != null &&
+              stato.timers.hashCode != mappaValore['hash']) {
+            // richiedi il set del timer
+            String message = "{\"id\": ${stato.id}, \"timers\": \"get\"}";
+            mqttClientWrapper!.publishMessage(
+                topicSurName: '$topicSurName/set', messageData: message);
+          }
+        });
+      }
     }
   }
 
@@ -236,68 +247,76 @@ class SchemaStatiModel with ChangeNotifier {
 
   void _subscribeTopic() {
     mqttClientWrapper!.subscribeToTopic(
-        topicSurName: '${topicSurName}/get',
+        topicSurName: '$topicSurName/get',
         onDataReceived: (messageData) => _onStatoChanged(messageData));
     // mqttClientWrapper!.publishMessage(
     //     topicSurName: '${topicSurName}/get', messageData: "{\"status\": \"\"}");
   }
 
   _onStatoChanged(String messageData) {
-    Map<String, dynamic> jsonData = jsonDecode(messageData);
-    if (jsonData.containsKey('id')) {
-      List<StatoModel> localStati = [];
-      if (jsonData['id'] == "*") {
-        localStati.addAll(stati);
-      } else {
-        if (jsonData['id'] is String) {
-          jsonData['id'] = int.parse(jsonData['id']);
-        }
-        // se passo un id intero
-        if (getStato(jsonData['id']) != null) {
-          // se è l'id è quello di un sensore registrato
-          localStati.add(getStato(jsonData['id'])!);
+    if (stati != null) {
+      Map<String, dynamic> jsonData = jsonDecode(messageData);
+      if (jsonData.containsKey('id')) {
+        List<StatoModel> localStati = [];
+        if (jsonData['id'] == "*") {
+          localStati.addAll(stati!);
         } else {
-          // se l'id non è registrato metto il comando in attesa
-          int findIndex = waitingStatoStato
-              .indexWhere((element) => element['id'] == jsonData['id']);
-          if (findIndex >= 0) {
-            waitingStatoStato[findIndex]['valore'] = jsonData['valore'];
+          if (jsonData['id'] is String) {
+            jsonData['id'] = int.parse(jsonData['id']);
+          }
+          // se passo un id intero
+          if (getStato(jsonData['id']) != null) {
+            // se è l'id è quello di un sensore registrato
+            localStati.add(getStato(jsonData['id'])!);
           } else {
-            waitingStatoStato.add(jsonData);
+            // se l'id non è registrato metto il comando in attesa
+            int findIndex = waitingStatoStato
+                .indexWhere((element) => element['id'] == jsonData['id']);
+            if (findIndex >= 0) {
+              waitingStatoStato[findIndex]['valore'] = jsonData['valore'];
+            } else {
+              waitingStatoStato.add(jsonData);
+            }
           }
         }
-      }
-      if (localStati.isNotEmpty) {
-        for (StatoModel localStati in localStati) {
-          if (jsonData.containsKey('valore')) {
-            localStati.valore = jsonData['valore'];
+        if (localStati.isNotEmpty) {
+          for (StatoModel localStati in localStati) {
+            if (jsonData.containsKey('valore')) {
+              localStati.valore = jsonData['valore'];
+            }
+            int findIndex = waitingStatoStato
+                .indexWhere((element) => element['id'] == jsonData['id']);
+            if (findIndex >= 0) {
+              waitingStatoStato.removeAt(findIndex);
+            }
           }
-          int findIndex = waitingStatoStato
-              .indexWhere((element) => element['id'] == jsonData['id']);
-          if (findIndex >= 0) {
-            waitingStatoStato.removeAt(findIndex);
-          }
+          notifyListeners();
         }
-        notifyListeners();
       }
     }
   }
 
   //funzione per salvare lo schema
   void saveSchema() {
-    schemaRepository?.saveSchema({
-      topicSurName:
-          stati.map<Map<String, dynamic>>((stato) => stato.toJson()).toList()
-    });
+    if (stati != null) {
+      schemaRepository?.saveSchema({
+        topicSurName:
+            stati!.map<Map<String, dynamic>>((stato) => stato.toJson()).toList()
+      });
+    }
   }
 
-  Map<String, dynamic> toShortJson() {
-    return {
-      'i': id,
-      's': stati
-          .map<Map<String, dynamic>>((stato) => stato.toShortJson())
-          .toList(),
-    };
+  Map<String, dynamic>? toShortJson() {
+    if (stati != null) {
+      return {
+        'i': id,
+        's': stati!
+            .map<Map<String, dynamic>>((stato) => stato.toShortJson())
+            .toList(),
+      };
+    } else {
+      return null;
+    }
   }
 
   // _onStatoChanged(String messageData) {

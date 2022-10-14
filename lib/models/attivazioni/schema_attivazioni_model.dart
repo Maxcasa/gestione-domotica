@@ -59,7 +59,7 @@ class SchemaAttivazioniModel with ChangeNotifier {
   // variabili
   int id;
   String nome;
-  List<AttivazioneModel> attivazioni = [];
+  List<AttivazioneModel>? attivazioni;
   Image? sensoriBack;
   MQTTClientWrapper? mqttClientWrapper;
   SchemaRepository? schemaRepository;
@@ -69,16 +69,18 @@ class SchemaAttivazioniModel with ChangeNotifier {
 
   // getter e setter
   AttivazioneModel? getAttivazione(id) {
-    for (var i = 0; i < attivazioni.length; i++) {
-      if (attivazioni[i].id == id) {
-        return attivazioni[id];
+    if (attivazioni != null) {
+      for (var i = 0; i < attivazioni!.length; i++) {
+        if (attivazioni![i].id == id) {
+          return attivazioni![id];
+        }
       }
     }
     return null;
   }
 
-  Future<List<AttivazioneModel>> getAttivazioni() async {
-    if (attivazioni.isEmpty) {
+  Future<List<AttivazioneModel>?> getAttivazioni() async {
+    if (attivazioni == null) {
       await _getSchemaAttivazioni();
     }
     return attivazioni;
@@ -92,9 +94,9 @@ class SchemaAttivazioniModel with ChangeNotifier {
   }
 
   Future<void> _getSchemaAttivazioni() async {
-    Map<String, dynamic> tmpSchema = await schemaRepository!.schema;
-    attivazioni = [];
-    if (tmpSchema.containsKey(topicSurName)) {
+    Map<String, dynamic>? tmpSchema = await schemaRepository!.schema;
+    if (tmpSchema != null && tmpSchema.containsKey(topicSurName)) {
+      attivazioni = [];
       List listAttivazioni = tmpSchema[topicSurName];
       if (listAttivazioni.isNotEmpty) {
         for (var element in listAttivazioni) {
@@ -102,13 +104,13 @@ class SchemaAttivazioniModel with ChangeNotifier {
           int id = element['id'];
           if (factories.containsKey(tipo)) {
             if (tipo == 'Attivazione') {
-              attivazioni.add(AttivazioneModel.fromJson(element));
+              attivazioni!.add(AttivazioneModel.fromJson(element));
             } else if (tipo == 'Allarme') {
-              attivazioni.add(AttivazioneAllarme.fromJson(element));
+              attivazioni!.add(AttivazioneAllarme.fromJson(element));
             } else if (tipo == 'Notifica') {
-              attivazioni.add(AttivazioneModel.fromJson(element));
+              attivazioni!.add(AttivazioneModel.fromJson(element));
             }
-            attivazioni.last
+            attivazioni!.last
                 .setAzioneAttivazioneListener(callback: azioneAttivazione);
           }
         }
@@ -148,35 +150,37 @@ class SchemaAttivazioniModel with ChangeNotifier {
   }
 
   _onAttivazioneChanged(String messageData) {
-    Map<String, dynamic> jsonData = jsonDecode(messageData);
-    if (jsonData.containsKey('stato')) {
-      List<AttivazioneModel> localAttivazioni = [];
-      if (jsonData['id'] == "*") {
-        localAttivazioni.addAll(attivazioni);
-      } else if (int.tryParse(jsonData['id']) != null) {
-        // se passo un id intero
-        if (getAttivazione(int.parse(jsonData['id'])) != null) {
-          // se è l'id è quello di un sensore registrato
-          localAttivazioni.add(getAttivazione(int.parse(jsonData['id']))!);
-        } else {
-          // se l'id non è registrato metto il comando in attesa
+    if (attivazioni != null) {
+      Map<String, dynamic> jsonData = jsonDecode(messageData);
+      if (jsonData.containsKey('stato')) {
+        List<AttivazioneModel> localAttivazioni = [];
+        if (jsonData['id'] == "*") {
+          localAttivazioni.addAll(attivazioni!);
+        } else if (int.tryParse(jsonData['id']) != null) {
+          // se passo un id intero
+          if (getAttivazione(int.parse(jsonData['id'])) != null) {
+            // se è l'id è quello di un sensore registrato
+            localAttivazioni.add(getAttivazione(int.parse(jsonData['id']))!);
+          } else {
+            // se l'id non è registrato metto il comando in attesa
+            int findIndex = waitingAttivazioneStato
+                .indexWhere((element) => element['id'] == jsonData['id']);
+            if (findIndex >= 0) {
+              waitingAttivazioneStato[findIndex]['stato'] = jsonData['stato'];
+            } else {
+              waitingAttivazioneStato.add(jsonData);
+            }
+          }
+        }
+        for (AttivazioneModel localAttivazione in localAttivazioni) {
+          localAttivazione.valore = int.parse(jsonData['stato']);
           int findIndex = waitingAttivazioneStato
               .indexWhere((element) => element['id'] == jsonData['id']);
           if (findIndex >= 0) {
-            waitingAttivazioneStato[findIndex]['stato'] = jsonData['stato'];
-          } else {
-            waitingAttivazioneStato.add(jsonData);
+            waitingAttivazioneStato.removeAt(findIndex);
           }
+          notifyListeners();
         }
-      }
-      for (AttivazioneModel localAttivazione in localAttivazioni) {
-        localAttivazione.valore = int.parse(jsonData['stato']);
-        int findIndex = waitingAttivazioneStato
-            .indexWhere((element) => element['id'] == jsonData['id']);
-        if (findIndex >= 0) {
-          waitingAttivazioneStato.removeAt(findIndex);
-        }
-        notifyListeners();
       }
     }
   }
@@ -190,13 +194,17 @@ class SchemaAttivazioniModel with ChangeNotifier {
     // });
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': nome,
-      'attivazioni': attivazioni
-          .map<Map<String, dynamic>>((sensore) => sensore.toJson())
-          .toList(),
-    };
+  Map<String, dynamic>? toJson() {
+    if (attivazioni != null) {
+      return {
+        'id': id,
+        'name': nome,
+        'attivazioni': attivazioni!
+            .map<Map<String, dynamic>>((sensore) => sensore.toJson())
+            .toList(),
+      };
+    } else {
+      return null;
+    }
   }
 }

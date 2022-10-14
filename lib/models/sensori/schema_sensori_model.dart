@@ -67,7 +67,7 @@ class SchemaSensoriModel with ChangeNotifier {
   // variabili
   int id;
   String nome;
-  List<SensoreModel> sensori = [];
+  List<SensoreModel>? sensori;
   Image? sensoriBack;
   MQTTClientWrapper? mqttClientWrapper;
   SchemaRepository? schemaRepository;
@@ -79,16 +79,18 @@ class SchemaSensoriModel with ChangeNotifier {
 
   // getter e setter
   SensoreModel? getSensore(id) {
-    for (var i = 0; i < sensori.length; i++) {
-      if (sensori[i].id == id) {
-        return sensori[id];
+    if (sensori != null) {
+      for (var i = 0; i < sensori!.length; i++) {
+        if (sensori![i].id == id) {
+          return sensori![id];
+        }
       }
     }
     return null;
   }
 
-  Future<List<SensoreModel>> getSensori() async {
-    if (sensori.isEmpty) {
+  Future<List<SensoreModel>?> getSensori() async {
+    if (sensori == null) {
       await _getSchemaSensori();
     }
     return sensori;
@@ -110,9 +112,9 @@ class SchemaSensoriModel with ChangeNotifier {
   }
 
   Future<void> _getSchemaSensori() async {
-    Map<String, dynamic> tmpSchema = await schemaRepository!.schema;
-    sensori = [];
-    if (tmpSchema.containsKey(topicSurName)) {
+    Map<String, dynamic>? tmpSchema = await schemaRepository!.schema;
+    if (tmpSchema != null && tmpSchema.containsKey(topicSurName)) {
+      sensori = [];
       List listSensori = tmpSchema[topicSurName];
       if (listSensori.isNotEmpty) {
         for (var element in listSensori) {
@@ -120,21 +122,21 @@ class SchemaSensoriModel with ChangeNotifier {
           //int id = element['id'];
           if (factories.containsKey(tipo)) {
             if (tipo == 'Sensore') {
-              sensori.add(SensoreModel.fromJson(element));
+              sensori!.add(SensoreModel.fromJson(element));
             } else if (tipo == 'SensoreLuce') {
-              sensori.add(SensoreLuce.fromJson(element));
+              sensori!.add(SensoreLuce.fromJson(element));
             } else if (tipo == 'SensoreInfisso') {
-              sensori.add(SensoreInfisso.fromJson(element));
+              sensori!.add(SensoreInfisso.fromJson(element));
             } else if (tipo == 'SensoreTeH') {
-              sensori.add(SensoreTeH.fromJson(element));
+              sensori!.add(SensoreTeH.fromJson(element));
             } else if (tipo == 'Sirena' || tipo == 'Sirena_1') {
-              sensori.add(SensoreSirena.fromJson(element, numeroRele: 1));
+              sensori!.add(SensoreSirena.fromJson(element, numeroRele: 1));
             } else if (tipo == 'Sirena_2') {
-              sensori.add(SensoreSirena.fromJson(element, numeroRele: 2));
+              sensori!.add(SensoreSirena.fromJson(element, numeroRele: 2));
             } else if (tipo == 'SensorePresenza') {
-              sensori.add(SensorePresenza.fromJson(element));
+              sensori!.add(SensorePresenza.fromJson(element));
             }
-            sensori.last.setAzioneSensoreListener(callback: azioneSensore);
+            sensori!.last.setAzioneSensoreListener(callback: azioneSensore);
           }
         }
         // mqttClientWrapper!.publishMessage(
@@ -152,8 +154,10 @@ class SchemaSensoriModel with ChangeNotifier {
   @override
   int get hashCode {
     int tmpHash = 0;
-    for (int i = 0; i < sensori.length; i++) {
-      tmpHash += 64 * i * sensori[i].hashCode;
+    if (sensori != null) {
+      for (int i = 0; i < sensori!.length; i++) {
+        tmpHash += 64 * i * sensori![i].hashCode;
+      }
     }
     return tmpHash;
   }
@@ -195,80 +199,82 @@ class SchemaSensoriModel with ChangeNotifier {
   }
 
   _onSensorChanged(String messageData) {
-    Map<String, dynamic> jsonData = jsonDecode(messageData);
-    List<SensoreModel> localSensori = [];
-    if (jsonData.containsKey('id')) {
-      if (jsonData['id'] == "*") {
-        localSensori.addAll(sensori);
-      } else {
-        if (jsonData['id'] is String) {
-          jsonData['id'] = int.parse(jsonData['id']);
-        }
-        // se passo un id intero
-        if (getSensore(jsonData['id']) != null) {
-          // se è l'id è quello di un sensore registrato
-          localSensori.add(getSensore(jsonData['id'])!);
+    if (sensori != null) {
+      Map<String, dynamic> jsonData = jsonDecode(messageData);
+      List<SensoreModel>? localSensori = [];
+      if (jsonData.containsKey('id')) {
+        if (jsonData['id'] == "*") {
+          localSensori.addAll(sensori!);
         } else {
-          // se l'id non è registrato metto il comando in attesa
-          int findIndex = waitingSensoreStato
-              .indexWhere((element) => element['id'] == jsonData['id']);
-          if (findIndex >= 0) {
+          if (jsonData['id'] is String) {
+            jsonData['id'] = int.parse(jsonData['id']);
+          }
+          // se passo un id intero
+          if (getSensore(jsonData['id']) != null) {
+            // se è l'id è quello di un sensore registrato
+            localSensori.add(getSensore(jsonData['id'])!);
+          } else {
+            // se l'id non è registrato metto il comando in attesa
+            int findIndex = waitingSensoreStato
+                .indexWhere((element) => element['id'] == jsonData['id']);
+            if (findIndex >= 0) {
+              if (jsonData.containsKey('valore')) {
+                waitingSensoreStato[findIndex]['valore'] = jsonData['valore'];
+              }
+              if (jsonData.containsKey('attiva')) {
+                waitingSensoreStato[findIndex]['attiva'] = jsonData['attiva'];
+              }
+              if (jsonData.containsKey('com')) {
+                waitingSensoreStato[findIndex]['com'] = jsonData['com'];
+              }
+            } else {
+              waitingSensoreStato.add(jsonData);
+            }
+          }
+        }
+        if (localSensori.isNotEmpty) {
+          for (SensoreModel localSensore in localSensori) {
             if (jsonData.containsKey('valore')) {
-              waitingSensoreStato[findIndex]['valore'] = jsonData['valore'];
+              try {
+                localSensore.valore = jsonData['valore'];
+              } catch (e) {
+                localSensore.valore = int.parse(jsonData['valore']);
+              }
             }
             if (jsonData.containsKey('attiva')) {
-              waitingSensoreStato[findIndex]['attiva'] = jsonData['attiva'];
+              _onAttivazioneChange(localSensore, jsonData['attiva']);
             }
             if (jsonData.containsKey('com')) {
-              waitingSensoreStato[findIndex]['com'] = jsonData['com'];
+              // Map<String, dynamic> messageJson = {};
+              // if (jsonData['com'] == 'shotrJ') {
+              //     messageJson['status'] = 'sensori';
+              //     List listSensorHash = [];
+              //     for (SensoreModel localSensore in localSensori) {
+              //       Map<String, dynamic> sensorHash = {
+              //         'id': localSensore.id,
+              //         'hash': localSensore.hashCode
+              //       };
+              //       listSensorHash.add(sensorHash);
+              //     }
+              //     if (listSensorHash.isNotEmpty) {
+              //       messageJson['hash'] = listSensorHash;
+              //       multiMessageProvider.addMessage(
+              //           'request/set', json.encode(messageJson), ['sensori/get']);
+              //     }
+              //   }
             }
-          } else {
-            waitingSensoreStato.add(jsonData);
-          }
-        }
-      }
-      if (localSensori.isNotEmpty) {
-        for (SensoreModel localSensore in localSensori) {
-          if (jsonData.containsKey('valore')) {
-            try {
-              localSensore.valore = jsonData['valore'];
-            } catch (e) {
-              localSensore.valore = int.parse(jsonData['valore']);
-            }
-          }
-          if (jsonData.containsKey('attiva')) {
-            _onAttivazioneChange(localSensore, jsonData['attiva']);
-          }
-          if (jsonData.containsKey('com')) {
-            // Map<String, dynamic> messageJson = {};
-            // if (jsonData['com'] == 'shotrJ') {
-            //     messageJson['status'] = 'sensori';
-            //     List listSensorHash = [];
-            //     for (SensoreModel localSensore in localSensori) {
-            //       Map<String, dynamic> sensorHash = {
-            //         'id': localSensore.id,
-            //         'hash': localSensore.hashCode
-            //       };
-            //       listSensorHash.add(sensorHash);
-            //     }
-            //     if (listSensorHash.isNotEmpty) {
-            //       messageJson['hash'] = listSensorHash;
-            //       multiMessageProvider.addMessage(
-            //           'request/set', json.encode(messageJson), ['sensori/get']);
-            //     }
-            //   }
-          }
 
-          // if (localSensore is SensoreSirena && jsonData.containsKey('azion')) {
-          //   localSensore.azionamenti = int.parse(jsonData['azion']);
-          // }
-          int findIndex = waitingSensoreStato
-              .indexWhere((element) => element['id'] == jsonData['id']);
-          if (findIndex >= 0) {
-            waitingSensoreStato.removeAt(findIndex);
+            // if (localSensore is SensoreSirena && jsonData.containsKey('azion')) {
+            //   localSensore.azionamenti = int.parse(jsonData['azion']);
+            // }
+            int findIndex = waitingSensoreStato
+                .indexWhere((element) => element['id'] == jsonData['id']);
+            if (findIndex >= 0) {
+              waitingSensoreStato.removeAt(findIndex);
+            }
           }
+          notifyListeners();
         }
-        notifyListeners();
       }
     }
     // if (jsonData.containsKey('set')) {
@@ -322,9 +328,11 @@ class SchemaSensoriModel with ChangeNotifier {
     // final ids = _storage.keys.toList()..sort();
     // final id = (ids.length == 0) ? 1 : ids.last + 1;
     int maxIdAzione = 0;
-    for (var element in sensori) {
-      if (element.id > maxIdAzione) {
-        maxIdAzione = element.id;
+    if (sensori != null) {
+      for (var element in sensori!) {
+        if (element.id > maxIdAzione) {
+          maxIdAzione = element.id;
+        }
       }
     }
 
@@ -377,7 +385,7 @@ class SchemaSensoriModel with ChangeNotifier {
   }
 
   void requestStatus() {
-    if (sensori.isNotEmpty) {
+    if (sensori != null && sensori!.isNotEmpty) {
       multiMessageProvider.addMessage('sensori/set',
           '{"hj": ${json.encode(toShortJson())}}', ['sensori/get']);
       statusRequested = false;
@@ -388,10 +396,13 @@ class SchemaSensoriModel with ChangeNotifier {
 
   //funzione per salvare lo schema
   void saveSchema() {
-    schemaRepository?.saveSchema({
-      topicSurName:
-          sensori.map<Map<String, dynamic>>((stato) => stato.toJson()).toList()
-    });
+    if (sensori != null) {
+      schemaRepository?.saveSchema({
+        topicSurName: sensori!
+            .map<Map<String, dynamic>>((stato) => stato.toJson())
+            .toList()
+      });
+    }
     //schemaRepository?.saveBackImage();
   }
 
@@ -404,23 +415,31 @@ class SchemaSensoriModel with ChangeNotifier {
     // });
   }
 
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': nome,
-      'hash': hashCode,
-      'sensori': sensori
-          .map<Map<String, dynamic>>((sensore) => sensore.toJson())
-          .toList(),
-    };
+  Map<String, dynamic>? toJson() {
+    if (sensori != null) {
+      return {
+        'id': id,
+        'name': nome,
+        'hash': hashCode,
+        'sensori': sensori!
+            .map<Map<String, dynamic>>((sensore) => sensore.toJson())
+            .toList(),
+      };
+    } else {
+      return null;
+    }
   }
 
-  Map<String, dynamic> toShortJson() {
-    return {
-      'i': id,
-      's': sensori
-          .map<Map<String, dynamic>>((sensore) => sensore.toShortJson())
-          .toList(),
-    };
+  Map<String, dynamic>? toShortJson() {
+    if (sensori != null) {
+      return {
+        'i': id,
+        's': sensori!
+            .map<Map<String, dynamic>>((sensore) => sensore.toShortJson())
+            .toList(),
+      };
+    } else {
+      return null;
+    }
   }
 }
