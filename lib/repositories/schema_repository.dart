@@ -123,16 +123,14 @@ class SchemaRepository extends ChangeNotifier {
               'domo_json',
               '${_directory.path}/domo_${remoteConnection!.connectionName}.json');
           if (_remoteSchemaTree != null &&
-              !(const DeepCollectionEquality()
-                  .equals(_remoteSchemaTree, _localSchemaTree))) {
+              !(checkDoubleMaps(_remoteSchemaTree, _localSchemaTree))) {
             _localSchemaTree = _remoteSchemaTree;
             saveJson(json.encode(_localSchemaTree),
                 '${_directory.path}/domo_${remoteConnection!.connectionName}.json');
           }
         }
         if (_localSchemaTree != null &&
-            !(const DeepCollectionEquality()
-                .equals(_localSchemaTree, _schemaTree))) {
+            !(checkDoubleMaps(_localSchemaTree, _schemaTree))) {
           _schemaTree = _localSchemaTree;
           notifyListeners();
         }
@@ -306,8 +304,7 @@ class SchemaRepository extends ChangeNotifier {
         ..._schemaTree!,
         ...schemaToMerge
       };
-      if (!(const DeepCollectionEquality()
-          .equals(_schemaTree, _localSchemaTree))) {
+      if (!(checkDoubleMaps(_schemaTree, _localSchemaTree))) {
         _schemaTree = _localSchemaTree;
         await saveJson(json.encode(_localSchemaTree),
             '${_directory.path}/domo_${remoteConnection!.connectionName}.json');
@@ -333,6 +330,66 @@ class SchemaRepository extends ChangeNotifier {
     if (!kIsWeb) {
       final File file = File(fileName);
       await file.writeAsBytes(imageData);
+    }
+  }
+
+  bool checkDoubleMaps(dynamic a, dynamic b) {
+    if (checkSingleMaps(a, b) && checkSingleMaps(b, a)) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  bool checkSingleMaps(dynamic a, dynamic b) {
+    if (a is List) {
+      if (b is List) {
+        if (a.length == b.length) {
+          for (var la in a) {
+            bool ret = false;
+            for (var lb in b) {
+              if (checkSingleMaps(la, lb)) {
+                ret = true;
+                break;
+              }
+            }
+            if (!ret) {
+              return false;
+            }
+          }
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    } else if (a is Map) {
+      if (b is Map) {
+        if (a.length == b.length) {
+          for (var aKey in a.keys) {
+            bool ret = false;
+            for (var bKey in b.keys) {
+              if (checkSingleMaps(a[aKey], b[bKey])) {
+                ret = true;
+                break;
+              }
+            }
+            if (!ret) {
+              return false;
+            }
+          }
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return false;
+      }
+    } else if (a == b) {
+      return true;
+    } else {
+      return false;
     }
   }
 }
