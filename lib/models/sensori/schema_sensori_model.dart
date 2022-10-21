@@ -273,6 +273,7 @@ class SchemaSensoriModel with ChangeNotifier {
               waitingSensoreStato.removeAt(findIndex);
             }
           }
+          saveSchema();
           notifyListeners();
         }
       }

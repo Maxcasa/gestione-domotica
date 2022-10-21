@@ -290,6 +290,7 @@ class SchemaStatiModel with ChangeNotifier {
               waitingStatoStato.removeAt(findIndex);
             }
           }
+          saveSchema();
           notifyListeners();
         }
       }

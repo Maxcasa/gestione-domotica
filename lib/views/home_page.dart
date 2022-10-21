@@ -83,7 +83,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         print("app in detached");
         widget.mqttClientWrapper!.wrapperState = MqttWrapperState.INACTIVE;
         widget._disconnect();
-        saveSchema();
+        // saveSchema();
         break;
     }
     // setState(() {

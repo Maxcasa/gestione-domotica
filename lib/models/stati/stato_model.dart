@@ -126,14 +126,15 @@ class StatoModel {
         inUrl = json['in'] ?? '',
         outUrl = json['out'] ?? '',
         nome = json['nome'],
-        icona = json['icona'] != null
-            ? json['icona'].map((key, value) {
-                return MapEntry(
-                    key,
-                    IconData(value['codePoint'],
-                        fontFamily: json['icona']['fontFamily']));
-              })
-            : {'0': Icons.power_settings_new_outlined},
+        icona =
+            (json['icona'] != null && json['icona'] is Map<String, IconData>)
+                ? json['icona'].map((key, value) {
+                    return MapEntry(
+                        key,
+                        IconData(value['codePoint'],
+                            fontFamily: json['icona']['fontFamily']));
+                  })
+                : {'0': Icons.power_settings_new_outlined},
         colore = json['colore'] != null
             ? json['colore'].map((key, value) {
                 return MapEntry(key, HexColor.fromHex(value));
@@ -142,7 +143,7 @@ class StatoModel {
         operatori = json['oper'] ?? [0, 0],
         abilitato = json['abilitato'] ?? 0,
         timers = json.containsKey('timers')
-            ? TimerAttivazioni.fromJson(json)
+            ? TimerAttivazioni.fromJson(json['timers'])
             : TimerAttivazioni() {
     valore = (json['valore'] ?? {'0': 0});
   }
@@ -159,7 +160,7 @@ class StatoModel {
       // 'size': size,
       'abilitato': abilitato,
       'oper': operatori,
-      'timers': timers?.toShortJson(),
+      'timers': timers?.toJson(),
       'icona': icona.map((key, value) {
         return MapEntry(key,
             {'codePoint': value.codePoint, 'fontFamily': value.fontFamily});

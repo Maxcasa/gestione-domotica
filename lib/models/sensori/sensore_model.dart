@@ -69,7 +69,6 @@ class SensoreModel {
         inUrl = json['in'] ?? '',
         outUrl = json['out'] ?? '',
         nome = json['nome'],
-        valoreInt = json['valore'] ?? 0,
         colore = json['colore'] != null
             ? HexColor.fromHex(json['colore'])
             : Colors.black,
@@ -81,6 +80,7 @@ class SensoreModel {
         posLeft = double.parse(json['posLeft'] ?? '0'),
         posTop = double.parse(json['posTop'] ?? '0'),
         abilitato = json['abilitato'] ?? true {
+    valore = json['valore'] ?? 0;
     if (json.containsKey('attiva') && json['attiva'] is List) {
       _getAttivazione(json['attiva']);
     } else if (json.containsKey('attivazione') && json['attivazione'] is List) {
@@ -145,8 +145,8 @@ class SensoreModel {
       'nome': nome,
       'valore': valoreInt,
       'tipo': runtimeType.toString(),
-      'posLeft': posLeft,
-      'posTop': posTop,
+      'posLeft': posLeft.toString(),
+      'posTop': posTop.toString(),
       //'colore': colore,
       'size': size,
       'abilitato': abilitato,
