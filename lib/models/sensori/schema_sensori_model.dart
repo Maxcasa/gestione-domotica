@@ -400,7 +400,7 @@ class SchemaSensoriModel with ChangeNotifier {
     if (sensori != null) {
       schemaRepository?.saveSchema({
         topicSurName: sensori!
-            .map<Map<String, dynamic>>((stato) => stato.toJson())
+            .map<Map<String, dynamic>>((sensore) => sensore.toJson())
             .toList()
       });
     }

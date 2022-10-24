@@ -15,11 +15,12 @@ import 'package:gestione_domotica/models/stati/schema_stati_model.dart';
 import 'package:gestione_domotica/models/hw/schema_hw_model.dart';
 import 'package:gestione_domotica/views/page_layer.dart';
 import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
-import 'models/drawer/main_drawer_provider.dart';
+import 'package:gestione_domotica/models/drawer/main_drawer_provider.dart';
+import 'package:gestione_domotica/models/logger.dart';
 // import 'package:gestione_domotica/widget/connection_icon.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+//import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 /// Define a top-level named handler which background/terminated messages will
 /// call.
@@ -130,6 +131,7 @@ Future<void> main() async {
 class MyApp extends StatelessWidget {
   MyApp({Key? key}) : super(key: key) {
     mqttClientWrapper = MQTTClientWrapper();
+    final log = logger(MyApp);
     // if (mqttClientWrapper!.connectionState == MqttCurrentConnectionState.IDLE) {
     //   _connect();
     // }

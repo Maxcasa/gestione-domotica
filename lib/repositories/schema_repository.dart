@@ -3,6 +3,7 @@ import 'package:collection/collection.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:gestione_domotica/models/configurazioni/remote_connection.dart';
+import 'package:gestione_domotica/models/logger.dart';
 import 'package:gestione_domotica/models/utils.dart';
 import 'dart:io';
 import 'package:http/http.dart' as http;
@@ -52,6 +53,8 @@ class SchemaRepository extends ChangeNotifier {
   Map<String, dynamic>? _schemaTree;
   //Map<String, dynamic> _backSchemaTree = {};
   bool _reloadSchema = true;
+
+  final log = logger(SchemaRepository);
 
   DoubleImage? _sensoriBack;
   //Image? _backSensoriBack;
@@ -113,6 +116,8 @@ class SchemaRepository extends ChangeNotifier {
         if (!kIsWeb) {
           _localSchemaTree = await _getJsonFromLocal(
               '${_directory.path}/domo_${remoteConnection!.connectionName}.json');
+          log.v('Caricato schema locale.');
+          log.d('${json.encode(_localSchemaTree)}');
         }
         // se c'è il remote carico anche da li
         if (await remoteConnection!.checkLocal()) {
@@ -122,15 +127,18 @@ class SchemaRepository extends ChangeNotifier {
           Map<String, dynamic>? _remoteSchemaTree = await _getJsonFromRemote(
               'domo_json',
               '${_directory.path}/domo_${remoteConnection!.connectionName}.json');
+          log.v('Caricato schema remoto.');
           if (_remoteSchemaTree != null &&
               !(checkDoubleMaps(_remoteSchemaTree, _localSchemaTree))) {
             _localSchemaTree = _remoteSchemaTree;
+            log.d('${json.encode(_localSchemaTree)}');
             saveJson(json.encode(_localSchemaTree),
                 '${_directory.path}/domo_${remoteConnection!.connectionName}.json');
           }
         }
         if (_localSchemaTree != null &&
             !(checkDoubleMaps(_localSchemaTree, _schemaTree))) {
+          log.v('Imposto lo schema.');
           _schemaTree = _localSchemaTree;
           notifyListeners();
         }
@@ -300,12 +308,16 @@ class SchemaRepository extends ChangeNotifier {
 
   Future<void> saveSchema(Map<String, dynamic>? schemaToMerge) async {
     if (_schemaTree != null && schemaToMerge != null) {
+      log.d('Schema: ${json.encode(_schemaTree)}');
+      log.d('Merge: ${json.encode(schemaToMerge)}');
       Map<String, dynamic> _localSchemaTree = {
         ..._schemaTree!,
         ...schemaToMerge
       };
       if (!(checkDoubleMaps(_schemaTree, _localSchemaTree))) {
         _schemaTree = _localSchemaTree;
+        log.v('Salvo lo schema.');
+        log.d('${json.encode(_localSchemaTree)}');
         await saveJson(json.encode(_localSchemaTree),
             '${_directory.path}/domo_${remoteConnection!.connectionName}.json');
       }
