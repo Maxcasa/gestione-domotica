@@ -1,34 +1,52 @@
 import 'dart:convert';
 
 import 'package:logger/logger.dart';
-import 'package:universal_html/html.dart';
+//import 'package:universal_html/html.dart';
 
-class AppLogger {
-  static final AppLogger _instance = AppLogger._internal();
-  late Logger _logger;
+// enum Level {
+//   verbose,
+//   debug,
+//   info,
+//   warning,
+//   error,
+//   wtf,
+//   nothing,
+// }
 
-  factory AppLogger() {
-    return _instance;
-  }
+// class AppLogger {
+//   static final AppLogger _instance = AppLogger._internal();
+//   late Logger _logger;
+//   Level _level = Level.info;
+//   Type type;
 
-  AppLogger._internal() {
-    _logger = Logger(
-      printer: CustomPrinter(type.toString()),
-    );
-  }
-  //getStatus();
-  // timerRepository = TimersRepository();
-  // timerRepository!.addListener(_getTimer);
-  // if (timerRepository != null) {
-  //   _getTimer();
-  // }
+//   factory AppLogger() {
+//     return _instance;
+//   }
 
-  static Logger getLogger(Type type) => Logger(
-        printer: CustomPrinter(type.toString()),
-      );
-}
+//   static Logger getLogger(Type ) => _logger;
 
-//final logger = (Type type) => Logger(printer: CustomPrinter(type.toString()));
+//   AppLogger._internal() {
+//     _logger = Logger(
+//       printer: CustomPrinter(type.toString()),
+//       level: _level
+//     );
+//   }
+
+//set
+//getStatus();
+// timerRepository = TimersRepository();
+// timerRepository!.addListener(_getTimer);
+// if (timerRepository != null) {
+//   _getTimer();
+// }
+
+// static Logger getLogger(Type type) => Logger(
+//       printer: CustomPrinter(type.toString()),
+//     );
+//}
+
+final logger = (Type type) =>
+    Logger(printer: CustomPrinter(type.toString()), level: Level.debug);
 
 class CustomPrinter extends LogPrinter {
   CustomPrinter(this.className);
