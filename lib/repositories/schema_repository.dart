@@ -133,7 +133,7 @@ class SchemaRepository extends ChangeNotifier {
           if (_remoteSchemaTree != null &&
               !(checkDoubleMaps(_remoteSchemaTree, _localSchemaTree))) {
             _localSchemaTree = _remoteSchemaTree;
-            log.d('${json.encode(_localSchemaTree)}');
+            log.d(json.encode(_localSchemaTree));
             saveJson(json.encode(_localSchemaTree),
                 '${_directory.path}/domo_${remoteConnection!.connectionName}.json');
           }

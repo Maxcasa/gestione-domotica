@@ -110,7 +110,7 @@ class SchemaStatiModel with ChangeNotifier {
     List<StatoModel> tmpStatiList = [];
     if (stati != null) {
       for (dynamic stato in stati!) {
-        if ((stato).toString() == "Instance of '${tipoStato}'") {
+        if (stato.tipo == tipoStato) {
           tmpStatiList.add(stato);
         }
       }

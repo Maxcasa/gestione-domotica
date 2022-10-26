@@ -194,7 +194,7 @@ class _StatoPageState extends State<StatoPage> {
               isSensorePresenza = true;
               sensore.attivazioni.forEach((key, value) {
                 if (int.parse(key) == attivazione && value > 0) {
-                  isSensoreInfissoAttivo = true;
+                  isSensorePresenzaAttivo = true;
                 }
               });
               // for (AttivazioneModel attivazioneModel in sensore.attivazioni) {

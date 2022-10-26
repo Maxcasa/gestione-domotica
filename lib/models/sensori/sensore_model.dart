@@ -82,10 +82,10 @@ class SensoreModel {
         abilitato = json['abilitato'] ?? true {
     valore = json['valore'] ?? 0;
     if (json.containsKey('attiva') && json['attiva'] is Map) {
-      attivazioni = json['attiva'] ?? {};
+      attivazioni = json['attiva'] ?? [];
       //_getAttivazione(json['attiva']);
     } else if (json.containsKey('attivazione') && json['attivazione'] is Map) {
-      attivazioni = json['attivazione'] ?? {};
+      attivazioni = json['attivazione'] ?? [];
       //_getAttivazione(json['attivazione']);
     }
   }
