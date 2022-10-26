@@ -21,10 +21,7 @@ import 'package:universal_html/html.dart';
 class StatoClima extends StatoModel {
   // costruttori
   StatoClima({required id, String? nome})
-      : super(
-            id: id,
-            nome: nome ?? "Stato clima",
-            icona: {'10': Icons.power_settings_new_outlined});
+      : super(id: id, nome: nome ?? "Stato clima");
 
   // this.icona = icona ?? Icons.power_settings_new_outlined,
   //   this.valore = valore ?? 0,

@@ -8,31 +8,33 @@ import 'package:gestione_domotica/models/timer/timer_attivazioni.dart';
 class AttivazioneAllarme extends AttivazioneModel {
   // costruttori
   AttivazioneAllarme({required id, String? nome})
-      : super(
-            id: id,
-            nome: nome ?? "Attivazione allarme",
-            icona: Icons.alarm_rounded);
+      : super(id: id, nome: nome ?? "Attivazione allarme", max: 2);
 
   //metodi
-  set valore(int valore) {
-    valoreInt = valore;
-    switch (valoreInt) {
-      // case 2:
-      //   colore = Colors.yellow;
-      //   icona = Icons.home_outlined;
-      //   break;
+
+  IconData getIcona({int valore = 0}) {
+    switch (valore) {
+      case 2:
+        return Icons.home_outlined;
       case 1:
-        colore = Colors.red;
-        icona = Icons.power_settings_new_outlined;
-        break;
+        return Icons.power_settings_new_outlined;
       case 0:
-        colore = Colors.black;
-        icona = Icons.power_settings_new_outlined;
-        break;
+        return Icons.power_settings_new_outlined;
     }
+    return Icons.power_settings_new_outlined;
   }
 
-  int get valore => valoreInt;
+  Color getColore({int valore = 0}) {
+    switch (valore) {
+      case 2:
+        return Colors.yellow;
+      case 1:
+        return Colors.red;
+      case 0:
+        return Colors.black;
+    }
+    return Colors.black;
+  }
 
   // // funzione invocata dall'interfaccia quando si cambia il valore
   // @override

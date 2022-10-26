@@ -20,10 +20,7 @@ import 'package:universal_html/html.dart';
 class StatoAllarme extends StatoModel {
   // costruttori
   StatoAllarme({required id, String? nome})
-      : super(
-            id: id,
-            nome: nome ?? "Stato allarme",
-            icona: {'0': Icons.power_settings_new_outlined});
+      : super(id: id, nome: nome ?? "Stato allarme");
 
   // this.icona = icona ?? Icons.power_settings_new_outlined,
   //   this.valore = valore ?? 0,

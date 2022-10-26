@@ -2,6 +2,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:gestione_domotica/models/attivazioni/attivazioni_layer.dart';
 import 'package:gestione_domotica/models/configurazioni/remote_connection.dart';
 import 'package:gestione_domotica/models/timer/timer_attivazioni.dart';
 import 'package:gestione_domotica/repositories/firebase/firebase_options.dart';
@@ -139,6 +140,7 @@ class MyApp extends StatelessWidget {
   }
 
   MQTTClientWrapper? mqttClientWrapper;
+  SchemaAttivazioniModel schemaAttivazioniModel = SchemaAttivazioniModel();
 
   void _connect() {
     mqttClientWrapper!.connectMqttClient();

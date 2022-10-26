@@ -1,4 +1,5 @@
 //import 'package:gestione_domotica/models/logging.dart';
+import 'package:gestione_domotica/models/attivazioni/attivazioni_layer.dart';
 import 'package:gestione_domotica/models/stati/stati_layer.dart';
 import 'package:gestione_domotica/models/timer/timer_attivazioni.dart';
 //import 'package:gestione_domotica/repositories/keep_alive_provider.dart';
@@ -19,11 +20,10 @@ import 'package:universal_html/html.dart';
 // ignore: mixin_inherits_from_not_object
 class StatoModel {
   // costruttori
-  StatoModel(
-      {required this.id,
-      this.nome = "Stato generico",
-      this.icona = const {'0': Icons.power_settings_new_outlined},
-      this.colore = const {'0': Colors.black}});
+  StatoModel({required this.id, this.nome = "Stato generico"}
+      // this.icona = const {'0': Icons.power_settings_new_outlined},
+      // this.colore = const {'0': Colors.black}}
+      );
   // : super() {
   //   _setupMqtt();
   //   schemaRepository = SchemaRepository();
@@ -45,12 +45,13 @@ class StatoModel {
   String inUrl = '';
   String outUrl = '';
   String nome = "";
-  Map<String, IconData> icona;
+  Map<String, IconData> icona = {};
   Map<String, int> valoreInt = {};
-  Map<String, Color> colore;
+  Map<String, Color> colore = {};
   bool abilitato = true;
   List<int> operatori = [0, 0];
   TimerAttivazioni? timers;
+  String tipo = "StatoModel";
   void Function(int, AzioneStato, String)? azioneStatoCallBack;
   // SchemaRepository? schemaRepository;
   // MQTTClientWrapper? mqttClientWrapper;
@@ -59,7 +60,8 @@ class StatoModel {
 
   //metodi
   // getter & setter
-  String get tipo => runtimeType.toString();
+  //String get tipo => runtimeType.toString();
+  SchemaAttivazioniModel schemaAttivazioniModel = SchemaAttivazioniModel();
 
   set valore(Map<String, dynamic> valore) {
     valore.forEach((key, value) {
@@ -69,13 +71,19 @@ class StatoModel {
         valoreInt[key] = int.parse(value);
       }
     });
+    valoreInt.forEach((key, value) {
+      AttivazioneModel attivazione =
+          schemaAttivazioniModel.getAttivazione(int.parse(key))!;
+      icona[key] = attivazione.getIcona(valore: value);
+      colore[key] = attivazione.getColore(valore: value);
+    });
   }
 
-  void setValore(int valore, String key) {
-    Map<String, int> locValore = valoreInt;
-    locValore[key] = valore;
-    this.valore = locValore;
-  }
+  // void setValore(String key, int valore) {
+  //   Map<String, int> locValore = valoreInt;
+  //   locValore[key] = valore;
+  //   this.valore = locValore;
+  // }
 
   int getValore(dynamic key) {
     if (key is int) {
@@ -106,7 +114,7 @@ class StatoModel {
   // }
 
   // funzione invocata dall'interfaccia quando si cambia il valore
-  void cambiaStato(int valore, dynamic key) {
+  void cambiaStato(dynamic key, int valore) {
     Map<String, int> locValore = valoreInt;
     if (key is int) {
       locValore[key.toString()] = valore;
@@ -126,20 +134,24 @@ class StatoModel {
         inUrl = json['in'] ?? '',
         outUrl = json['out'] ?? '',
         nome = json['nome'],
-        icona =
-            (json['icona'] != null && json['icona'] is Map<String, IconData>)
-                ? json['icona'].map((key, value) {
-                    return MapEntry(
-                        key,
-                        IconData(value['codePoint'],
-                            fontFamily: json['icona']['fontFamily']));
-                  })
-                : {'0': Icons.power_settings_new_outlined},
-        colore = json['colore'] != null
-            ? json['colore'].map((key, value) {
-                return MapEntry(key, HexColor.fromHex(value));
-              })
-            : {'0': Colors.black},
+        tipo = json['tipo'] ?? 'StatoModel',
+        // icona =
+        //     (json['icona'] != null && json['icona'] is Map<String, IconData>)
+        //         ? json['icona'].map((key, value) {
+        //             return MapEntry(
+        //                 key,
+        //                 IconData(value['codePoint'],
+        //                     fontFamily: json['icona']['fontFamily']));
+        //           })
+        //         : {'0': Icons.power_settings_new_outlined},
+        // colore =
+        // // json['colore'] != null
+        // //     ? json['colore'].map((key, value) {
+        // //         return MapEntry(key, HexColor.fromHex(value));
+        // //       }) :
+        //      {'0': Colors.black},
+        icona = {},
+        colore = {},
         operatori = json['oper'] ?? [0, 0],
         abilitato = json['abilitato'] ?? 0,
         timers = json.containsKey('timers')
@@ -155,16 +167,17 @@ class StatoModel {
       'out': outUrl,
       'nome': nome,
       'valore': valoreInt,
-      'tipo': runtimeType.toString(),
+      'tipo': tipo,
       //'colore': colore,
       // 'size': size,
       'abilitato': abilitato,
       'oper': operatori,
-      'timers': timers?.toJson(),
-      'icona': icona.map((key, value) {
-        return MapEntry(key,
-            {'codePoint': value.codePoint, 'fontFamily': value.fontFamily});
-      })
+      'timers': timers?.toJson()
+//      'icona': icona.map((key, value)
+      // {
+      //   return MapEntry(key,
+      //       {'codePoint': value.codePoint, 'fontFamily': value.fontFamily});
+      // })
     };
     return result;
   }
