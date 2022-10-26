@@ -8,18 +8,15 @@ import 'dart:convert';
 class AttivazioneModel {
   // costruttori
   AttivazioneModel(
-      {required this.id,
-      this.nome = "Attivazione generica",
-      this.icona = Icons.alarm_rounded,
-      this.colore = Colors.black});
+      {required this.id, this.nome = "Attivazione generica", this.max = 0});
 
   // variabili
   int id;
   String nome = "";
-  IconData icona;
-  int valoreInt = 0;
+  // IconData icona;
+  // int valoreInt = 0;
   int max = 0;
-  Color colore;
+  // Color colore;
   bool abilitato = true;
 
   void Function(int, AzioneAttivazione, String)? azioneAttivazioneCallBack;
@@ -32,37 +29,34 @@ class AttivazioneModel {
   // getter & setter
   String get tipo => runtimeType.toString();
 
-  set valore(int valore) {
-    valoreInt = valore;
+  IconData getIcona({int valore = 0}) {
+    return Icons.power_settings_new_outlined;
   }
 
-  int get valore => valoreInt;
-
-  void setAzioneAttivazioneListener(
-      {Function(int, AzioneAttivazione, String)? callback}) {
-    azioneAttivazioneCallBack = callback;
+  Color getColore({int valore = 0}) {
+    return Colors.black;
   }
 
   // funzione invocata dall'interfaccia quando si cambia il valore
-  void cambiaStato(int valore) {
-    //Se c'è un callback da chiamare lo chiamo
-    String messaggio = json.encode({'id': id, 'stato': valore});
-    if (azioneAttivazioneCallBack != null) {
-      azioneAttivazioneCallBack!(id, AzioneAttivazione.imposta, messaggio);
-    }
-  }
+  // void cambiaStato(int valore) {
+  //   //Se c'è un callback da chiamare lo chiamo
+  //   String messaggio = json.encode({'id': id, 'stato': valore});
+  //   if (azioneAttivazioneCallBack != null) {
+  //     azioneAttivazioneCallBack!(id, AzioneAttivazione.imposta, messaggio);
+  //   }
+  // }
 
-  @override
-  int get hashCode {
-    int tmpHash = valore;
-    // for (TimerAttivazione timer in timers) {
-    //   tmpHash += (300 *
-    //           (timers.length - timer.id!) *
-    //           (timers.length - (timer.isActivated ? 2 : 1))) +
-    //       timer.getSum();
-    // }
-    return tmpHash;
-  }
+  // @override
+  // int get hashCode {
+  //   int tmpHash = valore;
+  //   // for (TimerAttivazione timer in timers) {
+  //   //   tmpHash += (300 *
+  //   //           (timers.length - timer.id!) *
+  //   //           (timers.length - (timer.isActivated ? 2 : 1))) +
+  //   //       timer.getSum();
+  //   // }
+  //   return tmpHash;
+  // }
 
   @override
   bool operator ==(Object other) =>
@@ -74,48 +68,16 @@ class AttivazioneModel {
   AttivazioneModel.fromJson(Map<String, dynamic> json)
       : id = json['id'],
         nome = json['nome'] ?? 'Generico',
-        valoreInt = json['valore'] ?? 0,
-        max = json['max'] ?? 0,
-        icona = json['icona'] != null
-            ? IconData(json['icona']['codePoint'],
-                fontFamily: json['icona']['fontFamily'])
-            : Icons.power_settings_new_outlined,
-        colore = json['colore'] != null
-            ? HexColor.fromHex(json['colore'])
-            : Colors.black;
+        max = json['max'] ?? 0;
 
   setFromJson(Map<String, dynamic> json) {
+    id = json['id'] ?? 0;
     nome = json['nome'] ?? nome;
-    valoreInt = json['valore'] ?? valoreInt;
     max = json['max'] ?? 0;
-    icona = json['icona'] != null
-        ? IconData(json['icona']['codePoint'],
-            fontFamily: json['icona']['fontFamily'])
-        : icona;
-    colore = json['colore'] != null ? HexColor.fromHex(json['colore']) : colore;
   }
 
   Map<String, dynamic> toJson() {
-    Map<String, dynamic> result = {
-      'id': id,
-      'nome': nome,
-      'valore': valoreInt,
-      'max': max,
-      'tipo': runtimeType.toString(),
-      //'colore': colore,
-      // 'size': size,
-      'abilitato': abilitato,
-      'hash': hashCode,
-      'icona': {'codePoint': icona.codePoint, 'fontFamily': icona.fontFamily}
-    };
+    Map<String, dynamic> result = {'id': id, 'nome': nome, 'max': max};
     return result;
-  }
-
-  int toShortJson() {
-    // Map<String, dynamic> result = {
-    //   'valore': valoreInt
-    //   // 'abilitato': abilitato,
-    // };
-    return valoreInt;
   }
 }

@@ -21,11 +21,11 @@ import 'package:universal_html/html.dart';
 
 const String topicSurName = "stati";
 
-final factories = <String, Object Function(int id)>{
-  'Stato': (id) => StatoModel(id: id),
-  'StatoAllarme': (id) => StatoAllarme(id: id),
-  'StatoClima': (id) => StatoClima(id: id)
-};
+// final factories = <String, Object Function(int id)>{
+//   'Stato': (id) => StatoModel(id: id),
+//   'StatoAllarme': (id) => StatoAllarme(id: id),
+//   'StatoClima': (id) => StatoClima(id: id)
+// };
 
 /// Classe che contiene la gestione degli allarmi
 // ignore: mixin_inherits_from_not_object
@@ -168,16 +168,18 @@ class SchemaStatiModel with ChangeNotifier {
         for (var element in listStati) {
           String tipo = element['tipo'] ?? 'StatoAllarme';
           int id = element['id'];
-          if (factories.containsKey(tipo)) {
-            if (tipo == 'Stato') {
-              stati!.add(StatoModel.fromJson(element));
-            } else if (tipo == 'StatoAllarme') {
-              stati!.add(StatoAllarme.fromJson(element));
-            } else if (tipo == 'StatoClima') {
-              stati!.add(StatoClima.fromJson(element));
-            }
-            stati!.last.setAzioneStatoListener(callback: azioneStato);
-          }
+          stati!.add(StatoModel.fromJson(element));
+          stati!.last.setAzioneStatoListener(callback: azioneStato);
+          // if (factories.containsKey(tipo)) {
+          //   if (tipo == 'Stato') {
+          //     stati!.add(StatoModel.fromJson(element));
+          //   } else if (tipo == 'StatoAllarme') {
+          //     stati!.add(StatoAllarme.fromJson(element));
+          //   } else if (tipo == 'StatoClima') {
+          //     stati!.add(StatoClima.fromJson(element));
+          //   }
+          //   stati!.last.setAzioneStatoListener(callback: azioneStato);
+          // }
         }
         // mqttClientWrapper!.publishMessage(
         //     topicSurName: topicSurName, messageData: 'get/status');

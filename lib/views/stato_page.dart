@@ -3,7 +3,8 @@ import 'dart:convert';
 
 //import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:gestione_domotica/models/attivazioni/attivazione_model.dart';
+//import 'package:gestione_domotica/models/attivazioni/attivazione_model.dart';
+import 'package:gestione_domotica/models/attivazioni/attivazioni_layer.dart';
 import 'package:gestione_domotica/models/sensori/sensori_layer.dart';
 import 'package:gestione_domotica/models/stati/stati_layer.dart';
 import 'package:gestione_domotica/models/timer/timer_attivazioni.dart';
@@ -35,7 +36,8 @@ class _StatoPageState extends State<StatoPage> {
   // MultiMessageProvider multiMessageProvider = MultiMessageProvider();
   //final ScrollController scrollController = ScrollController();
   // final List<Map<String, dynamic>> drawerTree = [];
-  RangeValues _values = RangeValues(0.3, 0.7);
+  //RangeValues _values = RangeValues(0.3, 0.7);
+  //SchemaAttivazioniModel schemaAttivazioniModel = SchemaAttivazioniModel();
 
   @override
   Widget build(BuildContext context) {
@@ -126,6 +128,7 @@ class _StatoPageState extends State<StatoPage> {
   }
 
   Widget visalizzaAllarme(StatoModel stato) {
+    //AttivazioneModel attivazioneModel = schemaAttivazioniModel.getAttivazione(0)!;
     return (stato.timers != null && stato.timers!.isActivated)
         ? TimeSlider(
             stato: stato,
@@ -137,7 +140,7 @@ class _StatoPageState extends State<StatoPage> {
                   child: InkWell(
                     splashColor: Colors.green[50],
                     onTap: () {
-                      stato.cambiaStato(-1, 0);
+                      stato.cambiaStato(0, -1);
                     },
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -157,7 +160,7 @@ class _StatoPageState extends State<StatoPage> {
               icon:
                   Icon(stato.icona['0'], color: stato.colore['0'], size: 200.0),
               onPressed: () {
-                stato.cambiaStato(-1, 0);
+                stato.cambiaStato(0, -1);
               },
             ),
           );
@@ -177,12 +180,11 @@ class _StatoPageState extends State<StatoPage> {
           if (sensore is SensoreInfisso) {
             if (sensore.attivazioni.isNotEmpty) {
               isSensoreInfisso = true;
-              for (AttivazioneModel attivazioneModel in sensore.attivazioni) {
-                if (attivazioneModel.id == attivazione &&
-                    attivazioneModel.valore > 0) {
+              sensore.attivazioni.forEach((key, value) {
+                if (int.parse(key) == attivazione && value > 0) {
                   isSensoreInfissoAttivo = true;
                 }
-              }
+              });
               // AttivazioneModel sensore.attivazioni.
               // isSensoreInfissoAttivo = false;
             }
@@ -190,12 +192,17 @@ class _StatoPageState extends State<StatoPage> {
           if (sensore is SensorePresenza) {
             if (sensore.attivazioni.isNotEmpty) {
               isSensorePresenza = true;
-              for (AttivazioneModel attivazioneModel in sensore.attivazioni) {
-                if (attivazioneModel.id == attivazione &&
-                    attivazioneModel.valore > 0) {
-                  isSensorePresenzaAttivo = true;
+              sensore.attivazioni.forEach((key, value) {
+                if (int.parse(key) == attivazione && value > 0) {
+                  isSensoreInfissoAttivo = true;
                 }
-              }
+              });
+              // for (AttivazioneModel attivazioneModel in sensore.attivazioni) {
+              //   if (attivazioneModel.id == attivazione &&
+              //       attivazioneModel.valore > 0) {
+              //     isSensorePresenzaAttivo = true;
+              //   }
+              // }
               // AttivazioneModel sensore.attivazioni.
               // isSensoreInfissoAttivo = false;
             }
@@ -222,7 +229,7 @@ class _StatoPageState extends State<StatoPage> {
                 icon: Icon(icona ?? stato.icona[attivazione.toString()],
                     size: 20, color: stato.colore[attivazione.toString()]),
                 onPressed: () {
-                  stato.cambiaStato(-1, attivazione);
+                  stato.cambiaStato(attivazione, -1);
                 })
             : const SizedBox.shrink(),
         isSensoreInfisso

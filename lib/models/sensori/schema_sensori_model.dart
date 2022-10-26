@@ -300,12 +300,12 @@ class SchemaSensoriModel with ChangeNotifier {
         _onAttivazioneChange(sensore, jsonData[i], index: i);
       }
     } else if (jsonData is Map) {
-      int findIndex = sensore.attivazioni
-          .indexWhere((element) => element.id == jsonData['id']);
-      if (findIndex >= 0) {
-        sensore.attivazioni[findIndex]
-            .setFromJson(jsonData as Map<String, dynamic>);
-      }
+      sensore.attivazioni = {...sensore.attivazioni, ...jsonData};
+      // int findIndex = sensore.attivazioni
+      //     .indexWhere((element) => element.id == jsonData['id']);
+      // if (findIndex >= 0) {
+      //   sensore.attivazioni = [findIndex].setFromJson(jsonData as Map<String, dynamic>);
+      // }
     } else if (jsonData is int) {
       sensore.attivazioni[index].valoreInt = jsonData;
     }
@@ -400,7 +400,7 @@ class SchemaSensoriModel with ChangeNotifier {
     if (sensori != null) {
       schemaRepository?.saveSchema({
         topicSurName: sensori!
-            .map<Map<String, dynamic>>((stato) => stato.toJson())
+            .map<Map<String, dynamic>>((sensore) => sensore.toJson())
             .toList()
       });
     }

@@ -1,4 +1,4 @@
-//export 'schema_stati_model.dart';
+export 'schema_attivazioni_model.dart';
 export 'attivazione_model.dart';
 export 'attivazione_allarme.dart';
 export 'attivazione_notifica.dart';

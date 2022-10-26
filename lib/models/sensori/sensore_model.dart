@@ -38,7 +38,7 @@ class SensoreModel {
   double posLeft = 0;
   double posTop = 0;
   bool abilitato = true;
-  List<AttivazioneModel> attivazioni = [];
+  Map<String, dynamic> attivazioni = {};
   void Function(int, AzioneSensore, String)? azioneSensoreCallBack;
 
   int zIndex = 0;
@@ -81,32 +81,34 @@ class SensoreModel {
         posTop = double.parse(json['posTop'] ?? '0'),
         abilitato = json['abilitato'] ?? true {
     valore = json['valore'] ?? 0;
-    if (json.containsKey('attiva') && json['attiva'] is List) {
-      _getAttivazione(json['attiva']);
-    } else if (json.containsKey('attivazione') && json['attivazione'] is List) {
-      _getAttivazione(json['attivazione']);
+    if (json.containsKey('attiva') && json['attiva'] is Map) {
+      attivazioni = json['attiva'] ?? {};
+      //_getAttivazione(json['attiva']);
+    } else if (json.containsKey('attivazione') && json['attivazione'] is Map) {
+      attivazioni = json['attivazione'] ?? {};
+      //_getAttivazione(json['attivazione']);
     }
   }
 
-  void _getAttivazione(List arrayAttivazioni) {
-    attivazioni = [];
-    for (var element in arrayAttivazioni) {
-      int id = element['id'] ?? 0;
-      //int id = element['id'];
-      if (factories.containsKey(id.toString())) {
-        if (id == -1) {
-          attivazioni.add(AttivazioneModel.fromJson(element));
-        } else if (id == 0) {
-          attivazioni.add(AttivazioneAllarme.fromJson(element));
-        } else if (id == 1) {
-          attivazioni.add(AttivazioneNotifica.fromJson(element));
-        }
-        // attivazioni.last
-        //     .setAzioneAttivazioneListener(callback: azioneAttivazione);
-      }
-    }
-    //_consumeWaitingSensore();
-  }
+  // void _getAttivazione(List arrayAttivazioni) {
+  //   attivazioni = [];
+  //   for (var element in arrayAttivazioni) {
+  //     int id = element['id'] ?? 0;
+  //     //int id = element['id'];
+  //     if (factories.containsKey(id.toString())) {
+  //       if (id == -1) {
+  //         attivazioni.add(AttivazioneModel.fromJson(element));
+  //       } else if (id == 0) {
+  //         attivazioni.add(AttivazioneAllarme.fromJson(element));
+  //       } else if (id == 1) {
+  //         attivazioni.add(AttivazioneNotifica.fromJson(element));
+  //       }
+  //       // attivazioni.last
+  //       //     .setAzioneAttivazioneListener(callback: azioneAttivazione);
+  //     }
+  //   }
+  //   //_consumeWaitingSensore();
+  // }
 
   void setAzioneSensoreListener(
       {Function(int, AzioneSensore, String)? callback}) {
@@ -150,9 +152,9 @@ class SensoreModel {
       //'colore': colore,
       'size': size,
       'abilitato': abilitato,
-      'attiva': attivazioni
-          .map<Map<String, dynamic>>((attivazione) => attivazione.toJson())
-          .toList(),
+      'attiva': attivazioni,
+      // .map<Map<String, dynamic>>((attivazione) => attivazione.toJson())
+      // .toList(),
       'icona': {'codePoint': icona.codePoint, 'fontFamily': icona.fontFamily}
     };
     return result;
@@ -163,8 +165,8 @@ class SensoreModel {
       'v': valoreInt,
       // 'abilitato': abilitato,
       'a': attivazioni
-          .map<int>((attivazione) => attivazione.toShortJson())
-          .toList()
+      // .map<int>((attivazione) => attivazione.toShortJson())
+      // .toList()
     };
     return result;
   }

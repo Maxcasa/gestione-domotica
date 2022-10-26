@@ -8,31 +8,23 @@ import 'package:gestione_domotica/models/timer/timer_attivazioni.dart';
 class AttivazioneNotifica extends AttivazioneModel {
   // costruttori
   AttivazioneNotifica({required id, String? nome})
-      : super(
-            id: id,
-            nome: nome ?? "Attivazione allarme",
-            icona: Icons.alarm_rounded);
+      : super(id: id, nome: nome ?? "Attivazione allarme", max: 1);
 
   //metodi
-  set valore(int valore) {
-    valoreInt = valore;
-    switch (valoreInt) {
-      // case 2:
-      //   colore = Colors.yellow;
-      //   icona = Icons.home_outlined;
-      //   break;
-      case 1:
-        colore = Colors.red;
-        icona = Icons.power_settings_new_outlined;
-        break;
-      case 0:
-        colore = Colors.black;
-        icona = Icons.power_settings_new_outlined;
-        break;
-    }
+
+  IconData getIcona({int valore = 0}) {
+    return Icons.notifications_on_rounded;
   }
 
-  int get valore => valoreInt;
+  Color getColore({int valore = 0}) {
+    switch (valore) {
+      case 1:
+        return Colors.red;
+      case 0:
+        return Colors.black;
+    }
+    return Colors.black;
+  }
 
   AttivazioneNotifica.fromJson(Map<String, dynamic> json)
       :
