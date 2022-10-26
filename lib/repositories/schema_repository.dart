@@ -65,7 +65,9 @@ class SchemaRepository extends ChangeNotifier {
   late final _directory;
   bool _isDirectoryInitialized = false;
 
-  var lock = Lock();
+  var lock = Lock(reentrant: true);
+  String _encodedString = '';
+  String _uriJsonFile = '';
   //var lockJson = Lock();
 
   // Future<void> setRemoteVariables() async {
@@ -125,8 +127,10 @@ class SchemaRepository extends ChangeNotifier {
           if (_remoteSchemaTree != null &&
               !(checkDoubleMaps(_remoteSchemaTree, _localSchemaTree))) {
             _localSchemaTree = _remoteSchemaTree;
-            saveJson(json.encode(_localSchemaTree),
-                '${_directory.path}/domo_${remoteConnection!.connectionName}.json');
+            _encodedString = json.encode(_localSchemaTree);
+            _uriJsonFile =
+                '${_directory.path}/domo_${remoteConnection!.connectionName}.json';
+            await lock.synchronized(saveJson);
           }
         }
         if (_localSchemaTree != null &&
@@ -306,16 +310,18 @@ class SchemaRepository extends ChangeNotifier {
       };
       if (!(checkDoubleMaps(_schemaTree, _localSchemaTree))) {
         _schemaTree = _localSchemaTree;
-        await saveJson(json.encode(_localSchemaTree),
-            '${_directory.path}/domo_${remoteConnection!.connectionName}.json');
+        _encodedString = json.encode(_localSchemaTree);
+        _uriJsonFile =
+            '${_directory.path}/domo_${remoteConnection!.connectionName}.json';
+        await lock.synchronized(saveJson);
       }
     }
   }
 
-  Future<void> saveJson(schemaData, String fileName) async {
+  Future<void> saveJson() async {
     if (!kIsWeb) {
-      final File file = File(fileName);
-      String stringToWrite = schemaData;
+      final File file = File(_uriJsonFile);
+      String stringToWrite = _encodedString;
       await file.writeAsString(stringToWrite);
     }
   }
