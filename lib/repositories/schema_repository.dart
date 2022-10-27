@@ -131,7 +131,7 @@ class SchemaRepository extends ChangeNotifier {
               '${_directory.path}/domo_${remoteConnection!.connectionName}.json');
           log.v('Caricato schema remoto.');
           if (_remoteSchemaTree != null &&
-              !(checkSingleMaps(_remoteSchemaTree, _localSchemaTree))) {
+              !(checkDoubleMaps(_remoteSchemaTree, _localSchemaTree))) {
             _localSchemaTree = _remoteSchemaTree;
             log.d(json.encode(_localSchemaTree));
             saveJson(json.encode(_localSchemaTree),
@@ -316,7 +316,7 @@ class SchemaRepository extends ChangeNotifier {
         ..._schemaTree!,
         ...schemaToMerge
       };
-      if (!(checkSingleMaps(_schemaTree, _localSchemaTree))) {
+      if (!(checkDoubleMaps(_schemaTree, _localSchemaTree))) {
         _schemaTree = _localSchemaTree;
         log.i('Salvo lo schema.');
         log.d('${json.encode(_localSchemaTree)}');
@@ -329,7 +329,7 @@ class SchemaRepository extends ChangeNotifier {
   Future<void> saveJson(String stringToWrite, String _uriJsonFile) async {
     if (!kIsWeb) {
       final File file = File(_uriJsonFile);
-      String stringToWrite = _encodedString;
+      //String stringToWrite = _encodedString;
       await file.writeAsString(stringToWrite);
     }
   }
