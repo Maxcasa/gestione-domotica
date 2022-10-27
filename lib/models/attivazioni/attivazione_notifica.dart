@@ -8,7 +8,7 @@ import 'package:gestione_domotica/models/timer/timer_attivazioni.dart';
 class AttivazioneNotifica extends AttivazioneModel {
   // costruttori
   AttivazioneNotifica({required id, String? nome})
-      : super(id: id, nome: nome ?? "Attivazione allarme", max: 1);
+      : super(id: id, nome: nome ?? "Attivazione notifica", max: 1);
 
   //metodi
 

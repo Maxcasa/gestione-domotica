@@ -131,7 +131,7 @@ class SchemaRepository extends ChangeNotifier {
               '${_directory.path}/domo_${remoteConnection!.connectionName}.json');
           log.v('Caricato schema remoto.');
           if (_remoteSchemaTree != null &&
-              !(checkDoubleMaps(_remoteSchemaTree, _localSchemaTree))) {
+              !(checkSingleMaps(_remoteSchemaTree, _localSchemaTree))) {
             _localSchemaTree = _remoteSchemaTree;
             log.d(json.encode(_localSchemaTree));
             saveJson(json.encode(_localSchemaTree),
@@ -316,9 +316,9 @@ class SchemaRepository extends ChangeNotifier {
         ..._schemaTree!,
         ...schemaToMerge
       };
-      if (!(checkDoubleMaps(_schemaTree, _localSchemaTree))) {
+      if (!(checkSingleMaps(_schemaTree, _localSchemaTree))) {
         _schemaTree = _localSchemaTree;
-        log.v('Salvo lo schema.');
+        log.i('Salvo lo schema.');
         log.d('${json.encode(_localSchemaTree)}');
         await saveJson(json.encode(_localSchemaTree),
             '${_directory.path}/domo_${remoteConnection!.connectionName}.json');

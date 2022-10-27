@@ -123,7 +123,7 @@ class SchemaAttivazioniModel {
             } else if (tipo == 'Allarme') {
               attivazioni!.add(AttivazioneAllarme.fromJson(element));
             } else if (tipo == 'Notifica') {
-              attivazioni!.add(AttivazioneModel.fromJson(element));
+              attivazioni!.add(AttivazioneNotifica.fromJson(element));
             }
           }
         }
