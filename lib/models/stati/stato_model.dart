@@ -152,7 +152,7 @@ class StatoModel {
         //      {'0': Colors.black},
         icona = {},
         colore = {},
-        operatori = json['oper'] ?? [0, 0],
+        operatori = [0, 0], // json['oper'] ??
         abilitato = json['abilitato'] ?? 0,
         timers = json.containsKey('timers')
             ? TimerAttivazioni.fromJson(json['timers'])
@@ -171,8 +171,9 @@ class StatoModel {
       //'colore': colore,
       // 'size': size,
       'abilitato': abilitato,
-      'oper': operatori,
-      'timers': timers?.toJson()
+      'oper': operatori
+      //,
+//      'timers': timers?.toJson()
 //      'icona': icona.map((key, value)
       // {
       //   return MapEntry(key,

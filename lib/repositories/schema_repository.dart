@@ -330,6 +330,7 @@ class SchemaRepository extends ChangeNotifier {
     if (!kIsWeb) {
       final File file = File(_uriJsonFile);
       //String stringToWrite = _encodedString;
+      log.d(stringToWrite);
       await file.writeAsString(stringToWrite);
     }
   }
