@@ -318,7 +318,7 @@ class SchemaSensoriModel with ChangeNotifier {
 
   void attivaSensori(String tipoSensore, int attivazione, bool stato) {
     String messageData =
-        '{"id": "$tipoSensore", "attiva": [$attivazione, $stato]}';
+        '{"id": "$tipoSensore", "attiva": ["$attivazione", $stato]}';
     mqttClientWrapper!.publishMessage(
         topicSurName: '${topicSurName}/set', messageData: messageData);
     // mqttClientWrapper!
