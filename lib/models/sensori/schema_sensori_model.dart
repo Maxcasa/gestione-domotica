@@ -82,7 +82,7 @@ class SchemaSensoriModel with ChangeNotifier {
     if (sensori != null) {
       for (var i = 0; i < sensori!.length; i++) {
         if (sensori![i].id == id) {
-          return sensori![id];
+          return sensori![i];
         }
       }
     }
