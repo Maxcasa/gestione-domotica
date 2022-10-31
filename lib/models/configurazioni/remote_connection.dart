@@ -274,16 +274,25 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
 
   addConnection(ConnectionData connectionData) {
     if (connectionData.id < 0) {
-      connectionData.id =
-          connectionDataList[connectionDataList.length - 1].id + 1;
+      if (connectionDataList.isNotEmpty) {
+        connectionData.id =
+            connectionDataList[connectionDataList.length - 1].id + 1;
+      } else {
+        connectionData.id = 0;
+      }
     }
-    if (connectionDataList.indexWhere(
-            (element) => element.remoteDomain == connectionData.remoteDomain) <
-        0) {
+    int indexFinded = connectionDataList.indexWhere(
+        (element) => element.remoteDomain == connectionData.remoteDomain);
+    if (indexFinded < 0) {
       connectionDataList.add(connectionData);
       resetId();
       activeIndex = connectionDataList.length - 1;
       // localData.activeIndex = connectionDataList.length - 1;
+      saveConnectionInfo();
+    } else {
+      connectionDataList[indexFinded] = connectionData;
+      resetId();
+      activeIndex = indexFinded;
       saveConnectionInfo();
     }
   }
