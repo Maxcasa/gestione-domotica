@@ -83,4 +83,11 @@ class SensoreSirena extends SensoreModel {
     //   azioneSensoreCallBack!(id, AzioneSensore.imposta, messaggio);
     // }
   }
+
+  @override
+  Map<String, dynamic> toJson() {
+    Map<String, dynamic> result = super.toJson();
+    result['tipo'] = 'Sirena_$numeroRele';
+    return result;
+  }
 }

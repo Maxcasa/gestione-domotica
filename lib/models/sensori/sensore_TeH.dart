@@ -9,7 +9,7 @@ class SensoreTeH extends SensoreModel {
   // costruttori
   SensoreTeH({required int id, String? nome})
       : _id = id,
-        _nome = nome ?? "Sensore Luce generico",
+        _nome = nome ?? "Sensore TeH generico",
         super(id: id, nome: nome, icona: Icons.thermostat_rounded);
 
   SensoreTeH.fromJson(Map<String, dynamic> json)
