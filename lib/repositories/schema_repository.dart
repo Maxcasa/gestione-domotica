@@ -33,9 +33,9 @@ class SchemaRepository extends ChangeNotifier {
     remoteConnection = RemoteConnection();
     remoteConnection!.addListener(() async {
       _reloadSchema = true;
-      await lock.synchronized(_getSchema);
+      await lock_sensori.synchronized(_getSchema);
       _reloadBack = true;
-      await lock.synchronized(_getBack);
+      await lock_back.synchronized(_getBack);
     }, [
       'activeIndex',
       'connectivity',
@@ -68,7 +68,8 @@ class SchemaRepository extends ChangeNotifier {
   late final _directory;
   bool _isDirectoryInitialized = false;
 
-  var lock = Lock(reentrant: true);
+  var lock_sensori = Lock();
+  var lock_back = Lock();
   String _encodedString = '';
   String _uriJsonFile = '';
   //var lockJson = Lock();
@@ -87,12 +88,12 @@ class SchemaRepository extends ChangeNotifier {
   // }
 
   Future<Map<String, dynamic>?> get schema async {
-    await lock.synchronized(_getSchema);
+    await lock_sensori.synchronized(_getSchema);
     return _schemaTree;
   }
 
   Future<Image?> get sensoriBack async {
-    await lock.synchronized(_getBack);
+    await lock_back.synchronized(_getBack);
     if (_sensoriBack == null) {
       return null;
     } else {

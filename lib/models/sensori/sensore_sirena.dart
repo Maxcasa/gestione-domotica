@@ -12,7 +12,7 @@ class SensoreSirena extends SensoreModel {
         _nome = nome ?? "Sensore Sirena generico",
         super(id: id, nome: nome, icona: Icons.notifications_on_rounded);
 
-  SensoreSirena.fromJson(Map<String, dynamic> json, {int numeroRele = 1})
+  SensoreSirena.fromJson(Map<String, dynamic> json, {this.numeroRele = 1})
       : _id = json['id'],
         _nome = json['nome'],
         azionamenti = json['azion'] ?? 0,
