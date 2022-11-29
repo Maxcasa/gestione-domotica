@@ -27,7 +27,8 @@ final factories = <String, Object Function(int id)>{
   'SensoreTeH': (id) => SensoreTeH(id: id),
   'Sirena_1': (id) => SensoreSirena(id: id, numeroRele: 1),
   'Sirena_2': (id) => SensoreSirena(id: id, numeroRele: 2),
-  'SensorePresenza': (id) => SensorePresenza(id: id)
+  'SensorePresenza': (id) => SensorePresenza(id: id),
+  'SensoreCamera': (id) => SensoreCamera(id: id)
 };
 
 /// Classe che gestisce l'insieme dei sensori
@@ -123,20 +124,29 @@ class SchemaSensoriModel with ChangeNotifier {
           if (factories.containsKey(tipo)) {
             if (tipo == 'Sensore') {
               sensori!.add(SensoreModel.fromJson(element));
+              sensori!.last.setAzioneSensoreListener(callback: azioneSensore);
             } else if (tipo == 'SensoreLuce') {
               sensori!.add(SensoreLuce.fromJson(element));
+              sensori!.last.setAzioneSensoreListener(callback: azioneSensore);
             } else if (tipo == 'SensoreInfisso') {
               sensori!.add(SensoreInfisso.fromJson(element));
+              sensori!.last.setAzioneSensoreListener(callback: azioneSensore);
             } else if (tipo == 'SensoreTeH') {
               sensori!.add(SensoreTeH.fromJson(element));
+              sensori!.last.setAzioneSensoreListener(callback: azioneSensore);
             } else if (tipo == 'Sirena' || tipo == 'Sirena_1') {
               sensori!.add(SensoreSirena.fromJson(element, numeroRele: 1));
+              sensori!.last.setAzioneSensoreListener(callback: azioneSensore);
             } else if (tipo == 'Sirena_2') {
               sensori!.add(SensoreSirena.fromJson(element, numeroRele: 2));
+              sensori!.last.setAzioneSensoreListener(callback: azioneSensore);
             } else if (tipo == 'SensorePresenza') {
               sensori!.add(SensorePresenza.fromJson(element));
+              sensori!.last.setAzioneSensoreListener(callback: azioneSensore);
+            } else if (tipo == 'SensoreCamera') {
+              sensori!.add(SensoreCamera.fromJson(element));
+              sensori!.last.setAzioneSensoreListener(callback: azioneCamera);
             }
-            sensori!.last.setAzioneSensoreListener(callback: azioneSensore);
           }
         }
         // mqttClientWrapper!.publishMessage(
@@ -312,6 +322,11 @@ class SchemaSensoriModel with ChangeNotifier {
   }
 
   void azioneSensore(int id, AzioneSensore azione, String messageData) {
+    mqttClientWrapper!.publishMessage(
+        topicSurName: '${topicSurName}/set', messageData: messageData);
+  }
+
+  void azioneCamera(int id, AzioneSensore azione, String messageData) {
     mqttClientWrapper!.publishMessage(
         topicSurName: '${topicSurName}/set', messageData: messageData);
   }
