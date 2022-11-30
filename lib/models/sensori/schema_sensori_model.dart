@@ -104,6 +104,18 @@ class SchemaSensoriModel with ChangeNotifier {
     return sensoriBack;
   }
 
+  List<SensoreModel> getModel(String tipoSensore) {
+    List<SensoreModel> tmpSensoriList = [];
+    if (sensori != null) {
+      for (dynamic sensore in sensori!) {
+        if (sensore.tipo == tipoSensore) {
+          tmpSensoriList.add(sensore);
+        }
+      }
+    }
+    return tmpSensoriList;
+  }
+
   //metodi
 
   Future<void> _getDati() async {

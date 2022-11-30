@@ -152,8 +152,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return Consumer<SchemaStatiModel>(
-        builder: (BuildContext context, SchemaStatiModel stati, Widget? child) {
+    return Consumer2<SchemaStatiModel, SchemaSensoriModel>(builder:
+        (BuildContext context, SchemaStatiModel stati,
+            SchemaSensoriModel schemaSensori, Widget? child) {
       List<Widget> pageList = [SensorPage()];
       List<IconData> iconsList = [Icons.home_rounded];
       if (stati.getModel("StatoAllarme").isNotEmpty) {
@@ -163,6 +164,10 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       if (stati.getModel("StatoClima").isNotEmpty) {
         pageList.add(StatoPage(tipoStato: "StatoClima"));
         iconsList.add(MdiIcons.sunSnowflake);
+      }
+      if (schemaSensori.getModel("SensoreCamera").isNotEmpty) {
+        // pageList.add(StatoPage(tipoStato: "StatoClima"));
+        // iconsList.add(MdiIcons.sunSnowflake);
       }
       return Scaffold(
           appBar: AppBar(
