@@ -34,6 +34,7 @@ class SensoreModel {
   IconData icona;
   Color colore;
   int valoreInt = 0;
+  String? token;
   int size = 30;
   double posLeft = 0;
   double posTop = 0;

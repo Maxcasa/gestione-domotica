@@ -26,6 +26,7 @@ class SensoreCamera extends SensoreModel {
   // variabili
   int _id;
   String _nome;
+
   // @override
   // Color colore = Colors.black;
   // @override

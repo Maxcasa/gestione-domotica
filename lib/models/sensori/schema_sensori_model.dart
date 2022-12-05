@@ -249,6 +249,9 @@ class SchemaSensoriModel with ChangeNotifier {
               if (jsonData.containsKey('com')) {
                 waitingSensoreStato[findIndex]['com'] = jsonData['com'];
               }
+              if (jsonData.containsKey('token')) {
+                waitingSensoreStato[findIndex]['token'] = jsonData['token'];
+              }
             } else {
               waitingSensoreStato.add(jsonData);
             }
@@ -284,6 +287,13 @@ class SchemaSensoriModel with ChangeNotifier {
               //           'request/set', json.encode(messageJson), ['sensori/get']);
               //     }
               //   }
+            }
+            if (jsonData.containsKey('token')) {
+              try {
+                localSensore.token = jsonData['token'];
+              } catch (e) {
+                localSensore.token = jsonData['token'];
+              }
             }
 
             // if (localSensore is SensoreSirena && jsonData.containsKey('azion')) {

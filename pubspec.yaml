@@ -54,6 +54,7 @@ dependencies:
   firebase_core: ^1.13.1
   flutter_local_notifications: ^9.4.0
   collection: any
+  socket_io_client: ^2.0.0
 
 
 dev_dependencies:
