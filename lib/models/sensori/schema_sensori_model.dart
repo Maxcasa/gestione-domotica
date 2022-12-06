@@ -77,6 +77,7 @@ class SchemaSensoriModel with ChangeNotifier {
   KeepAliveProvider? keepAliveProvider;
   MultiMessageProvider multiMessageProvider = MultiMessageProvider();
   bool statusRequested = false;
+  Map<String, dynamic> azioneSensoreBack = {};
 
   // getter e setter
   SensoreModel? getSensore(id) {
@@ -349,8 +350,13 @@ class SchemaSensoriModel with ChangeNotifier {
   }
 
   void azioneCamera(int id, AzioneSensore azione, String messageData) {
-    mqttClientWrapper!.publishMessage(
-        topicSurName: '${topicSurName}/set', messageData: messageData);
+    if (azione == AzioneSensore.cambiaPagina) {
+      azioneSensoreBack = {'CameraPage': id};
+      notifyListeners();
+    } else {
+      mqttClientWrapper!.publishMessage(
+          topicSurName: '${topicSurName}/set', messageData: messageData);
+    }
   }
 
   void attivaSensori(String tipoSensore, int attivazione, bool stato) {

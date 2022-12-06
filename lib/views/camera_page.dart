@@ -22,6 +22,8 @@ class CameraPage extends StatelessWidget {
 
   List<SensoreCamera> sensoriCamera = [];
 
+  VideoStream? videoStream;
+
   // varible for visualization control
   //final ScrollController scrollController = ScrollController();
   // final List<Map<String, dynamic>> drawerTree = [];
@@ -40,24 +42,16 @@ class CameraPage extends StatelessWidget {
         } else {
           i = sensoriCamera.indexWhere((element) => element.id == id);
         }
-
+        videoStream ??= VideoStream(sensoreCamera: sensoriCamera[i]);
         return Row(
           children: [
             selectCamera(),
-            VideoStream(sensoreCamera: sensoriCamera[i])
+            videoStream ?? const CircularProgressIndicator()
           ],
         );
+      } else {
+        return const CircularProgressIndicator();
       }
-
-      return
-          // RefreshIndicator(
-          //     // reload page
-          //     onRefresh: () => _refresh(),
-          //     child: SingleChildScrollView(
-          //         //physics: const AlwaysScrollableScrollPhysics(),
-          //         scrollDirection: Axis.vertical,
-          //         child:
-          SchemaSensori(schemaSensoriModel: schemaSensori);
     });
     //floatingActionButton: _buildAddTaskButton(),
   }
@@ -80,6 +74,13 @@ class CameraPage extends StatelessWidget {
                       value: element.id, child: Text(element.nome));
                 }).toList(),
                 onChanged: (int? selectedId) {
+                  if (videoStream != null) {
+                    id = selectedId ?? 0;
+                    videoStream!.disconnect();
+                    int i =
+                        sensoriCamera.indexWhere((element) => element.id == id);
+                    videoStream = VideoStream(sensoreCamera: sensoriCamera[i]);
+                  }
                   //   activateStream(selectedId);
                 },
               )

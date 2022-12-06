@@ -9,6 +9,8 @@ class VideoStream extends StatelessWidget {
   VideoStream({Key? key, required this.sensoreCamera}) : super(key: key) {
     if (sensoreCamera.token != null) {
       videoSocketStream = VideoSocketStream(sensoreCamera.token!);
+    } else {
+      richiediToken();
     }
   }
 
@@ -44,5 +46,15 @@ class VideoStream extends StatelessWidget {
     } else {
       return const CircularProgressIndicator();
     }
+  }
+
+  void richiediToken() {
+    // il valore -10 corrisponde alla richiesta di un token
+    sensoreCamera.cambiaValore(-10);
+  }
+
+  void disconnect() {
+    videoSocketStream?.disconnect();
+    sensoreCamera.token = null;
   }
 }

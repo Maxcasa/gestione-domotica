@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'sensore_model.dart';
+import 'package:gestione_domotica/models/sensori/sensori_layer.dart';
 import 'package:gestione_domotica/models/hex_color.dart';
 
 /// Classe che definisce il sensore di apertura porte e finestre
@@ -10,7 +10,7 @@ class SensoreCamera extends SensoreModel {
   SensoreCamera({required int id, String? nome})
       : _id = id,
         _nome = nome ?? "Sensore Camera generico",
-        super(id: id, nome: nome, icona: Icons.directions_walk_rounded);
+        super(id: id, nome: nome, icona: Icons.camera_alt_outlined);
 
   SensoreCamera.fromJson(Map<String, dynamic> json)
       : _id = json['id'],
@@ -20,7 +20,7 @@ class SensoreCamera extends SensoreModel {
         //     ? HexColor.fromHex(json['colore'])
         //     : Colors.black,
         super.fromJson(json) {
-    icona = Icons.directions_walk_rounded;
+    icona = Icons.camera_alt_outlined;
   }
 
   // variabili
@@ -56,4 +56,25 @@ class SensoreCamera extends SensoreModel {
 
   @override
   bool get sensoreVisibile => true;
+
+  // funzione invocata dall'interfaccia quando si cambia il valore
+  @override
+  void cambiaValore(int valore) {
+    //Se c'è un callback da chiamare lo chiamo
+    String messaggio = json.encode({'id': id, 'valore': valore});
+    if (valore == -10) {
+      messaggio = json.encode({'id': id, 'video': 1});
+    }
+    if (azioneSensoreCallBack != null) {
+      azioneSensoreCallBack!(id, AzioneSensore.imposta, messaggio);
+    }
+  }
+
+  void cambiaPagina() {
+    abilitato = true;
+    if (azioneSensoreCallBack != null) {
+      String messaggio = json.encode({'id': id, 'com': 'abilita'});
+      azioneSensoreCallBack!(id, AzioneSensore.abilita, messaggio);
+    }
+  }
 }

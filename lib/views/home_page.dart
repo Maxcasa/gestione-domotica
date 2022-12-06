@@ -166,8 +166,21 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
         iconsList.add(MdiIcons.sunSnowflake);
       }
       if (schemaSensori.getModel("SensoreCamera").isNotEmpty) {
-        // pageList.add(StatoPage(tipoStato: "StatoClima"));
-        // iconsList.add(MdiIcons.sunSnowflake);
+        if (schemaSensori.azioneSensoreBack.isNotEmpty &&
+            schemaSensori.azioneSensoreBack.containsKey('CameraPage')) {
+          pageList.add(
+              CameraPage(id: schemaSensori.azioneSensoreBack['CameraPage']));
+          iconsList.add(Icons.camera_alt_outlined);
+          int page = pageList.length;
+          _controller.animateToPage(
+            page,
+            duration: _kDuration,
+            curve: _kCurve,
+          );
+        } else {
+          pageList.add(CameraPage());
+          iconsList.add(Icons.camera_alt_outlined);
+        }
       }
       return Scaffold(
           appBar: AppBar(
