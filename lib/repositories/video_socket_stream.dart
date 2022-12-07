@@ -47,8 +47,8 @@ class VideoSocketStream {
       socket = IO.io(
           'ws://${remoteConnection!.remoteServerName}:5000',
           IO.OptionBuilder().setTransports(['websocket']).setQuery(
-                  {'auth': 'token'}) // for Flutter or Dart VM
-              .setExtraHeaders({'auth': token}) // optional
+                  {'auth': token}) // for Flutter or Dart VM
+              //.setExtraHeaders({'auth': token}) // optional
               .build());
       socket.onConnect((_) {
         print('connect');
