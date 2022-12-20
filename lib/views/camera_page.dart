@@ -34,7 +34,7 @@ class CameraPage extends StatelessWidget {
     return Consumer<SchemaSensoriModel>(builder: (BuildContext context,
         SchemaSensoriModel schemaSensori, Widget? child) {
       List<SensoreCamera> sensoriCamera =
-          schemaSensori.getModel('SensoreCamera') as List<SensoreCamera>;
+          schemaSensori.getModel('SensoreCamera').cast<SensoreCamera>();
       int i = 0;
       if (sensoriCamera.isNotEmpty) {
         if (id == -1) {

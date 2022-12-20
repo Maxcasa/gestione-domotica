@@ -30,7 +30,7 @@ class VideoSocketStream {
 
   final _socketResponse = StreamController<String>();
 
-  void Function(String) get addResponse => _socketResponse.sink.add;
+  // void Function(String) get addResponse => _socketResponse.sink.add;
 
   Stream<String> get getResponse => _socketResponse.stream;
 
@@ -44,18 +44,22 @@ class VideoSocketStream {
         !remoteConnection!.connectionDataNull &&
         remoteConnection!.connectionPresent) {
       // _channel = IOWebSocketChannel.connect(Uri.parse(url));
+      const String videoWebsocketURL = "ws://192.168.1.192:5000";
+      // 'ws://${remoteConnection!.remoteServerName}:5000'
       socket = IO.io(
-          'ws://${remoteConnection!.remoteServerName}:5000',
+          videoWebsocketURL,
           IO.OptionBuilder().setTransports(['websocket']).setQuery(
                   {'auth': token}) // for Flutter or Dart VM
-              //.setExtraHeaders({'auth': token}) // optional
               .build());
       socket.onConnect((_) {
         print('connect');
       });
 
-      socket.on('frame', (data) => addResponse);
-      socket.onDisconnect((_) => print('disconnect'));
+      socket.on('frame', (data) {
+        print('frame');
+        _socketResponse.sink.add(data);
+      });
+      socket.onDisconnect((_) => socket.disconnect());
     }
   }
 
