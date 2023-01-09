@@ -5,6 +5,7 @@
 //import 'azione.dart';
 
 import 'dart:convert';
+import 'package:property_change_notifier/property_change_notifier.dart';
 
 import 'package:gestione_domotica/models/sensori/sensori_layer.dart';
 import 'package:gestione_domotica/models/model_data.dart';
@@ -33,7 +34,7 @@ final factories = <String, Object Function(int id)>{
 
 /// Classe che gestisce l'insieme dei sensori
 // ignore: mixin_inherits_from_not_object
-class SchemaSensoriModel with ChangeNotifier {
+class SchemaSensoriModel with PropertyChangeNotifier<String> {
   // costruttori
   static final SchemaSensoriModel _instance = SchemaSensoriModel._internal();
 
