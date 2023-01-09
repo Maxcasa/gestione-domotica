@@ -196,7 +196,7 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
                 alignment: Alignment.centerLeft,
                 margin: const EdgeInsets.all(10),
                 padding: const EdgeInsets.all(5),
-                child: RemoteDeviceManage(),
+                child: RemoteDeviceManager(),
               )
             ])
             //)

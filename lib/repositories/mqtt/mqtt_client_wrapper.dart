@@ -2,9 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:gestione_domotica/models/configurazioni/remote_connection.dart';
-import 'package:http/http.dart';
+//import 'package:http/http.dart';
 //import 'package:mqtt_client/mqtt_browser_client.dart';
-import 'package:mqtt_client/mqtt_server_client.dart';
+//import 'package:mqtt_client/mqtt_server_client.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:mqtt_client/mqtt_client.dart';
@@ -177,8 +177,9 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
       }
       if (sslCa != null) {
         try {
-          securityContext.setTrustedCertificatesBytes(sslCa.buffer.asInt8List(),
-              password: 'test');
+          securityContext
+              .setTrustedCertificatesBytes(sslCa.buffer.asInt8List());
+          //password: 'test');
         } catch (e) {
           print('MQTTClientWrapper::client exception - $e');
           connectionState = MqttCurrentConnectionState.ERROR_WHEN_CONNECTING;

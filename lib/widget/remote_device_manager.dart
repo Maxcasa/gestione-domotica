@@ -6,14 +6,14 @@ import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
 
 /// Classe WIDGET che contiene la gestione per abilitare
 /// il join remoto dei dispositivi
-class RemoteDeviceManage extends StatefulWidget {
-  RemoteDeviceManage({Key? key}) : super(key: key);
+class RemoteDeviceManager extends StatefulWidget {
+  RemoteDeviceManager({Key? key}) : super(key: key);
 
   @override
-  _RemoteDeviceManageState createState() => _RemoteDeviceManageState();
+  _RemoteDeviceManagerState createState() => _RemoteDeviceManagerState();
 }
 
-class _RemoteDeviceManageState extends State<RemoteDeviceManage> {
+class _RemoteDeviceManagerState extends State<RemoteDeviceManager> {
   MQTTClientWrapper? mqttClientWrapper;
   ElevatedButton _button =
       const ElevatedButton(onPressed: null, child: Text('Non collegato'));

@@ -65,6 +65,10 @@ class SensoreCamera extends SensoreModel {
     if (valore == -10) {
       messaggio = json.encode({'id': id, 'video': 1});
     }
+    if (valore == -20) {
+      token = null;
+      return;
+    }
     if (azioneSensoreCallBack != null) {
       azioneSensoreCallBack!(id, AzioneSensore.imposta, messaggio);
     }

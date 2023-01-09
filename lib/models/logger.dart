@@ -46,7 +46,7 @@ import 'package:logger/logger.dart';
 //}
 
 final logger = (Type type) =>
-    Logger(printer: CustomPrinter(type.toString()), level: Level.debug);
+    Logger(printer: CustomPrinter(type.toString()), level: Level.info);
 
 class CustomPrinter extends LogPrinter {
   CustomPrinter(this.className);
