@@ -4,6 +4,7 @@ import 'dart:convert';
 //import 'package:flutter/gestures.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:gestione_domotica/models/logger.dart';
 import 'package:gestione_domotica/models/sensori/sensori_layer.dart';
 import 'package:gestione_domotica/repositories/mqtt/multi_message_provider.dart';
 import 'package:gestione_domotica/repositories/video_socket_stream.dart';
@@ -31,6 +32,8 @@ class _CameraPageState extends State<CameraPage> {
   VideoSocketStream? videoSocketStream;
   SensoreCamera? sensoreCamera;
 
+  final log = logger(_CameraPageState);
+
   @override
   void initState() {
     videoSocketStream = VideoSocketStream();
@@ -57,9 +60,12 @@ class _CameraPageState extends State<CameraPage> {
           i = sensoriCamera.indexWhere((element) => element.id == widget.id);
         }
         sensoreCamera = sensoriCamera[i];
+        log.d('SensoreCamera: $sensoreCamera');
+        log.v('Token: ${sensoreCamera?.token}');
         if (sensoreCamera?.token != null) {
           videoSocketStream!.token = sensoreCamera?.token!;
         } else {
+          log.d('Richiedo il Token.');
           richiediToken();
         }
         if (sensoreCamera?.token != null &&

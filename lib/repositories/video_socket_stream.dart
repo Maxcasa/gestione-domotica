@@ -6,6 +6,7 @@ import 'dart:io';
 // //import 'package:web_socket_channel/io.dart';
 // import 'package:web_socket_channel/status.dart' as status;
 
+import 'package:gestione_domotica/models/logger.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -51,6 +52,8 @@ class VideoSocketStream extends PropertyChangeNotifier<String> {
 
   final _socketResponse = StreamController<String>();
 
+  final log = logger(VideoSocketStream);
+
   // void Function(String) get addResponse => _socketResponse.sink.add;
 
   Stream<String> get getResponse => _socketResponse.stream;
@@ -91,7 +94,7 @@ class VideoSocketStream extends PropertyChangeNotifier<String> {
           // securityContext.setClientAuthoritiesBytes(sslCa.buffer.asInt8List(),
           //     password: 'test');
         } catch (e) {
-          print('HTTPS connection error::client exception - $e');
+          log.e('HTTPS connection error::client exception - $e');
           // client!.disconnect();
         }
       } else {
@@ -108,7 +111,7 @@ class VideoSocketStream extends PropertyChangeNotifier<String> {
                   '${directory.path}/${remoteConnection!.connectionName}${remoteConnection!.certFile}.pfx')
               .readAsBytes();
         } catch (e) {
-          print('HTTPS connection error::client exception - $e');
+          log.e('HTTPS connection error::client exception - $e');
         }
       } else {
         sslCert = await rootBundle.load('assets/certs/client/client.pfx');
@@ -125,7 +128,7 @@ class VideoSocketStream extends PropertyChangeNotifier<String> {
 
           //, password: 'HostPass997');
         } catch (e) {
-          print('HTTPS connection error::client exception - $e');
+          log.e('HTTPS connection error::client exception - $e');
           // client!.disconnect();
         }
       } else {
@@ -135,6 +138,7 @@ class VideoSocketStream extends PropertyChangeNotifier<String> {
       String remoteBackUri =
           'https://${remoteConnection!.remoteServerName}:$ConnPort/';
       // 'ws://${remoteConnection!.remoteServerName}:5000'
+      log.d('Avvio la Connessione to Planci.');
       socket = IO.io(
           remoteBackUri,
           IO.OptionBuilder()
@@ -149,17 +153,18 @@ class VideoSocketStream extends PropertyChangeNotifier<String> {
       socket.onConnect((_) {
         connectionState = SocketCurrentConnectionState.CONNECTING;
         notifyListeners('connected');
-        print('connect');
+        log.v('Connected to Planci.');
       });
 
       socket.on('frame', (data) {
-        print('frame');
+        log.d('frame');
         _socketResponse.sink.add(data);
       });
 
       socket.onDisconnect((_) {
         //socket.disconnect();
         connectionState = SocketCurrentConnectionState.DISCONNECTED;
+        log.v('Disconnected to Planci.');
         notifyListeners('disconnected');
       });
     }
