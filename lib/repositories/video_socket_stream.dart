@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:rxdart/rxdart.dart';
 
 // import 'package:socket_io_client/socket_io_client.dart';
 // import 'package:web_socket_channel/web_socket_channel.dart';
@@ -48,9 +49,9 @@ class VideoSocketStream extends PropertyChangeNotifier<String> {
   }
 
   // ------------------------- Members ------------------------- //
-  late IO.Socket socket;
+  IO.Socket? socket;
 
-  final _socketResponse = StreamController<String>();
+  final _socketResponse = StreamController<String>.broadcast();
 
   final log = logger(VideoSocketStream);
 
@@ -71,9 +72,10 @@ class VideoSocketStream extends PropertyChangeNotifier<String> {
   set token(String? token) {
     if (token != _token) {
       if (connectionState == SocketCurrentConnectionState.CONNECTED) {
-        socket.disconnect();
+        socket?.disconnect();
       }
     }
+    _token = token;
   }
 
   /// Connects the current application to a websocket
@@ -83,60 +85,66 @@ class VideoSocketStream extends PropertyChangeNotifier<String> {
         remoteConnection!.connectionPresent) {
       final directory = await getApplicationDocumentsDirectory();
 
-      // loading CA Certificate
-      dynamic sslCa;
-      if (remoteConnection!.caFile != null &&
-          remoteConnection!.certDirBase != null) {
-        try {
-          sslCa = await File(
-                  '${directory.path}/${remoteConnection!.connectionName}${remoteConnection!.caFile}.pfx')
-              .readAsBytes();
-          // securityContext.setClientAuthoritiesBytes(sslCa.buffer.asInt8List(),
-          //     password: 'test');
-        } catch (e) {
-          log.e('HTTPS connection error::client exception - $e');
-          // client!.disconnect();
-        }
-      } else {
-        sslCa = await rootBundle.load('assets/certs/ca/ca.pfx');
-      }
+      dynamic sslCa = await rootBundle.load('assets/certs/ca.pfx');
       String passPhrase = 'supermax';
+      dynamic sslCert = await rootBundle.load('assets/certs/client.pfx');
+      dynamic sslKey = await rootBundle.load('assets/certs/client.key');
 
-      // loading Client Certificate
-      dynamic sslCert;
-      if (remoteConnection!.certFile != null &&
-          remoteConnection!.certDirBase != null) {
-        try {
-          sslCert = await File(
-                  '${directory.path}/${remoteConnection!.connectionName}${remoteConnection!.certFile}.pfx')
-              .readAsBytes();
-        } catch (e) {
-          log.e('HTTPS connection error::client exception - $e');
-        }
-      } else {
-        sslCert = await rootBundle.load('assets/certs/client/client.pfx');
-      }
+      // // loading CA Certificate
+      // dynamic sslCa;
+      // if (remoteConnection!.caFile != null &&
+      //     remoteConnection!.certDirBase != null) {
+      //   try {
+      //     sslCa = await File(
+      //             '${directory.path}/${remoteConnection!.connectionName}${remoteConnection!.caFile}.pfx')
+      //         .readAsBytes();
+      //     // securityContext.setClientAuthoritiesBytes(sslCa.buffer.asInt8List(),
+      //     //     password: 'test');
+      //   } catch (e) {
+      //     log.e('HTTPS connection error::client exception - $e');
+      //     // client!.disconnect();
+      //   }
+      // } else {
+      //   sslCa = await rootBundle.load('assets/certs/ca/ca.pfx');
+      // }
+      // String passPhrase = 'supermax';
 
-      // loadinf Client Key
-      dynamic sslKey;
-      if (remoteConnection!.keyFile != null &&
-          remoteConnection!.certDirBase != null) {
-        try {
-          sslKey = await File(
-                  '${directory.path}/${remoteConnection!.connectionName}${remoteConnection!.keyFile}.key')
-              .readAsBytes();
+      // // loading Client Certificate
+      // dynamic sslCert;
+      // if (remoteConnection!.certFile != null &&
+      //     remoteConnection!.certDirBase != null) {
+      //   try {
+      //     sslCert = await File(
+      //             '${directory.path}/${remoteConnection!.connectionName}${remoteConnection!.certFile}.pfx')
+      //         .readAsBytes();
+      //   } catch (e) {
+      //     log.e('HTTPS connection error::client exception - $e');
+      //   }
+      // } else {
+      //   sslCert = await rootBundle.load('assets/certs/client/client.pfx');
+      // }
 
-          //, password: 'HostPass997');
-        } catch (e) {
-          log.e('HTTPS connection error::client exception - $e');
-          // client!.disconnect();
-        }
-      } else {
-        sslKey = await rootBundle.load('assets/certs/client/client.key');
-      }
+      // // loadinf Client Key
+      // dynamic sslKey;
+      // if (remoteConnection!.keyFile != null &&
+      //     remoteConnection!.certDirBase != null) {
+      //   try {
+      //     sslKey = await File(
+      //             '${directory.path}/${remoteConnection!.connectionName}${remoteConnection!.keyFile}.key')
+      //         .readAsBytes();
+
+      //     //, password: 'HostPass997');
+      //   } catch (e) {
+      //     log.e('HTTPS connection error::client exception - $e');
+      //     // client!.disconnect();
+      //   }
+      // } else {
+      //   sslKey = await rootBundle.load('assets/certs/client/client.key');
+      // }
 
       String remoteBackUri =
           'https://${remoteConnection!.remoteServerName}:$ConnPort/';
+      //    "https://5.249.149.198:5002/"
       // 'ws://${remoteConnection!.remoteServerName}:5000'
       log.d('Avvio la Connessione to Planci.');
       socket = IO.io(
@@ -150,18 +158,18 @@ class VideoSocketStream extends PropertyChangeNotifier<String> {
               .setQuery({'auth': _token})
               .build());
       connectionState = SocketCurrentConnectionState.CONNECTING;
-      socket.onConnect((_) {
-        connectionState = SocketCurrentConnectionState.CONNECTING;
+      socket?.onConnect((_) {
+        connectionState = SocketCurrentConnectionState.CONNECTED;
         notifyListeners('connected');
         log.v('Connected to Planci.');
       });
 
-      socket.on('frame', (data) {
+      socket?.on('get_frame', (data) {
         log.d('frame');
         _socketResponse.sink.add(data);
       });
 
-      socket.onDisconnect((_) {
+      socket?.onDisconnect((_) {
         //socket.disconnect();
         connectionState = SocketCurrentConnectionState.DISCONNECTED;
         log.v('Disconnected to Planci.');
@@ -172,7 +180,7 @@ class VideoSocketStream extends PropertyChangeNotifier<String> {
 
   Future<void> disconnect() async {
     connectionState = SocketCurrentConnectionState.DISCONNECTING;
-    socket.disconnect();
+    socket?.disconnect();
   }
 
   // ---------------------- Functions ----------------------- //

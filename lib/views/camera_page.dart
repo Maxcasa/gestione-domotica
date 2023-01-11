@@ -36,11 +36,17 @@ class _CameraPageState extends State<CameraPage> {
 
   @override
   void initState() {
-    videoSocketStream = VideoSocketStream();
+    videoSocketStream ??= VideoSocketStream();
     videoSocketStream!.addListener(connected, ['connected']);
     videoSocketStream!.addListener(disconnected, ['disconnected']);
     super.initState();
   }
+
+  @override
+  void dispose() {
+    super.dispose();
+  }
+
   // varible for visualization control
   //final ScrollController scrollController = ScrollController();
   // final List<Map<String, dynamic>> drawerTree = [];
@@ -74,36 +80,39 @@ class _CameraPageState extends State<CameraPage> {
                     SocketCurrentConnectionState.DISCONNECTED ||
                 videoSocketStream!.connectionState ==
                     SocketCurrentConnectionState.IDLE)) {
+          log.d('Provo a connettere.');
           videoSocketStream!.connect();
         }
-        return Row(children: [
+        return Column(children: [
           selectCamera(),
           (videoSocketStream != null &&
                   videoSocketStream!.connectionState ==
                       SocketCurrentConnectionState.CONNECTED)
               ? Container(
+                  alignment: Alignment.center,
                   child: StreamBuilder(
-                    stream: videoSocketStream!.getResponse,
+                    stream: videoSocketStream?.getResponse,
                     builder:
                         (BuildContext context, AsyncSnapshot<String> snapshot) {
                       if (!snapshot.hasData) {
-                        return const CircularProgressIndicator();
+                        return Text(
+                            'Attendo dati: ${videoSocketStream!.token}');
+                        //return const CircularProgressIndicator();
                       }
                       return Image.memory(
-                        Uint8List.fromList(
-                          base64Decode(
-                            (snapshot.data.toString()),
+                          Uint8List.fromList(
+                            base64Decode(
+                              (snapshot.data.toString()),
+                            ),
                           ),
-                        ),
-                        gaplessPlayback: true,
-                        excludeFromSemantics: true,
-                      );
+                          gaplessPlayback: true,
+                          excludeFromSemantics: true,
+                          fit: BoxFit.contain);
                       // return Container(
                       //   child: snapshot.data ??  ,
                       // );
                     },
-                  ),
-                )
+                  ))
               : const CircularProgressIndicator()
         ]);
       } else {

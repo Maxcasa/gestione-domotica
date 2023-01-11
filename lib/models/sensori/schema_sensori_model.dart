@@ -34,7 +34,7 @@ final factories = <String, Object Function(int id)>{
 
 /// Classe che gestisce l'insieme dei sensori
 // ignore: mixin_inherits_from_not_object
-class SchemaSensoriModel with PropertyChangeNotifier<String> {
+class SchemaSensoriModel extends PropertyChangeNotifier<String> {
   // costruttori
   static final SchemaSensoriModel _instance = SchemaSensoriModel._internal();
 
