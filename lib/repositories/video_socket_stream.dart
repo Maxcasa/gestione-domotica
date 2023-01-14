@@ -70,11 +70,11 @@ class VideoSocketStream extends PropertyChangeNotifier<String> {
   }
 
   set token(String? token) {
-    if (token != _token) {
-      if (connectionState == SocketCurrentConnectionState.CONNECTED) {
-        socket?.disconnect();
-      }
-    }
+    // if (token != _token) {
+    //   if (connectionState == SocketCurrentConnectionState.CONNECTED) {
+    //     socket?.disconnect();
+    //   }
+    // }
     _token = token;
   }
 
@@ -155,13 +155,14 @@ class VideoSocketStream extends PropertyChangeNotifier<String> {
               .setPassphrase(passPhrase)
               .setPfx(sslCert)
               .setKey(sslKey)
-              .setQuery({'auth': _token})
+              .setQuery({'auth': 'App client'})
               .build());
       connectionState = SocketCurrentConnectionState.CONNECTING;
       socket?.onConnect((_) {
         connectionState = SocketCurrentConnectionState.CONNECTED;
         notifyListeners('connected');
         log.v('Connected to Planci.');
+        socket?.emit('add_camera', _token);
       });
 
       socket?.on('get_frame', (data) {

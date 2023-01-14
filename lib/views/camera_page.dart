@@ -44,6 +44,9 @@ class _CameraPageState extends State<CameraPage> {
 
   @override
   void dispose() {
+    videoSocketStream!.removeListener(connected);
+    videoSocketStream!.removeListener(disconnected);
+    videoSocketStream?.disconnect();
     super.dispose();
   }
 
