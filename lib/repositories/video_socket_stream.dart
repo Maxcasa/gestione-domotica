@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:rxdart/rxdart.dart';
 
@@ -64,6 +65,7 @@ class VideoSocketStream extends PropertyChangeNotifier<String> {
       SocketCurrentConnectionState.IDLE;
 
   String? _token;
+  final String _serverToken = 'App client';
 
   String? get token {
     return _token;
@@ -155,19 +157,20 @@ class VideoSocketStream extends PropertyChangeNotifier<String> {
               .setPassphrase(passPhrase)
               .setPfx(sslCert)
               .setKey(sslKey)
-              .setQuery({'auth': 'App client'})
+              .setQuery({'auth': _serverToken})
               .build());
       connectionState = SocketCurrentConnectionState.CONNECTING;
       socket?.onConnect((_) {
         connectionState = SocketCurrentConnectionState.CONNECTED;
         notifyListeners('connected');
         log.v('Connected to Planci.');
-        socket?.emit('add_camera', _token);
+
+        socket?.emit('add_camera', json.encode([_token, _serverToken]));
       });
 
       socket?.on('get_frame', (data) {
         log.d('frame');
-        _socketResponse.sink.add(data);
+        _socketResponse.sink.add(json.decode(data)['image']);
       });
 
       socket?.onDisconnect((_) {
