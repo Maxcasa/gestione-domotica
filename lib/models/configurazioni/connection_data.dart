@@ -1,4 +1,10 @@
+/// Porta MQTT standard (LAN/Tailscale, senza TLS)
+const int defaultMqttPort = 1883;
+
 /// Classe che contiene i dati delle connessioni
+///
+/// Le credenziali MQTT (remoteUser/remotePassword) vivono solo in memoria e
+/// nello storage sicuro del sistema operativo: [toJson] non le include.
 class ConnectionData {
   // costruttori
   ConnectionData({
@@ -8,14 +14,11 @@ class ConnectionData {
     required this.remoteServerName,
     required this.remoteUser,
     required this.remotePassword,
-    required this.certDirBase,
-    required this.caFile,
-    required this.certFile,
-    required this.keyFile,
     required this.remoteDomain,
     required this.localWiFiConnectionName,
     required this.intervalKeepAlive,
     required this.modeKeepAlive,
+    this.mqttPort = defaultMqttPort,
   });
 
   // variabili
@@ -25,16 +28,16 @@ class ConnectionData {
   String remoteServerName;
   String remoteUser;
   String remotePassword;
-  String certDirBase;
-  String caFile;
-  String certFile;
-  String keyFile;
   String remoteDomain;
   String localWiFiConnectionName;
   int intervalKeepAlive;
   int modeKeepAlive;
+  int mqttPort;
+
+  bool get hasCredentials => remoteUser.isNotEmpty && remotePassword.isNotEmpty;
 
   // conversione Json
+  // remoteUser/remotePassword sono letti solo per migrare i vecchi file locali
   ConnectionData.fromJson(Map<String, dynamic> json)
       : id = json['id'] ?? -1,
         connectionName = json['connectionName'] ?? 'Vuoto',
@@ -42,14 +45,11 @@ class ConnectionData {
         remoteServerName = json['remoteServerName'] ?? '',
         remoteUser = json['remoteUser'] ?? '',
         remotePassword = json['remotePassword'] ?? '',
-        certDirBase = json['certDirBase'] ?? '',
-        caFile = json['caFile'] ?? '',
-        certFile = json['certFile'] ?? '',
-        keyFile = json['keyFile'] ?? '',
         remoteDomain = json['remoteDomain'] ?? '',
         localWiFiConnectionName = json['localWiFiConnectionName'] ?? '',
         intervalKeepAlive = json['intervalKeepAlive'] ?? 1,
-        modeKeepAlive = json['modeKeepAlive'] ?? 0;
+        modeKeepAlive = json['modeKeepAlive'] ?? 0,
+        mqttPort = json['mqttPort'] ?? defaultMqttPort;
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> result = {
@@ -57,16 +57,11 @@ class ConnectionData {
       'connectionName': connectionName,
       'localServerName': localServerName,
       'remoteServerName': remoteServerName,
-      'remoteUser': remoteUser,
-      'remotePassword': remotePassword,
-      'certDirBase': certDirBase,
-      'caFile': caFile,
-      'certFile': certFile,
-      'keyFile': keyFile,
       'remoteDomain': remoteDomain,
       'localWiFiConnectionName': localWiFiConnectionName,
       'intervalKeepAlive': intervalKeepAlive,
       'modeKeepAlive': modeKeepAlive,
+      'mqttPort': mqttPort,
     };
     return result;
   }

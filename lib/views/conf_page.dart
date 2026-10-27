@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'dart:io';
 
 //import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -6,8 +6,7 @@ import 'package:gestione_domotica/models/configurazioni/connection_data.dart';
 import 'package:gestione_domotica/models/configurazioni/remote_layer.dart';
 import 'package:gestione_domotica/models/hw/hw_model.dart';
 import 'package:gestione_domotica/models/hw/schema_hw_model.dart';
-import 'package:gestione_domotica/models/utils.dart';
-import 'package:gestione_domotica/repositories/encrypt_data.dart';
+import 'package:gestione_domotica/repositories/enrollment_client.dart';
 //import 'package:gestione_domotica/repositories/keep_alive_provider.dart';
 import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
 //import 'package:gestione_domotica/repositories/mqtt_client_wrapper.dart';
@@ -18,9 +17,7 @@ import 'package:gestione_domotica/widget/connection_icon.dart';
 //import 'package:gestione_domotica/widget/icons_indicator.dart';
 import 'package:gestione_domotica/widget/remote_device_manager.dart';
 import 'package:gestione_domotica/widget/rf_manager_button.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
-import 'package:http/http.dart' as http;
 
 import 'main_drawer.dart';
 
@@ -143,6 +140,7 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
                 //     child:
                 Column(children: <Widget>[
               selectConnection(),
+              enrollmentNotice(),
               IconButton(
                   icon: _vediDettagli
                       ? const Icon(Icons.arrow_circle_up_rounded,
@@ -243,11 +241,25 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
         IconButton(
             icon: const Icon(Icons.remove_circle_outline_rounded, size: 30.0),
             onPressed: () {
-              setState(() {
-                remoteConnection.removeItem();
-              });
+              remoteConnection.removeItem();
             }),
       ]);
+    });
+  }
+
+  Widget enrollmentNotice() {
+    return Consumer<RemoteConnection>(builder: (BuildContext context,
+        RemoteConnection remoteConnection, Widget? child) {
+      final active = remoteConnection.activeConnectionData;
+      if (active == null || active.hasCredentials) {
+        return const SizedBox.shrink();
+      }
+      return const Padding(
+          padding: EdgeInsets.symmetric(horizontal: 10),
+          child: Text(
+              'Registrazione richiesta: aggiungi la connessione con il token '
+              'di pairing.',
+              style: TextStyle(color: Colors.red)));
     });
   }
 
@@ -481,14 +493,35 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
+  Widget _enrollmentField(TextEditingController controller, String hint,
+      {bool obscure = false, TextInputType? keyboardType}) {
+    return Container(
+      margin: const EdgeInsets.all(10),
+      padding: const EdgeInsets.all(5),
+      width: 200,
+      child: TextField(
+        controller: controller,
+        obscureText: obscure,
+        keyboardType: keyboardType,
+        autocorrect: false,
+        enableSuggestions: !obscure,
+        decoration: InputDecoration(
+          border: const UnderlineInputBorder(),
+          hintText: hint,
+        ),
+      ),
+    );
+  }
+
   // ignore: non_constant_identifier_names
   OverlayEntry _MenuOverlay(RemoteConnection remoteConnection) {
     RenderBox renderBox = _context!.findRenderObject() as RenderBox;
-    // var size = renderBox.size;
     var offset = renderBox.localToGlobal(Offset.zero);
-    final serverCodeController = TextEditingController();
+    final pairingCodeController = TextEditingController();
     final serverNameController = TextEditingController();
-    final serverPortController = TextEditingController(text: '8085');
+    final serverPortController = TextEditingController(text: '8443');
+    final deviceNameController =
+        TextEditingController(text: 'App Domotica ${Platform.operatingSystem}');
     return OverlayEntry(
         builder: (_context) => Positioned(
               left: offset.dx + 5,
@@ -497,147 +530,84 @@ class _ConfPageState extends State<ConfPage> with WidgetsBindingObserver {
                   elevation: 4,
                   child: Container(
                       alignment: Alignment.topCenter,
-                      padding: const EdgeInsets.only(
-                          //top: size.height * .58,
-                          right: 20.0,
-                          left: 20.0),
-                      child: Column(
-                        children: [
-                          Container(
-                            margin: const EdgeInsets.all(10),
-                            padding: const EdgeInsets.all(5),
-                            width: 200,
-                            child: TextField(
-                              controller: serverCodeController,
-                              decoration: const InputDecoration(
-                                border: UnderlineInputBorder(),
-                                hintText: 'Server Code',
-                              ),
-                            ),
-                            // The validator receives the text that the user has entered.
-                          ),
-                          Container(
-                            margin: const EdgeInsets.all(10),
-                            padding: const EdgeInsets.all(5),
-                            width: 200,
-                            child: TextField(
-                              controller: serverNameController,
-                              decoration: const InputDecoration(
-                                border: UnderlineInputBorder(),
-                                hintText: 'Server Name',
-                              ),
-                            ),
-                            // The validator receives the text that the user has entered.
-                          ),
-                          Container(
-                            margin: const EdgeInsets.all(10),
-                            padding: const EdgeInsets.all(5),
-                            width: 200,
-                            child: TextField(
-                              controller: serverPortController,
-                              decoration: const InputDecoration(
-                                border: UnderlineInputBorder(),
-                                hintText: 'Server Port',
-                              ),
-                            ),
-                            // The validator receives the text that the user has entered.
-                          ),
-                          Row(children: [
-                            IconButton(
-                                icon: const Icon(
-                                    Icons.add_circle_outline_rounded,
-                                    size: 30.0),
-                                onPressed: () async {
-                                  if (await _addConnection(
-                                      remoteConnection,
-                                      serverCodeController.text,
-                                      serverNameController.text,
-                                      serverPortController.text)) {
-                                    mostraSnackBar('Aggiornato', context);
-                                    // serverCodeController.dispose();
+                      constraints: const BoxConstraints(maxHeight: 480),
+                      padding: const EdgeInsets.only(right: 20.0, left: 20.0),
+                      child: SingleChildScrollView(
+                        child: Column(
+                          children: [
+                            _enrollmentField(
+                                pairingCodeController, 'Token di pairing',
+                                obscure: true),
+                            _enrollmentField(serverNameController,
+                                'Server (hostname MagicDNS)'),
+                            _enrollmentField(
+                                serverPortController, 'Porta HTTPS',
+                                keyboardType: TextInputType.number),
+                            _enrollmentField(
+                                deviceNameController, 'Nome dispositivo'),
+                            Row(children: [
+                              IconButton(
+                                  icon: const Icon(
+                                      Icons.add_circle_outline_rounded,
+                                      size: 30.0),
+                                  onPressed: () async {
+                                    final String? error = await _addConnection(
+                                        remoteConnection,
+                                        pairingCodeController.text,
+                                        serverNameController.text,
+                                        serverPortController.text,
+                                        deviceNameController.text);
+                                    if (error == null) {
+                                      mostraSnackBar('Aggiornato', context);
+                                      _menuOverlay!.remove();
+                                    } else {
+                                      mostraSnackBar(error, context);
+                                    }
+                                  }),
+                              IconButton(
+                                  icon: const Icon(Icons.backspace_outlined,
+                                      size: 30.0),
+                                  onPressed: () {
                                     _menuOverlay!.remove();
-                                  } else {
-                                    mostraSnackBar(
-                                        'Problema nella CONNESSIONE', context);
-                                  }
-
-                                  //remoteConnection.addItem();
-                                }),
-                            IconButton(
-                                icon: const Icon(Icons.backspace_outlined,
-                                    size: 30.0),
-                                onPressed: () {
-                                  // serverCodeController.dispose();
-                                  _menuOverlay!.remove();
-                                }),
-                          ])
-                        ],
+                                  }),
+                            ])
+                          ],
+                        ),
                       ))),
             ));
   }
 
-  Future<bool> _addConnection(RemoteConnection remoteConnection,
-      String serverCode, String serverName, String port) async {
-    try {
-      String remoteUri = 'http://$serverName:$port/get/remote_connection';
-      // http.Response? httpResponse = await lock.synchronized(() async {
-      //   return http.get(Uri.parse(remoteBackUri!));
-      // });
-      http.Response httpResponse = await http.get(Uri.parse(remoteUri));
-      //http.Response httpResponse = await ioClient.get(Uri.parse(remoteFileUri));
-      if (httpResponse.statusCode == 200) {
-        // If the server did return a 200 OK response,
-        // then parse the JSON.
-        ConnectionData connectionData = ConnectionData.fromJson(json.decode(
-            decryptWithKey(
-                httpResponse.body, Utils.cutToLength(serverCode, 32))!));
-        connectionData.certDirBase =
-            (await getApplicationDocumentsDirectory()).path + '/';
-        connectionData.id = -1;
-        remoteConnection.addConnection(connectionData);
-        return true;
-      } else {
-        // If the server did not return a 200 OK response,
-        // then throw an exception.
-        throw Exception('RemoteConnectionError');
-      }
-      //_serverCodeController = serverCodeController;
-//       if (widget.mqttClientWrapper!.connectionState ==
-//           MqttCurrentConnectionState.CONNECTED) {
-//         widget.mqttClientWrapper!.subscribeToGenericTopic(
-//             totalTopic: 'configRemote/get',
-//             onDataReceived: (messageData) => _onConnectionRecived(
-//                 remoteConnection, messageData, serverCode));
-
-// // MCC_${serverCodeController}/set
-//         String messageData = encryptWithKey('{"code": "$serverCode"}',
-//             Utils.cutToLength(serverCode, 32));
-//         widget.mqttClientWrapper!.publishGenericMessage(
-//             totalTopic: 'configRemote/set', messageData: messageData);
-//         return true;
-      //   http.Response httpResponse = await http.get(
-      //       Uri.parse('http://$serverCodeController:$port/get/remote_connection'));
-      //   if (httpResponse.statusCode == 200) {
-      //     connectionDataList
-      //         .add(ConnectionData.fromJson(json.decode(httpResponse.body)));
-
-      //   }
-    } on Exception catch (e) {
-      print('RemoteConnectionError :: $e');
+  /// Registra il dispositivo via HTTPS (mai HTTP in chiaro); restituisce un
+  /// messaggio di errore oppure null se la registrazione e' riuscita.
+  Future<String?> _addConnection(
+      RemoteConnection remoteConnection,
+      String pairingCode,
+      String serverName,
+      String port,
+      String deviceName) async {
+    final int? httpsPort = int.tryParse(port.trim());
+    if (httpsPort == null) {
+      return 'Porta HTTPS non valida';
     }
-    return false;
-  }
-
-  _onConnectionRecived(RemoteConnection remoteConnection, String messageData,
-      String serverCodeController) {
-    Map<String, dynamic> jsonConfig = json.decode(decryptWithKey(
-            messageData, Utils.cutToLength(serverCodeController, 32)) ??
-        '');
-    setState(() {
-      remoteConnection.addConnection(ConnectionData.fromJson(jsonConfig));
-    });
-    widget.mqttClientWrapper!
-        .unsubscribeToGenericTopic(totalTopic: 'configRemote/get');
+    try {
+      final String deviceId =
+          await remoteConnection.credentialsStore.deviceId();
+      final ConnectionData connectionData = await EnrollmentClient().enroll(
+          serverName: serverName,
+          httpsPort: httpsPort,
+          pairingCode: pairingCode,
+          deviceId: deviceId,
+          deviceName: deviceName.trim().isEmpty
+              ? 'App Domotica ${Platform.operatingSystem}'
+              : deviceName);
+      await remoteConnection.addConnection(connectionData);
+      return null;
+    } on EnrollmentException catch (e) {
+      return e.message;
+    } on Exception catch (e) {
+      print('RemoteConnectionError :: ${e.runtimeType}');
+      return 'Problema nella CONNESSIONE';
+    }
   }
 
   // Widget connectionState() {

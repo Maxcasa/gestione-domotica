@@ -184,18 +184,6 @@ class SchemaRepository extends ChangeNotifier {
                   '${_directory.path}/domo_${remoteConnection!.connectionName}.jpg');
             }
           }
-          if (remoteConnection!.caFile != null) {
-            _getAndSaveFileFromRemote('caFile',
-                '${_directory.path}/${remoteConnection!.connectionName}${remoteConnection!.caFile}.pfx');
-          }
-          if (remoteConnection!.certFile != null) {
-            _getAndSaveFileFromRemote('certFile',
-                '${_directory.path}/${remoteConnection!.connectionName}${remoteConnection!.certFile}.pfx');
-          }
-          if (remoteConnection!.keyFile != null) {
-            _getAndSaveFileFromRemote('keyFile',
-                '${_directory.path}/${remoteConnection!.connectionName}${remoteConnection!.keyFile}.key');
-          }
         }
         if (_localSensoriBack != null &&
             (_sensoriBack == null ||
@@ -286,26 +274,6 @@ class SchemaRepository extends ChangeNotifier {
       // then throw an exception.
       //throw Exception('Failed to load album');
       return null;
-    }
-  }
-
-  Future<void> _getAndSaveFileFromRemote(
-      String urlName, String fileName) async {
-    remoteBackUri =
-        'http://${remoteConnection!.localServerName}:$port/get/${urlName}';
-    // http.Response? httpResponse = await lock.synchronized(() async {
-    //   return http.get(Uri.parse(remoteBackUri!));
-    // });
-    http.Response httpResponse = await http.get(Uri.parse(remoteBackUri!));
-    //http.Response httpResponse = await ioClient.get(Uri.parse(remoteFileUri));
-    if (httpResponse.statusCode == 200) {
-      // If the server did return a 200 OK response,
-      // then parse the JSON.
-      await saveFile(httpResponse.bodyBytes, fileName);
-    } else {
-      // If the server did not return a 200 OK response,
-      // then throw an exception.
-      //throw Exception('Failed to load album');
     }
   }
 

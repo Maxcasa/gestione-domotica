@@ -4,11 +4,8 @@
         "connectionName": "Massimo",
         "localServerName": "MassimoDomoS",
         "remoteServerName": "5.249.149.198",
-        "remoteUser": "[REDACTED]",
-        "remotePassword": "[REDACTED]",
         "remoteDomain": "Massimo",
         "localWiFiConnectionName": "TIM-29622213",
-        "serverCodeController": "[REDACTED]",
         "intervalKeepAlive": 1,
         "modeKeepAlive": 0
     },
@@ -17,10 +14,8 @@
         "connectionName": "Valeria",
         "localServerName": "ValeriaDomoS",
         "remoteServerName": "mqtt.flespi.io",
-        "remoteUser": "[REDACTED]",
         "remoteDomain": "Valeria",
         "localWiFiConnectionName": "test",
-        "serverCodeController": "[REDACTED]",
         "intervalKeepAlive": 1,
         "modeKeepAlive": 1
     }

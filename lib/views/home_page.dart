@@ -14,8 +14,6 @@ import 'package:gestione_domotica/widget/connection_icon.dart';
 import 'package:gestione_domotica/widget/icons_indicator.dart';
 import 'package:provider/provider.dart';
 
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
-
 // import 'package:logger_flutter/logger_flutter.dart';
 /// Pagina di Home contenente diverse schermate che scrollano orizzontalmente
 class HomePage extends StatefulWidget {
@@ -152,9 +150,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return Consumer2<SchemaStatiModel, SchemaSensoriModel>(builder:
-        (BuildContext context, SchemaStatiModel stati,
-            SchemaSensoriModel schemaSensori, Widget? child) {
+    return Consumer<SchemaStatiModel>(builder:
+        (BuildContext context, SchemaStatiModel stati, Widget? child) {
       List<Widget> pageList = [SensorPage()];
       List<IconData> iconsList = [Icons.home_rounded];
       if (stati.getModel("StatoAllarme").isNotEmpty) {
@@ -163,24 +160,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       }
       if (stati.getModel("StatoClima").isNotEmpty) {
         pageList.add(StatoPage(tipoStato: "StatoClima"));
-        iconsList.add(MdiIcons.sunSnowflake);
-      }
-      if (schemaSensori.getModel("SensoreCamera").isNotEmpty) {
-        if (schemaSensori.azioneSensoreBack.isNotEmpty &&
-            schemaSensori.azioneSensoreBack.containsKey('CameraPage')) {
-          pageList.add(
-              CameraPage(id: schemaSensori.azioneSensoreBack['CameraPage']));
-          iconsList.add(Icons.camera_alt_outlined);
-          int page = pageList.length;
-          _controller.animateToPage(
-            page,
-            duration: _kDuration,
-            curve: _kCurve,
-          );
-        } else {
-          pageList.add(CameraPage());
-          iconsList.add(Icons.camera_alt_outlined);
-        }
+        iconsList.add(Icons.ac_unit);
       }
       return Scaffold(
           appBar: AppBar(

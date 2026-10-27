@@ -1,17 +1,11 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
-import 'package:gestione_domotica/models/configurazioni/remote_connection.dart';
-//import 'package:http/http.dart';
-//import 'package:mqtt_client/mqtt_browser_client.dart';
-//import 'package:mqtt_client/mqtt_server_client.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:property_change_notifier/property_change_notifier.dart';
-import 'package:mqtt_client/mqtt_client.dart';
+import 'dart:async';
 import 'dart:math';
-import 'package:flutter/services.dart' show rootBundle;
-import './mqtt_client_web.dart'
-    if (dart.library.io) './mqtt_client_server.dart';
+
+import 'package:gestione_domotica/models/configurazioni/connection_data.dart';
+import 'package:gestione_domotica/models/configurazioni/remote_connection.dart';
+import 'package:mqtt_client/mqtt_client.dart';
+import 'package:mqtt_client/mqtt_server_client.dart';
+import 'package:property_change_notifier/property_change_notifier.dart';
 
 //import 'package:mqtt_client/mqtt_server_client.dart';
 //import 'package:flutter/material.dart';
@@ -59,7 +53,11 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   }
 
   // variabili
-  MqttDomoClient? client;
+  MqttServerClient? client;
+  StreamSubscription<List<MqttReceivedMessage<MqttMessage?>>>?
+      _updatesSubscription;
+  // topic gia' richiesti al broker sul client corrente
+  final Set<String> _requestedTopics = {};
   MqttCurrentConnectionState connectionState = MqttCurrentConnectionState.IDLE;
   MqttSubscriptionState subscriptionState = MqttSubscriptionState.IDLE;
   MqttWrapperState wrapperState = MqttWrapperState.INACTIVE;
@@ -83,41 +81,37 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
   String? remoteServer;
   String mqttUser = "";
   String mqttPW = "";
-  // const int port = 1883;
+  int mqttPort = defaultMqttPort;
   static const String topicBase = "Domotic";
 
   Future<void> connectMqttClient() async {
     print('MQTTClientWrapper::ConnectionState $connectionState');
-    if (connectionAllowed) {
-      // Posso collegarmi devo decidere se local o remote
-      connectionState = MqttCurrentConnectionState.CONNECTING;
-      if (await remoteConnection!.checkLocal()) {
-        remoteServer = remoteConnection!.localServerName;
-        mqttUser = 'mqtt_user';
-        mqttPW = 'mqtt_user';
-        remote = false;
-      } else if (remoteConnection!.remoteUser != null) {
-        remoteServer = remoteConnection!.remoteServerName;
-        mqttUser = remoteConnection!.remoteUser!;
-        mqttPW = remoteConnection!.remotePassword ?? "";
-        remote = true;
-      } else {
-        _remoteNull();
-        notifyListeners('connectionState.disconnected');
-      }
-      if (remoteServer != null) {
-        await _setupMqttClient();
-        await _connectClient();
-        _listenClient();
-      }
-      // serverUri = 'ws://$remoteServer';
-
-      // } else {
-      //   connectionState = MqttCurrentConnectionState.IDLE;
-      // }
-    } else {
+    if (!connectionAllowed) {
       _remoteNull();
+      return;
     }
+    // LAN preferita se l'health check risponde, altrimenti tailnet; in
+    // entrambi i casi stesso account MQTT, porta 1883 e nessun TLS.
+    connectionState = MqttCurrentConnectionState.CONNECTING;
+    final bool local = await remoteConnection!.checkLocal();
+    final String? host = local
+        ? remoteConnection!.localServerName
+        : remoteConnection!.remoteServerName;
+    final String? user = remoteConnection!.remoteUser;
+    final String? password = remoteConnection!.remotePassword;
+    if (host == null || host.isEmpty || user == null || password == null) {
+      _remoteNull();
+      notifyListeners('connectionState.disconnected');
+      return;
+    }
+    remoteServer = host;
+    mqttUser = user;
+    mqttPW = password;
+    mqttPort = remoteConnection!.mqttPort;
+    remote = !local;
+    _disposeClient();
+    _setupMqttClient();
+    await _connectClient();
   }
 
   bool get connectionAllowed {
@@ -138,138 +132,31 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     remote = false;
   }
 
-  Future<void> _setupMqttClient() async {
-    // client = MqttServerClient.withPort(serverUri, '#', port);
-    Random random = Random();
-    String cliendId = 'mqtt_domo' + random.nextInt(1000000).toString();
-    client = MqttDomoClient.withPort(remoteServer!, cliendId, remote: remote);
-    if (kIsWeb) {
-      client!.websocketProtocols = ['mqtt'];
-    } else if (remote) {
-      final directory = await getApplicationDocumentsDirectory();
-      print('MQTTClientWrapper::Secure activated');
-      client!.secure = true;
-      //client!.onBadCertificate = (X509Certificate cert) => false;
-
-      /// Security context
-      SecurityContext securityContext =
-          SecurityContext(withTrustedRoots: false);
-      //SecurityContext securityContext = SecurityContext.defaultContext;
-      //if (remoteConnection!.caFile != null &&
-      //    remoteConnection!.certDirBase != null) {
-      dynamic sslCa;
-      if (remoteConnection!.caFile != null &&
-          remoteConnection!.certDirBase != null) {
-        try {
-          sslCa = await File(
-                  '${directory.path}/${remoteConnection!.connectionName}${remoteConnection!.caFile}.pfx')
-              .readAsBytes();
-          // securityContext.setClientAuthoritiesBytes(sslCa.buffer.asInt8List(),
-          //     password: 'test');
-        } catch (e) {
-          print('MQTTClientWrapper::client exception - $e');
-          connectionState = MqttCurrentConnectionState.ERROR_WHEN_CONNECTING;
-          notifyListeners('connectionState.error');
-          // client!.disconnect();
-        }
-      } else {
-        sslCa = await rootBundle.load('assets/certs/ca/ca.pfx');
-      }
-      if (sslCa != null) {
-        try {
-          securityContext
-              .setTrustedCertificatesBytes(sslCa.buffer.asInt8List());
-          //password: 'test');
-        } catch (e) {
-          print('MQTTClientWrapper::client exception - $e');
-          connectionState = MqttCurrentConnectionState.ERROR_WHEN_CONNECTING;
-          notifyListeners('connectionState.error');
-          // client!.disconnect();
-        }
-      }
-      dynamic sslCert;
-      if (remoteConnection!.certFile != null &&
-          remoteConnection!.certDirBase != null) {
-        //       remoteConnection!.caFile! +
-        //       '.pem');
-        //}
-        try {
-          sslCert = await File(
-                  '${directory.path}/${remoteConnection!.connectionName}${remoteConnection!.certFile}.pfx')
-              .readAsBytes();
-        } catch (e) {
-          print('MQTTClientWrapper::client exception - $e');
-          connectionState = MqttCurrentConnectionState.ERROR_WHEN_CONNECTING;
-          notifyListeners('connectionState.error');
-          // client!.disconnect();
-        }
-      } else {
-        sslCert = await rootBundle.load('assets/certs/client/client.pfx');
-      }
-      if (sslCert != null) {
-        try {
-          securityContext.useCertificateChainBytes(sslCert.buffer.asInt8List());
-          //    password: 'HostPass997');
-          // securityContext
-          //     .setTrustedCertificatesBytes(sslCert.buffer.asInt8List());
-          //, password: 'HostPass997');
-        } catch (e) {
-          print('MQTTClientWrapper::client exception - $e');
-          connectionState = MqttCurrentConnectionState.ERROR_WHEN_CONNECTING;
-          notifyListeners('connectionState.error');
-          // client!.disconnect();
-        }
-      }
-      dynamic sslKey;
-      if (remoteConnection!.keyFile != null &&
-          remoteConnection!.certDirBase != null) {
-        try {
-          sslKey = await File(
-                  '${directory.path}/${remoteConnection!.connectionName}${remoteConnection!.keyFile}.key')
-              .readAsBytes();
-
-          //, password: 'HostPass997');
-        } catch (e) {
-          print('MQTTClientWrapper::client exception - $e');
-          connectionState = MqttCurrentConnectionState.ERROR_WHEN_CONNECTING;
-          notifyListeners('connectionState.error');
-          // client!.disconnect();
-        }
-      } else {
-        sslKey = await rootBundle.load('assets/certs/client/client.key');
-      }
-      if (sslKey != null) {
-        try {
-          securityContext.usePrivateKeyBytes(sslKey.buffer.asInt8List());
-          //    password: 'HostPass997');
-          // securityContext
-          //     .setTrustedCertificatesBytes(sslCert.buffer.asInt8List());
-          //, password: 'HostPass997');
-        } catch (e) {
-          print('MQTTClientWrapper::client exception - $e');
-          connectionState = MqttCurrentConnectionState.ERROR_WHEN_CONNECTING;
-          notifyListeners('connectionState.error');
-          // client!.disconnect();
-        }
-      }
-      // if (remoteConnection!.keyFile != null &&
-      //     remoteConnection!.certDirBase != null) {
-      //   securityContext.usePrivateKey(remoteConnection!.certDirBase! +
-      //       remoteConnection!.keyFile! +
-      //       '.key');
-      // }
-      // if (remoteConnection!.certFile != null &&
-      //     remoteConnection!.certDirBase != null) {
-      //   securityContext.setClientAuthorities(remoteConnection!.certDirBase! +
-      //       remoteConnection!.certFile! +
-      //       '.pem');
-      // }
-      client!.securityContext = securityContext;
+  void _disposeClient() {
+    _updatesSubscription?.cancel();
+    _updatesSubscription = null;
+    _requestedTopics.clear();
+    final MqttServerClient? old = client;
+    if (old != null) {
+      old.autoReconnect = false;
+      old.onDisconnected = null;
+      old.onAutoReconnect = null;
+      old.onAutoReconnected = null;
+      old.onConnected = null;
+      old.onSubscribed = null;
+      old.onUnsubscribed = null;
+      old.disconnect();
     }
+    client = null;
+  }
+
+  void _setupMqttClient() {
+    String clientId = 'mqtt_domo${Random.secure().nextInt(1000000)}';
+    print('MQTTClientWrapper::client connecting to port $mqttPort');
+    client = MqttServerClient.withPort(remoteServer!, clientId, mqttPort);
     client!.logging(on: false);
     client!.useWebSocket = false;
-    //client!.setProtocolV311();
-    client!.badCertificateResult = true;
+    client!.secure = false;
     client!.keepAlivePeriod = 60;
     client!.autoReconnect = true;
     client!.onDisconnected = _onDisconnected;
@@ -285,45 +172,51 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
       notifyListeners('connectionState.connecting');
       await client!.connect(mqttUser, mqttPW);
     } on Exception catch (e) {
-      print('MQTTClientWrapper::client exception - $e');
+      print('MQTTClientWrapper::client exception - ${e.runtimeType}');
       connectionState = MqttCurrentConnectionState.ERROR_WHEN_CONNECTING;
       notifyListeners('connectionState.error');
-      // client!.disconnect();
     }
-
-    // if (client!.connectionStatus!.state == MqttConnectionState.connected) {
-    //   connectionState = MqttCurrentConnectionState.CONNECTED;
-    //   notifyListeners('connectionState.error');
-    //   print('MQTTClientWrapper::$serverUri client connected');
-    // } else {
-    //   print(
-    //       'MQTTClientWrapper::ERROR $serverUri client connection failed - disconnecting, status is ${client!.connectionStatus}');
-    //   connectionState = MqttCurrentConnectionState.ERROR_WHEN_CONNECTING;
-    //   notifyListeners('currentConnectionState');
-    //   client!.disconnect();
-    // }
   }
 
   void _listenClient() {
-    try {
-      client!.updates!.listen((List<MqttReceivedMessage<MqttMessage?>>? c) {
-        final recMess = c![0].payload as MqttPublishMessage;
-        final topic = c[0].topic;
+    // una sola sottoscrizione allo stream per client, anche dopo riconnessioni
+    if (_updatesSubscription != null ||
+        client == null ||
+        client!.connectionStatus?.state != MqttConnectionState.connected) {
+      return;
+    }
+    _updatesSubscription = client!.updates!
+        .listen((List<MqttReceivedMessage<MqttMessage?>> messages) {
+      for (final MqttReceivedMessage<MqttMessage?> received in messages) {
+        final MqttMessage? payload = received.payload;
+        if (payload is! MqttPublishMessage) {
+          continue;
+        }
+        final String topic = received.topic;
         final String message =
-            MqttPublishPayload.bytesToStringAsString(recMess.payload.message);
-        print(
-            "MQTTClientWrapper::GOT A NEW MESSAGE $message from topic $topic");
-        if (onDataReceivedArray.containsKey(topic)) {
-          for (var element in onDataReceivedArray[topic]!) {
+            MqttPublishPayload.bytesToStringAsString(payload.payload.message);
+        final List<Function(String)>? callbacks = onDataReceivedArray[topic];
+        if (callbacks != null) {
+          for (var element in List.of(callbacks)) {
             element(message);
           }
         }
-      });
-    } on Exception catch (e) {
-      print('MQTTClientWrapper::client exception - $e');
-      connectionState = MqttCurrentConnectionState.ERROR_WHEN_CONNECTING;
-      notifyListeners('connectionState.error');
-      client!.disconnect();
+      }
+    });
+  }
+
+  // sottoscrizione idempotente: un solo subscribe per topic e callback unica
+  void _subscribe(String totalTopic, Function(String) onDataReceived) {
+    print('MQTTClientWrapper::Subscribing to the $totalTopic topic');
+    if (client != null &&
+        !subscribedTopicList.contains(totalTopic) &&
+        _requestedTopics.add(totalTopic)) {
+      client!.subscribe(totalTopic, MqttQos.exactlyOnce);
+    }
+    final List<Function(String)> callbacks =
+        onDataReceivedArray.putIfAbsent(totalTopic, () => []);
+    if (!callbacks.contains(onDataReceived)) {
+      callbacks.add(onDataReceived);
     }
   }
 
@@ -335,15 +228,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
       required Function(String) onDataReceived}) {
     String totalTopic =
         "$topicBase/${remoteConnection!.remoteDomain}/$topicSurName";
-    print('MQTTClientWrapper::Subscribing to the ' + totalTopic + ' topic');
-    if (!subscribedTopicList.contains(totalTopic)) {
-      client!.subscribe(totalTopic, MqttQos.exactlyOnce);
-    }
-    if (onDataReceivedArray.containsKey(totalTopic)) {
-      onDataReceivedArray[totalTopic]!.add(onDataReceived);
-    } else {
-      onDataReceivedArray[totalTopic] = [onDataReceived];
-    }
+    _subscribe(totalTopic, onDataReceived);
   }
 
   // metodo per la sottoscizione ad un topic
@@ -353,15 +238,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
       {required String totalTopic, required Function(String) onDataReceived}) {
     // String totalTopic =
     //     "$topicBase/${remoteConnection!.remoteDomain}/$topicSurName";
-    print('MQTTClientWrapper::Subscribing to the ' + totalTopic + ' topic');
-    if (!subscribedTopicList.contains(totalTopic)) {
-      client!.subscribe(totalTopic, MqttQos.exactlyOnce);
-    }
-    if (onDataReceivedArray.containsKey(totalTopic)) {
-      onDataReceivedArray[totalTopic]!.add(onDataReceived);
-    } else {
-      onDataReceivedArray[totalTopic] = [onDataReceived];
-    }
+    _subscribe(totalTopic, onDataReceived);
   }
 
   void subscriptionCallback(
@@ -386,7 +263,8 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
           '$topicBase/${remoteConnection!.remoteDomain}/' +
           '$topicSurName/' +
           ' topic');
-      client!.unsubscribe(totalTopic);
+      _requestedTopics.remove(totalTopic);
+      client?.unsubscribe(totalTopic);
       onDataReceivedArray.remove(totalTopic);
     }
   }
@@ -398,7 +276,8 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     //     "$topicBase/${remoteConnection!.remoteDomain}/$topicSurName";
     if (onDataReceivedArray.containsKey(totalTopic)) {
       print('MQTTClientWrapper::UnSubscribing to the $totalTopic topic');
-      client!.unsubscribe(totalTopic);
+      _requestedTopics.remove(totalTopic);
+      client?.unsubscribe(totalTopic);
       onDataReceivedArray.remove(totalTopic);
     }
   }
@@ -427,8 +306,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
         "$topicBase/${remoteConnection!.remoteDomain}/$topicSurName";
     builder.addString(messageData);
 
-    print(
-        'MQTTClientWrapper::Publishing message ${messageData} to topic ${totalTopic}');
+    print('MQTTClientWrapper::Publishing message to topic $totalTopic');
     client!.publishMessage(totalTopic, MqttQos.exactlyOnce, builder.payload!);
   }
 
@@ -442,8 +320,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     //     "$topicBase/${remoteConnection!.remoteDomain}/$topicSurName";
     builder.addString(messageData);
 
-    print(
-        'MQTTClientWrapper::Publishing message ${messageData} to topic ${totalTopic}');
+    print('MQTTClientWrapper::Publishing message to topic $totalTopic');
     client!.publishMessage(totalTopic, MqttQos.exactlyOnce, builder.payload!);
   }
 
@@ -451,8 +328,10 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     print('MQTTClientWrapper::Subscription confirmed for topic $topic');
     String subTopic =
         topic.substring(topic.indexOf('/', topic.indexOf('/') + 1) + 1);
-    subscribedTopicList.add(topic);
-    subscribedSubTopicList.add(subTopic);
+    if (!subscribedTopicList.contains(topic)) {
+      subscribedTopicList.add(topic);
+      subscribedSubTopicList.add(subTopic);
+    }
     if (onSubscriptionArray.containsKey(subTopic)) {
       for (var element in onSubscriptionArray[subTopic]!) {
         element(subTopic, true);
@@ -496,6 +375,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
     // }
     subscribedTopicList = [];
     subscribedSubTopicList = [];
+    _requestedTopics.clear();
     if (connectionAllowed) {
       connectMqttClient();
     } else {
@@ -510,6 +390,7 @@ class MQTTClientWrapper extends PropertyChangeNotifier<String> {
 
   void _onConnected() {
     connectionState = MqttCurrentConnectionState.CONNECTED;
+    _listenClient();
     // if (_statusRequest) {
     //   _getstatus();
     // }

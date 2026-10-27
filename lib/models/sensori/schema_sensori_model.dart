@@ -29,7 +29,6 @@ final factories = <String, Object Function(int id)>{
   'Sirena_1': (id) => SensoreSirena(id: id, numeroRele: 1),
   'Sirena_2': (id) => SensoreSirena(id: id, numeroRele: 2),
   'SensorePresenza': (id) => SensorePresenza(id: id),
-  'SensoreCamera': (id) => SensoreCamera(id: id)
 };
 
 /// Classe che gestisce l'insieme dei sensori
@@ -78,7 +77,6 @@ class SchemaSensoriModel extends PropertyChangeNotifier<String> {
   KeepAliveProvider? keepAliveProvider;
   MultiMessageProvider multiMessageProvider = MultiMessageProvider();
   bool statusRequested = false;
-  Map<String, dynamic> azioneSensoreBack = {};
 
   // getter e setter
   SensoreModel? getSensore(id) {
@@ -157,9 +155,6 @@ class SchemaSensoriModel extends PropertyChangeNotifier<String> {
             } else if (tipo == 'SensorePresenza') {
               sensori!.add(SensorePresenza.fromJson(element));
               sensori!.last.setAzioneSensoreListener(callback: azioneSensore);
-            } else if (tipo == 'SensoreCamera') {
-              sensori!.add(SensoreCamera.fromJson(element));
-              sensori!.last.setAzioneSensoreListener(callback: azioneCamera);
             }
           }
         }
@@ -348,16 +343,6 @@ class SchemaSensoriModel extends PropertyChangeNotifier<String> {
   void azioneSensore(int id, AzioneSensore azione, String messageData) {
     mqttClientWrapper!.publishMessage(
         topicSurName: '${topicSurName}/set', messageData: messageData);
-  }
-
-  void azioneCamera(int id, AzioneSensore azione, String messageData) {
-    if (azione == AzioneSensore.cambiaPagina) {
-      azioneSensoreBack = {'CameraPage': id};
-      notifyListeners();
-    } else {
-      mqttClientWrapper!.publishMessage(
-          topicSurName: '${topicSurName}/set', messageData: messageData);
-    }
   }
 
   void attivaSensori(String tipoSensore, int attivazione, bool stato) {

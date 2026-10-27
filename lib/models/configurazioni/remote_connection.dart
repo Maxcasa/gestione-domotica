@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:gestione_domotica/models/configurazioni/connection_data.dart';
@@ -16,12 +15,17 @@ import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:gestione_domotica/repositories/encrypt_data.dart';
+import 'package:gestione_domotica/repositories/secure_credentials_store.dart';
 
 //import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
 //import 'package:gestione_domotica/models/remote_conf/connection_data.dart';
 // import 'package:wifi_iot/wifi_iot.dart';
 
+/// Porta HTTP per le API non sensibili (health check)
 const String port = '8085';
+
+/// Timeout breve dell'health check LAN prima del fallback sulla tailnet
+const Duration localHealthTimeout = Duration(seconds: 2);
 
 /// Classe che contiene la gestione dei dispositivi autorizzati
 // ignore: mixin_inherits_from_not_object
@@ -52,6 +56,7 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
   ConnectivityResult _connectivityResult = ConnectivityResult.none;
   // PermissionWithService locationPermission = Permission.locationWhenInUse;
   var lock = Lock(reentrant: true);
+  final SecureCredentialsStore credentialsStore = SecureCredentialsStore();
 
   String _serverCodeController = '';
 
@@ -132,7 +137,8 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
 
   String? get remoteUser {
     if (connectionDataList.length > localData.activeIndex &&
-        localData.activeIndex >= 0) {
+        localData.activeIndex >= 0 &&
+        connectionDataList[localData.activeIndex].remoteUser != '') {
       return connectionDataList[localData.activeIndex].remoteUser;
     } else {
       return null;
@@ -144,46 +150,6 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
         localData.activeIndex >= 0 &&
         connectionDataList[localData.activeIndex].remotePassword != '') {
       return connectionDataList[localData.activeIndex].remotePassword;
-    } else {
-      return null;
-    }
-  }
-
-  String? get certDirBase {
-    if (connectionDataList.length > localData.activeIndex &&
-        localData.activeIndex >= 0 &&
-        connectionDataList[localData.activeIndex].certDirBase != '') {
-      return connectionDataList[localData.activeIndex].certDirBase;
-    } else {
-      return null;
-    }
-  }
-
-  String? get caFile {
-    if (connectionDataList.length > localData.activeIndex &&
-        localData.activeIndex >= 0 &&
-        connectionDataList[localData.activeIndex].caFile != '') {
-      return connectionDataList[localData.activeIndex].caFile;
-    } else {
-      return null;
-    }
-  }
-
-  String? get certFile {
-    if (connectionDataList.length > localData.activeIndex &&
-        localData.activeIndex >= 0 &&
-        connectionDataList[localData.activeIndex].caFile != '') {
-      return connectionDataList[localData.activeIndex].certFile;
-    } else {
-      return null;
-    }
-  }
-
-  String? get keyFile {
-    if (connectionDataList.length > localData.activeIndex &&
-        localData.activeIndex >= 0 &&
-        connectionDataList[localData.activeIndex].keyFile != '') {
-      return connectionDataList[localData.activeIndex].keyFile;
     } else {
       return null;
     }
@@ -212,6 +178,8 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
         localWiFiConnectionName ?? '';
   }
 
+  int get mqttPort => activeConnectionData?.mqttPort ?? defaultMqttPort;
+
   int get id {
     if (connectionDataList.length > localData.activeIndex &&
         localData.activeIndex >= 0) {
@@ -238,7 +206,7 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
   }
 
   bool get connectionPresent {
-    if (connectivity > 0 || kIsWeb) {
+    if (connectivity > 0) {
       return true;
     }
     return false;
@@ -272,7 +240,15 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
 
   //metodi
 
-  addConnection(ConnectionData connectionData) {
+  /// Aggiunge o aggiorna una connessione; le credenziali vanno nello storage
+  /// sicuro e non nel file locale.
+  Future<void> addConnection(ConnectionData connectionData) async {
+    if (connectionData.hasCredentials) {
+      await credentialsStore.write(
+          connectionData.remoteDomain,
+          MqttCredentials(
+              connectionData.remoteUser, connectionData.remotePassword));
+    }
     if (connectionData.id < 0) {
       if (connectionDataList.isNotEmpty) {
         connectionData.id =
@@ -288,12 +264,12 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
       resetId();
       activeIndex = connectionDataList.length - 1;
       // localData.activeIndex = connectionDataList.length - 1;
-      saveConnectionInfo();
+      await saveConnectionInfo();
     } else {
       connectionDataList[indexFinded] = connectionData;
       resetId();
       activeIndex = indexFinded;
-      saveConnectionInfo();
+      await saveConnectionInfo();
     }
   }
 
@@ -336,78 +312,120 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
   }
 
   Future<void> _getConnectionInfo() async {
-    //if (localWiFiConnectionName == null && remoteServerUri == null) {
     // ricarico solo se necessario o forzato.
     if (connectionDataList.isEmpty) {
-      if (kIsWeb) {
-        await _getAssetsInfo();
-      } else {
-        final directory = await getApplicationDocumentsDirectory();
-        final File file = File('${directory.path}/connection_info.json');
-        if (await file.exists()) {
-          try {
-            String fileString = decryptMyData(await file.readAsString()) ?? '';
-            List<dynamic> jsonData = json.decode(fileString);
-            // remoteServerUri = jsonData['remoteServerUri'];
-            for (int i = 0; i < jsonData.length; i++) {
-              ConnectionData localConnectionData =
-                  ConnectionData.fromJson(jsonData[i]);
-              localConnectionData.id = i;
-              connectionDataList.add(localConnectionData);
-            }
-          } on Exception catch (e) {
-            print('ConnectionInfo::client exception - $e');
-            await _getAssetsInfo();
+      final directory = await getApplicationDocumentsDirectory();
+      final File file = File('${directory.path}/connection_info.json');
+      bool legacyCredentials = false;
+      if (await file.exists()) {
+        try {
+          String fileString = decryptMyData(await file.readAsString()) ?? '';
+          List<dynamic> jsonData = json.decode(fileString);
+          for (int i = 0; i < jsonData.length; i++) {
+            ConnectionData localConnectionData =
+                ConnectionData.fromJson(jsonData[i]);
+            localConnectionData.id = i;
+            connectionDataList.add(localConnectionData);
           }
-          // localServerName = jsonData['localServerName'];
-          // remoteServerName = jsonData['remoteServerName'];
-          // remoteUser = jsonData['remoteUser'];
-          // remoteDomain = jsonData['remoteDomain'];
-          // localWiFiConnectionName = jsonData['localWiFiConnectionName'];
-        } else {
+          legacyCredentials = await _discardLegacyCredentials();
+        } on Exception catch (e) {
+          print('ConnectionInfo::client exception - ${e.runtimeType}');
+          connectionDataList = [];
           await _getAssetsInfo();
         }
+      } else {
+        await _getAssetsInfo();
       }
+      if (legacyCredentials) {
+        await _writeConnectionInfoFile();
+      }
+      await _loadCredentials();
       notifyListeners('connectionInfo');
     }
-    //}
+  }
+
+  /// Le credenziali presenti nei vecchi file locali non vengono migrate: la
+  /// release 2 le revoca e i profili richiedono una nuova registrazione.
+  /// Vengono rimosse dal profilo in memoria (il file viene riscritto senza) e,
+  /// una sola volta, anche le eventuali credenziali obsolete nello storage
+  /// sicuro; dopo la bonifica un nuovo enrollment non viene mai cancellato.
+  /// Restituisce true se il file va riscritto.
+  Future<bool> _discardLegacyCredentials() async {
+    final legacy = connectionDataList.where((c) => c.hasCredentials).toList();
+    if (legacy.isEmpty) {
+      return false;
+    }
+    bool purged = false;
+    try {
+      purged = await credentialsStore.isLegacyPurged();
+      if (!purged) {
+        for (ConnectionData connection in legacy) {
+          if (connection.remoteDomain != '') {
+            await credentialsStore.delete(connection.remoteDomain);
+          }
+        }
+        await credentialsStore.markLegacyPurged();
+      }
+    } on Exception catch (e) {
+      print('ConnectionInfo::secure storage error - ${e.runtimeType}');
+    }
+    for (ConnectionData connection in legacy) {
+      connection.remoteUser = '';
+      connection.remotePassword = '';
+    }
+    return true;
+  }
+
+  Future<void> _loadCredentials() async {
+    for (ConnectionData connection in connectionDataList) {
+      connection.remoteUser = '';
+      connection.remotePassword = '';
+      if (connection.remoteDomain != '') {
+        try {
+          final MqttCredentials? credentials =
+              await credentialsStore.read(connection.remoteDomain);
+          if (credentials != null) {
+            connection.remoteUser = credentials.username;
+            connection.remotePassword = credentials.password;
+          }
+        } on Exception catch (e) {
+          print('ConnectionInfo::secure storage error - ${e.runtimeType}');
+        }
+      }
+    }
   }
 
   Future<void> _getConnectionConf() async {
     //if (localWiFiConnectionName == null && remoteServerUri == null) {
     // ricarico solo se necessario o forzato.
     if (localData.activeIndex < 0) {
-      if (kIsWeb) {
-        await _getAssetsConf();
-      } else {
-        final directory = await getApplicationDocumentsDirectory();
-        final File file = File('${directory.path}/config.json');
-        if (await file.exists()) {
-          try {
-            String fileString = decryptMyData(await file.readAsString()) ?? '';
-            Map<String, dynamic> jsonConfig = json.decode(fileString);
-            localData = LocalData.fromJson(jsonConfig);
-            if (localData.activeIndex < 0 ||
-                localData.activeIndex > connectionDataList.length - 1) {
-              localData.activeIndex = 0;
-            }
-            String tmpToken = await FirebaseMessaging.instance.getToken() ?? '';
-            if (localData.token == '' || localData.token != tmpToken) {
-              localData.token = tmpToken;
-              notifyListeners('token');
-              //saveConnectionInfo();
-            }
-            FirebaseMessaging.instance.onTokenRefresh.listen((String? token) {
-              localData.token = token ?? '';
-              notifyListeners('token');
-            });
-          } on Exception catch (e) {
-            print('ConnectionConf::client exception - $e');
-            await _getAssetsConf();
+      final directory = await getApplicationDocumentsDirectory();
+      final File file = File('${directory.path}/config.json');
+      if (await file.exists()) {
+        try {
+          String fileString = decryptMyData(await file.readAsString()) ?? '';
+          Map<String, dynamic> jsonConfig = json.decode(fileString);
+          localData = LocalData.fromJson(jsonConfig);
+          if (localData.activeIndex < 0 ||
+              localData.activeIndex > connectionDataList.length - 1) {
+            localData.activeIndex = 0;
           }
-        } else {
+          String tmpToken = await FirebaseMessaging.instance.getToken() ?? '';
+          if (localData.token == '' || localData.token != tmpToken) {
+            localData.token = tmpToken;
+            notifyListeners('token');
+            //saveConnectionInfo();
+          }
+          FirebaseMessaging.instance.onTokenRefresh.listen((String? token) {
+            localData.token = token ?? '';
+            notifyListeners('token');
+          });
+        } on Exception catch (e) {
+          print('ConnectionConf::client exception - $e');
           await _getAssetsConf();
         }
+      } else {
+        await _getAssetsConf();
       }
       //await subscribeFirebase();
       notifyListeners('connectionConf');
@@ -434,23 +452,18 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
     print('RemoteConnection :: $localServerName, $localWiFiConnectionName');
   }
 
+  Future<void> _writeConnectionInfoFile() async {
+    final directory = await getApplicationDocumentsDirectory();
+    final File file = File('${directory.path}/connection_info.json');
+    String stringToWrite = encryptMyData(jsonEncode(connectionDataList));
+    await file.writeAsString(stringToWrite);
+    final File configFile = File('${directory.path}/config.json');
+    stringToWrite = encryptMyData(jsonEncode(localData.toJson()));
+    await configFile.writeAsString(stringToWrite);
+  }
+
   Future<bool> saveConnectionInfo() async {
-    if (!kIsWeb) {
-      final directory = await getApplicationDocumentsDirectory();
-      final File file = File('${directory.path}/connection_info.json');
-      // final dataToPrint = {
-      //   "localServerName": localServerName,
-      //   "remoteServerName": remoteServerName,
-      //   "remoteUser": remoteUser,
-      //   "remoteDomain": remoteDomain,
-      //   "localWiFiConnectionName": localWiFiConnectionName
-      // };
-      String stringToWrite = encryptMyData(jsonEncode(connectionDataList));
-      await file.writeAsString(stringToWrite);
-      final File configFile = File('${directory.path}/config.json');
-      stringToWrite = encryptMyData(jsonEncode(localData.toJson()));
-      await configFile.writeAsString(stringToWrite);
-    }
+    await _writeConnectionInfoFile();
     // forzo il ricaricare i valori
     connectionDataList = [];
     getConnectionInfo();
@@ -458,12 +471,10 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
   }
 
   Future<bool> saveConnectionConf() async {
-    if (!kIsWeb) {
-      final directory = await getApplicationDocumentsDirectory();
-      final File file = File('${directory.path}/config.json');
-      String stringToWrite = encryptMyData(jsonEncode(localData.toJson()));
-      await file.writeAsString(stringToWrite);
-    }
+    final directory = await getApplicationDocumentsDirectory();
+    final File file = File('${directory.path}/config.json');
+    String stringToWrite = encryptMyData(jsonEncode(localData.toJson()));
+    await file.writeAsString(stringToWrite);
     // forzo il ricaricare i valori
     localData.activeIndex = -1;
     getConnectionInfo();
@@ -478,14 +489,15 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
     nameValue ??= localServerName;
     if (nameValue != null) {
       try {
-        http.Response httpResponse =
-            await http.get(Uri.parse('http://$nameValue:$port/'));
+        http.Response httpResponse = await http
+            .get(Uri.parse('http://$nameValue:$port/'))
+            .timeout(localHealthTimeout);
         if (httpResponse.statusCode == 200 &&
             httpResponse.body == 'Domo_Server is here!') {
           ipOK = true;
         }
       } on Exception catch (e) {
-        print('RemoteConnectionError :: $e');
+        print('RemoteConnectionError :: ${e.runtimeType}');
       }
     }
     return ipOK;
@@ -499,22 +511,33 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
     return false;
   }
 
+  /// La rete locale e' preferita se il server risponde all'health check HTTP
+  /// entro un timeout breve: l'SSID non e' piu' una prova di raggiungibilita'.
   Future<bool> checkLocal() async {
-    if (kIsWeb) {
+    if (connectivity == 2 || connectivity == 3) {
       return await checkLocalName();
-    } else if (connectivity == 2) {
-      //return await checkLocalName();
-      return ((await checkLocalWiFi()) && (await checkLocalName()));
-    } else {
-      return false;
     }
+    return false;
   }
 
-  void removeItem() {
+  Future<void> removeItem() async {
+    if (connectionDataList.isEmpty) {
+      return;
+    }
+    final String removedDomain =
+        connectionDataList[localData.activeIndex].remoteDomain;
     connectionDataList.removeAt(localData.activeIndex);
+    if (removedDomain != '' &&
+        !connectionDataList.any((c) => c.remoteDomain == removedDomain)) {
+      try {
+        await credentialsStore.delete(removedDomain);
+      } on Exception catch (e) {
+        print('ConnectionInfo::secure storage error - ${e.runtimeType}');
+      }
+    }
     activeIndex = 0;
     resetId();
-    saveConnectionInfo();
+    await saveConnectionInfo();
   }
 
   void resetId() {
@@ -528,34 +551,30 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
   }
 
   Future<String?> _getWifiName() async {
-    if (kIsWeb) {
-      return null;
-    } else {
-      var permissionStatus = await Permission.location.status;
-      if (permissionStatus == PermissionStatus.denied) {
-        permissionStatus = await Permission.location.request();
-      }
-
-      //   if (permissionStatus == PermissionStatus.denied) {
-      //     permissionStatus = await locationPermission.request();
-      //   }
-      // }
-
-      // // Removed piece of code here, since the variable mentioned in it was not included
-
-      if (permissionStatus == PermissionStatus.granted) {
-        bool isLocationServiceOn =
-            await Permission.location.serviceStatus.isEnabled;
-        if (isLocationServiceOn) {
-          final info = NetworkInfo();
-          String? wifiName = await info.getWifiName();
-          return wifiName;
-        } else {
-          return null;
-        }
-      }
-      return null;
+    var permissionStatus = await Permission.location.status;
+    if (permissionStatus == PermissionStatus.denied) {
+      permissionStatus = await Permission.location.request();
     }
+
+    //   if (permissionStatus == PermissionStatus.denied) {
+    //     permissionStatus = await locationPermission.request();
+    //   }
+    // }
+
+    // // Removed piece of code here, since the variable mentioned in it was not included
+
+    if (permissionStatus == PermissionStatus.granted) {
+      bool isLocationServiceOn =
+          await Permission.location.serviceStatus.isEnabled;
+      if (isLocationServiceOn) {
+        final info = NetworkInfo();
+        String? wifiName = await info.getWifiName();
+        return wifiName;
+      } else {
+        return null;
+      }
+    }
+    return null;
   }
 
   void connectionState(bool connectionState) {
@@ -568,5 +587,4 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
 
   // final key = Key.fromUtf8('chiveDiMassimoCasarin1371Domotic'); //32 chars
   // final iv = IV.fromUtf8('MassimoDomotic13'); //16 chars
-
 }

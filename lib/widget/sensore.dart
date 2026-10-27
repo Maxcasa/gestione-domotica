@@ -32,11 +32,7 @@ class Sensore extends StatelessWidget {
               color: sensore.colore, size: sensore.visualSize.toDouble()),
           label: Text(sensore.text),
           onPressed: () {
-            if (sensore.tipo == 'SensoreCamera') {
-              sensore.cambiaValore(-10);
-            } else {
-              sensore.cambiaValore(1);
-            }
+            sensore.cambiaValore(1);
           },
           onLongPress: () {
             _menuOverlay = _MenuOverlay();
