@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
-import 'package:gestione_domotica/repositories/encrypt_data.dart';
 import 'package:path_provider/path_provider.dart';
 
 import './timer_attivazione.dart';

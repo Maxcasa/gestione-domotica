@@ -26,6 +26,7 @@ class SecureCredentialsStore {
 
   static const String _deviceIdKey = 'domo.deviceId';
   static const String _credentialsPrefix = 'domo.mqtt.';
+  static const String _pushTokenKey = 'domo.pushToken';
 
   String _key(String domain) => '$_credentialsPrefix$domain';
 
@@ -63,6 +64,15 @@ class SecureCredentialsStore {
       _storage.write(key: _legacyPurgedKey, value: '1');
 
   Future<void> delete(String domain) => _storage.delete(key: _key(domain));
+
+  Future<String?> readPushToken() => _storage.read(key: _pushTokenKey);
+
+  Future<void> writePushToken(String token) {
+    if (token.isEmpty) {
+      return Future<void>.value();
+    }
+    return _storage.write(key: _pushTokenKey, value: token);
+  }
 
   /// Identificativo casuale generato una volta e conservato in locale.
   Future<String> deviceId() async {

@@ -16,13 +16,12 @@ class LocalData {
   LocalData.fromJson(Map<String, dynamic> json)
       : activeIndex = json['activeIndex'] ?? -1,
         sensoriVisibili = json['sensoriVisibili'] ?? false,
-        token = json['tolken'] ?? '';
+        token = json['token'] ?? json['tolken'] ?? '';
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> result = {
       'activeIndex': activeIndex,
       'sensoriVisibili': sensoriVisibili,
-      'token': token,
     };
     return result;
   }

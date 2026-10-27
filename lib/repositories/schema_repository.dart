@@ -11,7 +11,6 @@ import 'package:http/io_client.dart' as io_client;
 import 'package:path_provider/path_provider.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:gestione_domotica/repositories/encrypt_data.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:synchronized/synchronized.dart';
 

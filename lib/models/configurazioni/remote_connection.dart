@@ -14,7 +14,7 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:property_change_notifier/property_change_notifier.dart';
 import 'package:synchronized/synchronized.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:gestione_domotica/repositories/encrypt_data.dart';
+import 'package:gestione_domotica/repositories/legacy_encrypted_config.dart';
 import 'package:gestione_domotica/repositories/secure_credentials_store.dart';
 
 //import 'package:gestione_domotica/repositories/mqtt/mqtt_client_wrapper.dart';
@@ -317,9 +317,12 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
       final directory = await getApplicationDocumentsDirectory();
       final File file = File('${directory.path}/connection_info.json');
       bool legacyCredentials = false;
+      bool encryptedFile = false;
       if (await file.exists()) {
         try {
-          String fileString = decryptMyData(await file.readAsString()) ?? '';
+          final storedData = await file.readAsString();
+          encryptedFile = isLegacyEncryptedData(storedData);
+          String fileString = decodeLegacyStoredJson(storedData);
           List<dynamic> jsonData = json.decode(fileString);
           for (int i = 0; i < jsonData.length; i++) {
             ConnectionData localConnectionData =
@@ -336,8 +339,8 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
       } else {
         await _getAssetsInfo();
       }
-      if (legacyCredentials) {
-        await _writeConnectionInfoFile();
+      if (legacyCredentials || encryptedFile) {
+        await _writeConnectionDataFile();
       }
       await _loadCredentials();
       notifyListeners('connectionInfo');
@@ -403,25 +406,51 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
       final File file = File('${directory.path}/config.json');
       if (await file.exists()) {
         try {
-          String fileString = decryptMyData(await file.readAsString()) ?? '';
+          final storedData = await file.readAsString();
+          final encryptedFile = isLegacyEncryptedData(storedData);
+          String fileString = decodeLegacyStoredJson(storedData);
           Map<String, dynamic> jsonConfig = json.decode(fileString);
           localData = LocalData.fromJson(jsonConfig);
           if (localData.activeIndex < 0 ||
               localData.activeIndex > connectionDataList.length - 1) {
             localData.activeIndex = 0;
           }
-          String tmpToken = await FirebaseMessaging.instance.getToken() ?? '';
-          if (localData.token == '' || localData.token != tmpToken) {
-            localData.token = tmpToken;
-            notifyListeners('token');
-            //saveConnectionInfo();
+          bool canRewriteConfig = encryptedFile ||
+              jsonConfig.containsKey('token') ||
+              jsonConfig.containsKey('tolken');
+          try {
+            final String? storedToken = await credentialsStore.readPushToken();
+            if (storedToken != null) {
+              localData.token = storedToken;
+            } else if (localData.token.isNotEmpty) {
+              await credentialsStore.writePushToken(localData.token);
+            }
+          } on Exception catch (e) {
+            canRewriteConfig = false;
+            print('ConnectionConf::secure storage error - ${e.runtimeType}');
           }
-          FirebaseMessaging.instance.onTokenRefresh.listen((String? token) {
+          String tmpToken = await FirebaseMessaging.instance.getToken() ?? '';
+          if (tmpToken.isNotEmpty && localData.token != tmpToken) {
+            localData.token = tmpToken;
+            await credentialsStore.writePushToken(tmpToken);
+            canRewriteConfig = true;
+            notifyListeners('token');
+          }
+          FirebaseMessaging.instance.onTokenRefresh
+              .listen((String? token) async {
             localData.token = token ?? '';
+            try {
+              await credentialsStore.writePushToken(localData.token);
+            } on Exception catch (e) {
+              print('ConnectionConf::secure storage error - ${e.runtimeType}');
+            }
             notifyListeners('token');
           });
+          if (canRewriteConfig) {
+            await _writeLocalConfigFile();
+          }
         } on Exception catch (e) {
-          print('ConnectionConf::client exception - $e');
+          print('ConnectionConf::client exception - ${e.runtimeType}');
           await _getAssetsConf();
         }
       } else {
@@ -453,13 +482,21 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
   }
 
   Future<void> _writeConnectionInfoFile() async {
+    await _writeConnectionDataFile();
+    await _writeLocalConfigFile();
+  }
+
+  Future<void> _writeConnectionDataFile() async {
     final directory = await getApplicationDocumentsDirectory();
     final File file = File('${directory.path}/connection_info.json');
-    String stringToWrite = encryptMyData(jsonEncode(connectionDataList));
-    await file.writeAsString(stringToWrite);
+    await file.writeAsString(jsonEncode(connectionDataList));
+  }
+
+  Future<void> _writeLocalConfigFile() async {
+    await credentialsStore.writePushToken(localData.token);
+    final directory = await getApplicationDocumentsDirectory();
     final File configFile = File('${directory.path}/config.json');
-    stringToWrite = encryptMyData(jsonEncode(localData.toJson()));
-    await configFile.writeAsString(stringToWrite);
+    await configFile.writeAsString(jsonEncode(localData.toJson()));
   }
 
   Future<bool> saveConnectionInfo() async {
@@ -471,10 +508,7 @@ class RemoteConnection extends PropertyChangeNotifier<String> {
   }
 
   Future<bool> saveConnectionConf() async {
-    final directory = await getApplicationDocumentsDirectory();
-    final File file = File('${directory.path}/config.json');
-    String stringToWrite = encryptMyData(jsonEncode(localData.toJson()));
-    await file.writeAsString(stringToWrite);
+    await _writeLocalConfigFile();
     // forzo il ricaricare i valori
     localData.activeIndex = -1;
     getConnectionInfo();

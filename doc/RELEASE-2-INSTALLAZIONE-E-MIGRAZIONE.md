@@ -1,7 +1,7 @@
 # Gestione Domotica — Installazione e migrazione app 2.x
 
 Questa guida e' per chi prepara, distribuisce e configura la app Flutter nativa
-`gestione-domotica 2.0.0+1` su Android o iOS. La release 2 e' una major
+`gestione-domotica 2.0.1+2` su Android o iOS. La release 2 e' una major
 incompatibile con il vecchio provisioning: ogni installazione deve registrarsi
 nuovamente presso `domo-server` tramite enrollment v2 HTTPS.
 
@@ -111,8 +111,7 @@ flutter build ipa --release
 Conservare insieme a ogni artefatto il commit/tag sorgente, la versione Flutter,
 il risultato dei test, le impostazioni di firma e il checksum. Non includere
 token di pairing, credenziali MQTT, chiavi private o file `.env` nella build.
-Incrementare il build number quando si pubblicano aggiornamenti successivi
-allo stesso `2.0.0`.
+Incrementare il build number per ogni nuovo artefatto distribuito.
 
 ## 4. Primo avvio e enrollment
 
@@ -181,6 +180,31 @@ precedente:
 5. L'aggiornamento dell'app non revoca da solo account MQTT gia' provisionati
    sul server. L'amministratore deve disabilitare/eliminare in Dynamic Security
    gli account dei dispositivi non piu' autorizzati.
+
+### Migrazione automatica dei file locali da 2.0.0+1
+
+La prima apertura della versione `2.0.1+2` importa i file locali cifrati dalla
+versione `2.0.0+1` senza richiedere operazioni manuali:
+
+- `connection_info.json` viene riscritto come JSON con i soli dati descrittivi
+  dei profili; username e password MQTT legacy vengono scartati e richiedono
+  un nuovo enrollment;
+- `config.json` viene riscritto senza il token FCM, che viene trasferito al
+  keystore/keychain del sistema operativo;
+- i nuovi salvataggi non usano piu' la cifratura AES statica del vecchio
+  formato.
+
+Non cancellare i dati dell'app prima del primo avvio della versione `2.0.1+2`.
+Se il keystore/keychain non e' temporaneamente accessibile, `config.json` non
+viene riscritto e la migrazione del token viene ritentata al successivo avvio.
+La normalizzazione di `connection_info.json` puo' comunque avvenire, poiche'
+il file contiene solo dati descrittivi e non credenziali.
+
+Questa e' una versione ponte: mantiene un lettore di compatibilita' per
+decifrare i vecchi file, ma non li crea piu'. La rimozione definitiva del
+lettore e la seconda bonifica della cronologia Git potranno avvenire solo dopo
+che tutti i telefoni ancora in uso avranno aperto almeno una volta questa
+versione.
 
 ### Problemi comuni
 
